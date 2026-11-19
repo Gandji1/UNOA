@@ -654,3 +654,13 @@ Chaque vue listée dans ce catalogue exige : route nommée, permission côté se
 **États/erreurs à mettre en scène :** CI rouge ; rollback incompatible ; perte de messages ; verrou fournisseur.
 
 **Vérification :** afficher, saisir, valider, sauvegarder, modifier selon version, refuser selon droits et déclencher les notifications ; tester sur mobile, écran vide et double soumission.
+
+## Écrans livrés — administration des territoires (lot 005)
+
+`/administration/territoires` : sélection de portée paginée, identité régionale
+(type, nature, portée mère, fuseau, monnaie, format régional, fenêtre de présence),
+identité légale et contacts pour les établissements, désignations traduites,
+portées filles paginées, rattachements datés avec clôture, et formulaires de
+création, de modification, de traduction, de rattachement et de déclaration de
+type. États vides, messages d'erreur par code HTTP, tableaux annoncés aux
+lecteurs d'écran et navigation au clavier sans script client.

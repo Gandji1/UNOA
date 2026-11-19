@@ -60,3 +60,15 @@ Légende : `R` lecture propre/périmètre ; `C` créer/agir ; `V` valider ; `A` 
 ## 5. Tests droits obligatoires
 
 Pour **chaque** API de lecture, création, modification, transition et téléchargement : anonyme → refus ; rôle erroné → refus ; bon rôle autre portée → refus ; bon rôle ancienne date/mandat révoqué → refus ; relation personnelle absente → refus ; bon rôle et relation active → succès ; audit correct. Tester BOLA par substitution d'ID, filtrage des exports, pièces sensibles, URLs signées expirées, SSRF sur liens fournis, affichage côté client. Tester changement de rôle pendant session et cache invalidé.
+
+## Registre territorial (lot 005)
+
+`territory.read`, `territory.write` et `territory.define` sont distinctes.
+La lecture donne accès à la portée et à ses portées filles visibles, jamais aux
+portées sœurs. L'écriture couvre la création d'une portée fille, la modification
+des attributs régionaux, les désignations traduites et les rattachements ; elle
+est vérifiée sur la portée mère pour une création et sur la portée elle-même pour
+une modification. Un rattachement exige en outre la lecture de la portée visée,
+afin qu'aucun établissement ne revendique un territoire qu'il ne voit pas. La
+définition d'un type de portée et d'une règle de hiérarchie n'est possible qu'à la
+racine de la plateforme.

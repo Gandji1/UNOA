@@ -11,6 +11,7 @@ import pg from 'pg';
 import { migrate } from '../../../packages/db/src/migrations.mjs';
 import { startIssuer } from './oidc-provider.fixture.mjs';
 import { exerciseConfiguration } from './configuration.fixture.mjs';
+import { exerciseTerritory } from './territory.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -56,7 +57,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async c
   const alpha = randomUUID();
   const beta = randomUUID();
   await database.query(`
-    INSERT INTO unoa.scope_type VALUES ('platform', 'Racine'), ('territory', 'Territoire');
+    INSERT INTO unoa.scope_type(code, label, nature)
+    VALUES ('platform', 'Racine', 'platform'), ('territory', 'Territoire', 'territory');
+    INSERT INTO unoa.scope_type_parent VALUES ('territory', 'platform'), ('territory', 'territory');
     INSERT INTO unoa.access_role VALUES ('local_reader');
     INSERT INTO unoa.permission VALUES ('config.read');
     INSERT INTO unoa.role_permission VALUES ('local_reader', 'config.read');
@@ -167,8 +170,11 @@ test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async c
     await context.test('Studio, publication et indépendance territoriale', () =>
       exerciseConfiguration({ database, issuer, call, login, origin, actor, root, alpha, beta }),
     );
+    await context.test('Territoires, hiérarchie et rattachements', () =>
+      exerciseTerritory({ database, issuer, call, login, origin, root, alpha }),
+    );
   } catch (error) {
-    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage)/.test(line));
+    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage|territory-storage)/.test(line));
     context.diagnostic(diagnostic.join('\n'));
     throw error;
   }

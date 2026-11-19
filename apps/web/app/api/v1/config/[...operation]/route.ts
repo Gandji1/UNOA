@@ -4,46 +4,13 @@ import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { privateJson, problem, redirectTo, unavailable } from '@/lib/iam/responses';
 import { auditConfigDenial, catalogue, createDefinition, createValue, resolveConfiguration, transitionValue } from '@/lib/config/store';
-import { ConfigProblem, keyName, requireConfig, utcTime, uuid, type Input } from '@/lib/config/validation';
+import { ConfigProblem, keyName, requireConfig, utcTime, uuid } from '@/lib/config/validation';
+import { readInput, storageError } from '@/lib/studio/requests';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 
-async function readInput(request: Request, form: boolean): Promise<Input> {
-  const reader = request.body?.getReader();
-  requireConfig(reader, 400, 'Corps de requête requis');
-  const bytes: Uint8Array[] = [];
-  let size = 0;
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > 16_384) {
-      await reader.cancel();
-      throw new ConfigProblem(413, 'Requête trop volumineuse');
-    }
-    bytes.push(value);
-  }
-  const raw = Buffer.concat(bytes).toString('utf8');
-  if (form) {
-    const fields = new URLSearchParams(raw);
-    return { ...Object.fromEntries(fields), allowedTypes: fields.getAll('allowedTypes') };
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
-  } catch {
-    // Return the same error for malformed JSON and non-object payloads.
-  }
-  throw new ConfigProblem(400, 'Objet JSON invalide');
-}
-
 function configError(error: unknown) {
-  if (error instanceof ConfigProblem) return error;
-  const code = typeof error === 'object' && error && 'code' in error ? error.code : undefined;
-  if (code === '23514') return new ConfigProblem(422, 'Valeur ou transition incompatible avec le paramètre');
-  if (code === '23505') return new ConfigProblem(409, 'Une publication existe déjà à cette date ou la requête est déjà enregistrée');
-  console.error('unoa-config-storage', typeof code === 'string' && /^[A-Z0-9]{5}$/.test(code) ? code : 'unknown');
-  return new ConfigProblem(503, 'Configuration temporairement indisponible');
+  return storageError(error, 'unoa-config-storage', 'Configuration temporairement indisponible');
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
@@ -98,7 +65,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     actor = await sessionAccount(settings, request.cookies.get(cookieName(settings, 'session'))?.value);
     requireConfig(actor, 401, 'Session institutionnelle requise');
     requireConfig(form || type === 'application/json', 415, 'Format de requête non pris en charge');
-    const input = await readInput(request, form);
+    const input = await readInput(request, form, ['allowedTypes']);
     url.searchParams.set('scope', uuid(input.scopeId));
     if (typeof input.key === 'string' && input.key.length <= 96) url.searchParams.set('key', input.key);
     const { operation } = await params;

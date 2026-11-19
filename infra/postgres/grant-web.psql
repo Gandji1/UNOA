@@ -17,4 +17,14 @@ GRANT INSERT (request_id, definition_key, scope_id, value, reason, effective_fro
 ON unoa.config_value TO :"web_role";
 GRANT INSERT (version_id, scope_id, actor_id, correlation_id)
 ON unoa.config_publication_event TO :"web_role";
+GRANT INSERT (id, type_code, parent_id, label, time_zone, currency, locale,
+              legal_name, contact, present_from, present_until),
+      UPDATE (label, time_zone, currency, locale, legal_name, contact, present_until)
+ON unoa.scope TO :"web_role";
+GRANT INSERT (code, label, nature) ON unoa.scope_type TO :"web_role";
+GRANT SELECT, INSERT ON unoa.scope_type_parent TO :"web_role";
+GRANT SELECT, INSERT ON unoa.scope_label TO :"web_role";
+GRANT UPDATE (label, updated_at) ON unoa.scope_label TO :"web_role";
+GRANT SELECT, INSERT ON unoa.scope_attachment TO :"web_role";
+GRANT UPDATE (effective_until) ON unoa.scope_attachment TO :"web_role";
 COMMIT;

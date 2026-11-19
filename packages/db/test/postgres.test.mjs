@@ -13,6 +13,7 @@ const initial = '0001_scopes.sql';
 const next = '0002_identity_audit.sql';
 const sessions = '0003_sessions.sql';
 const config = '0004_configuration.sql';
+const territories = '0005_territories.sql';
 
 test('Socle PostgreSQL UNOA', async context => {
   const name = 'unoa_test_' + randomUUID().replaceAll('-', '');
@@ -64,21 +65,78 @@ test('Socle PostgreSQL UNOA', async context => {
       [campus, alpha],
     );
     const results = await Promise.all([migrate(database), migrate(database)]);
-    assert.deepEqual(results.flat(), [next, sessions, config]);
+    assert.deepEqual(results.flat(), [next, sessions, config, territories]);
     assert.deepEqual(await migrate(database), []);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.scope')).total, 4);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.account')).total, 0);
+    // Types created before the territorial migration keep the territory nature,
+    // and no hierarchy is declared yet, so a new scope is refused until reviewed.
+    assert.equal((await one("SELECT nature FROM unoa.scope_type WHERE code = 'platform'")).nature, 'territory');
+    await assert.rejects(database.query(
+      "INSERT INTO unoa.scope(type_code, parent_id, label) VALUES ('territory', $1, 'Non déclarée')", [root],
+    ), { code: '23514' });
+    await database.query(`
+      UPDATE unoa.scope_type SET nature = 'platform' WHERE code = 'platform';
+      UPDATE unoa.scope_type SET nature = 'institution' WHERE code = 'campus';
+      INSERT INTO unoa.scope_type_parent
+      VALUES ('territory', 'platform'), ('territory', 'territory'), ('campus', 'territory');
+    `);
+  });
+
+  await context.test('Hiérarchie déclarée, présence et identité légale contrôlées en base', async () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    await assert.rejects(database.query(
+      "INSERT INTO unoa.scope(type_code, parent_id, label) VALUES ('campus', $1, 'Hors hiérarchie')", [root],
+    ), { code: '23514' });
+    await assert.rejects(database.query(
+      `INSERT INTO unoa.scope(type_code, parent_id, label, present_from)
+       VALUES ('territory', $1, 'Avant la mère', '2000-01-01T00:00Z')`, [alpha],
+    ), { code: '23514' });
+    await assert.rejects(database.query(
+      "UPDATE unoa.scope SET legal_name = 'Faux sceau' WHERE id = $1", [alpha],
+    ), { code: '23514' });
+    await assert.rejects(database.query(
+      "UPDATE unoa.scope SET time_zone = 'Afrique/Nulle' WHERE id = $1", [alpha],
+    ), { code: '23514' });
+    await database.query(
+      "UPDATE unoa.scope SET time_zone = 'Africa/Porto-Novo', currency = 'XOF' WHERE id = $1", [alpha],
+    );
+    // A region is closed only once the scopes it holds are closed themselves.
+    await assert.rejects(database.query(
+      'UPDATE unoa.scope SET present_until = $2 WHERE id = $1', [alpha, future],
+    ), { code: '23514' });
+    await database.query('UPDATE unoa.scope SET present_until = $2 WHERE id = $1', [campus, future]);
+    await database.query('UPDATE unoa.scope SET present_until = $2 WHERE id = $1', [alpha, future]);
+    await assert.rejects(database.query(
+      "INSERT INTO unoa.scope(type_code, parent_id, label) VALUES ('territory', $1, 'Sans terme')", [alpha],
+    ), { code: '23514' });
+    await database.query(
+      "UPDATE unoa.scope SET legal_name = 'Campus Alpha de test', contact = 'contact@example.test' WHERE id = $1",
+      [campus],
+    );
+    await assert.rejects(database.query(
+      `INSERT INTO unoa.scope_attachment(scope_id, territory_id, kind, reason, effective_from)
+       VALUES ($1, $2, 'regulatory', 'Nature incompatible', now())`, [campus, beta],
+    ), { code: '23514' });
+    await database.query(
+      `INSERT INTO unoa.scope_attachment(scope_id, territory_id, kind, reason, effective_from)
+       VALUES ($1, $2, 'implantation', 'Antenne Bêta', now())`, [campus, beta],
+    );
+    assert.equal((await one(
+      'SELECT count(*)::int AS total FROM unoa.scope_attachment WHERE scope_id = $1', [campus],
+    )).total, 1);
   });
 
   await context.test('Échec atomique et refus de modification de l’historique', async () => {
     await copyMigration(next);
     await copyMigration(sessions);
     await copyMigration(config);
-    const broken = join(directory, '0005_atomic.sql');
+    await copyMigration(territories);
+    const broken = join(directory, '0006_atomic.sql');
     await writeFile(broken, 'CREATE TABLE unoa.atomic_test (id int); SELECT 1 / 0;');
     await assert.rejects(migrate(database, directory), { code: '22012' });
     assert.equal((await one("SELECT to_regclass('unoa.atomic_test') AS relation")).relation, null);
-    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 4);
+    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 5);
     await writeFile(join(directory, initial), 'SELECT 1');
     await assert.rejects(migrate(database, directory), /Historique incohérent/);
   });

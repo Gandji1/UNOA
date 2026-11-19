@@ -44,3 +44,24 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Écritures sérialisées par clé. Toute publication enregistre un événement et une trace d’audit dans PostgreSQL.
 - La recette HTTP sur PostgreSQL couvre les variantes Alpha et Bêta, la provenance, les refus et la concurrence.
 - L’activation du studio institutionnel dépend du raccordement OIDC et PostgreSQL mentionné au lot 003. Le moteur légal par juridiction, les snapshots et les transferts de configurations restent ouverts.
+
+## 19 novembre 2026 — Lot 005
+
+- Migration 0005 et studio « Territoires et implantations ». Natures de portée,
+  table de hiérarchie, attributs régionaux, désignations traduites, présence datée
+  et rattachements multiples motivés.
+- Fuseaux contrôlés contre `pg_timezone_names`, monnaies et formats régionaux
+  contre les données ICU du moteur. Aucun découpage territorial dans le code.
+- Règles tenues par des déclencheurs PostgreSQL : hiérarchie non déclarée, identité
+  légale hors établissement, présence hors de celle de la mère, clôture d’une portée
+  avant ses filles et rattachement de nature incompatible sont refusés en base.
+- Recette HTTP sur PostgreSQL 16.15 et fournisseur protocolaire de recette :
+  `node --test apps/web/test/iam.test.mjs` (3 tests PASS) et
+  `node --test packages/db/test/postgres.test.mjs` (7 tests PASS), `pnpm test`
+  (5 PASS), `pnpm build` et `python3 automation/verifier_tracabilite.py` PASS.
+  La recette précédente des lots 002 à 004 utilisait PostgreSQL 18.6 ; l’écart de
+  version est consigné et la CI reste sur 18.6.
+- Un agent local n’obtient aucune lecture ni écriture hors de son territoire ; chaque
+  refus est inscrit dans le journal d’audit.
+- Les découpages réels, juridictions, identités légales et contacts restent à fournir
+  (EXT-001, EXT-002, EXT-012). REQ-TEN-008 dépend du dossier étudiant.

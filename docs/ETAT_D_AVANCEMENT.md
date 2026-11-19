@@ -10,3 +10,10 @@
   puis publication programmée avec contrôle par un autre compte. Voir
   [la fiche de lot](LOT_004.md). Le studio s’ouvre avec les habilitations
   et la connexion institutionnelles.
+
+- Lot 005. Registre territorial : natures de portée, hiérarchie déclarée en base,
+  fuseaux, monnaies et formats régionaux vérifiés contre les référentiels du
+  moteur, désignations traduites, fenêtres de présence et rattachements multiples
+  des établissements. Voir [la fiche de lot](LOT_005.md) et
+  [l’ADR](ADR/0004-registre-territorial.md). Le studio des territoires s’ouvre
+  avec les habilitations et la connexion institutionnelles.
