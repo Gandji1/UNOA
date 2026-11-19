@@ -204,3 +204,25 @@ Chaque transition doit avoir un acteur permis, des gardes, une validation de ver
 ## I. Indexation, partitionnement et migrations
 
 Indexer par portée, statut, dates, IDs externes, délibérations et principales FK ; éviter index inutiles sur données sensibles ; unicité sur numérotations métier dans leur portée. Réviser index avec `EXPLAIN ANALYZE` et volumes pilotes réalistes. Les rapports lourds utilisent projections contrôlées et vues matérialisées actualisées, sans perturber le transactionnel. Les migrations de schéma doivent fonctionner sur jeux vierges et peuplés, inclure tests rollback ou correctifs compensatoires et préservation des anciennes versions.
+
+## J. Contrat actif du studio de paramétrage
+
+Les routes suivantes utilisent la session institutionnelle et un accès
+`config.read` à la portée. Les POST navigateur ou JSON exigent l’origine
+du site. Les accès refusés ou les entrées invalides répondent en
+`application/problem+json` aux clients JSON.
+
+| Route | Entrée et effet |
+|---|---|
+| `GET /api/v1/config/definitions` | `scopeId` UUID et `after` facultatif. Renvoie 24 définitions et le curseur suivant. |
+| `GET /api/v1/config/resolve` | `scopeId`, `key` et date UTC facultative `at`. Renvoie la valeur, la portée source, la version et la justification ou la valeur par défaut. |
+| `POST /api/v1/config/definitions` | `scopeId` racine, `key`, `label`, `description`, `kind`, `allowedTypes`, `inherits`, `allowOverride`. Bornes numériques, choix et valeur par défaut facultatifs selon le type. |
+| `POST /api/v1/config/values` | `scopeId`, `key`, `value`, `reason`, `effectiveFrom` et en-tête `Idempotency-Key` UUID. Crée un brouillon. |
+| `POST /api/v1/config/versions/{id}/{action}` | `scopeId`, `key` et `previewVersion` pour `approve` ou `publish`. Envoyer `null` si l’aperçu part du défaut. Les actions disponibles sont `submit`, `approve`, `reopen` et `publish`. |
+
+Les valeurs datées sont sélectionnées d’abord par la proximité de la portée,
+puis par la dernière date d’effet passée et le numéro de version. La
+prévisualisation de la version se fait dans le studio à la date d’effet du
+brouillon. Le champ `previewVersion` permet de signaler une référence périmée.
+Chaque publication crée l’événement de sortie
+`region.configuration_published` et une trace d’audit dans la même transaction.

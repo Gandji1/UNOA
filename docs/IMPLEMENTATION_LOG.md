@@ -37,3 +37,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0003, sessions à empreinte, compte de service restreint. Révocation du droit ou de la session visible sur la requête suivante.
 - Tests HTTP sur PostgreSQL 18.6 et fournisseur protocolaire de recette. Voir LOT_003.md et ADR-0003.
 - Fournisseur institutionnel et secret à configurer avant activation. Récupération et gestion administrative des sessions restent à traiter.
+
+## 19 novembre 2026 — Lot 004
+
+- Migration 0004 et studio « Paramètres et versions » pour les portées autorisées. Catalogue typé, héritage, justification, prévisualisation, revue distincte et publication datée.
+- Écritures sérialisées par clé. Toute publication enregistre un événement et une trace d’audit dans PostgreSQL.
+- La recette HTTP sur PostgreSQL couvre les variantes Alpha et Bêta, la provenance, les refus et la concurrence.
+- L’activation du studio institutionnel dépend du raccordement OIDC et PostgreSQL mentionné au lot 003. Le moteur légal par juridiction, les snapshots et les transferts de configurations restent ouverts.

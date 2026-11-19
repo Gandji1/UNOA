@@ -56,3 +56,22 @@ La commande `pnpm --filter @unoa/web test:iam` utilise le même serveur de
 recette PostgreSQL que les autres tests d’intégration. Son compte doit pouvoir
 créer une base et un rôle temporaires. L’émetteur local de recette et ses
 identités fictives ne sont pas déployés.
+
+## Paramètres et versions
+
+Une fois le socle OIDC connecté et la migration 0004 appliquée, relancer le
+script d’attribution des droits PostgreSQL du rôle web. Attribuer à chaque
+groupe les permissions requises dans les portées concernées. Le point
+d’entrée se trouve dans « Mon espace ».
+
+| Permission | Effet |
+|---|---|
+| `config.read` | Consulte le catalogue et les versions de la portée |
+| `config.define` à la racine | Crée une définition typée |
+| `config.write` | Propose une valeur et la soumet à la revue |
+| `config.review` | Approuve la proposition d’une autre personne |
+| `config.publish` | Programme ou renvoie en revue une version approuvée |
+
+La publication se fait depuis la prévisualisation. Les dates sont en UTC.
+Le choix d’un territoire n’accorde aucun droit. Les migrations n’ajoutent
+aucune définition ou valeur de démonstration.

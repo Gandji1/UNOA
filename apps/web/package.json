@@ -8,6 +8,7 @@
     "test:iam": "node --test test/iam.test.mjs"
   },
   "dependencies": {
+    "@unoa/config": "workspace:*",
     "jose": "6.2.18",
     "next": "16.4.6",
     "openid-client": "6.9.0",

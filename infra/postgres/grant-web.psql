@@ -7,6 +7,14 @@ GRANT SELECT (token_hash, account_id, account_epoch, expires_at, revoked_at),
       INSERT (token_hash, account_id, account_epoch, expires_at),
       UPDATE (revoked_at) ON unoa.login_session TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.has_scope_permission(uuid, text, uuid) TO :"web_role";
-GRANT INSERT (actor_id, action, correlation_id, resource_id, outcome)
+GRANT INSERT (actor_id, scope_id, action, correlation_id, resource_id, outcome)
 ON unoa.audit_event TO :"web_role";
+GRANT SELECT ON unoa.scope, unoa.scope_type TO :"web_role";
+GRANT SELECT, INSERT ON unoa.config_definition TO :"web_role";
+GRANT SELECT ON unoa.config_value TO :"web_role";
+GRANT INSERT (request_id, definition_key, scope_id, value, reason, effective_from, author_id),
+      UPDATE (state, approved_by, reviewed_against, published_by, published_at)
+ON unoa.config_value TO :"web_role";
+GRANT INSERT (version_id, scope_id, actor_id, correlation_id)
+ON unoa.config_publication_event TO :"web_role";
 COMMIT;

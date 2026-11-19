@@ -14,6 +14,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@unoa/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       jose:
         specifier: 6.2.18
         version: 6.2.18

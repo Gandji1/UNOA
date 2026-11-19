@@ -1,2 +1,5 @@
 /** @type {import('next').NextConfig} */
-export default {poweredByHeader:false};
+export default {
+  poweredByHeader: false,
+  transpilePackages: ['@unoa/config'],
+};

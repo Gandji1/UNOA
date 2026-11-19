@@ -5,7 +5,7 @@ import { sessionDurationSeconds, type IamSettings } from './settings';
 
 let pool: Pool | undefined;
 
-function database(settings: IamSettings) {
+export function database(settings: IamSettings) {
   if (!pool) {
     pool = new Pool({
       connectionString: settings.databaseUrl,

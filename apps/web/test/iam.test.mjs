@@ -10,11 +10,12 @@ import { test } from 'node:test';
 import pg from 'pg';
 import { migrate } from '../../../packages/db/src/migrations.mjs';
 import { startIssuer } from './oidc-provider.fixture.mjs';
+import { exerciseConfiguration } from './configuration.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
 
-test('Connexion institutionnelle et droits via HTTP', { timeout: 60_000 }, async context => {
+test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async context => {
   const suffix = randomUUID().replaceAll('-', '');
   const name = 'unoa_iam_' + suffix;
   const role = 'unoa_web_' + suffix;
@@ -163,8 +164,11 @@ test('Connexion institutionnelle et droits via HTTP', { timeout: 60_000 }, async
     await database.query('UPDATE unoa.account SET disabled_at = now() WHERE id = $1', [actor]);
     await database.query('UPDATE unoa.account SET disabled_at = NULL WHERE id = $1', [actor]);
     assert.equal((await call('/api/v1/me', { headers: { Cookie: latestCookie } })).status, 401);
+    await context.test('Studio, publication et indépendance territoriale', () =>
+      exerciseConfiguration({ database, issuer, call, login, origin, actor, root, alpha, beta }),
+    );
   } catch (error) {
-    const diagnostic = serverLog.split('\n').filter(line => line.includes('unoa-oidc-validation'));
+    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage)/.test(line));
     context.diagnostic(diagnostic.join('\n'));
     throw error;
   }
