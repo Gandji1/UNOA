@@ -1,1 +1,19 @@
-{"name":"unoa","private":true,"packageManager":"pnpm@11.25.0","engines":{"node":"24.x"},"scripts":{"dev":"pnpm --filter @unoa/web dev","build":"turbo run build","test":"node --test tests/*.test.mjs","trace":"python3 automation/verifier_tracabilite.py"},"devDependencies":{"turbo":"2.5.8"}}
+{
+  "name": "unoa",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @unoa/web dev",
+    "build": "turbo run build",
+    "test": "node --test tests/*.test.mjs",
+    "trace": "python3 automation/verifier_tracabilite.py",
+    "db:migrate": "pnpm --filter @unoa/db migrate",
+    "test:integration": "pnpm --filter @unoa/db test"
+  },
+  "devDependencies": {
+    "turbo": "2.5.8"
+  }
+}

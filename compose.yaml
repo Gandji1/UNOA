@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: unoa
+      POSTGRES_USER: unoa_migrator
+      POSTGRES_PASSWORD: ${UNOA_LOCAL_DB_PASSWORD:?Définir UNOA_LOCAL_DB_PASSWORD pour le développement}
+    ports:
+      - "127.0.0.1:${UNOA_LOCAL_DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "unoa_migrator", "-d", "unoa"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+volumes:
+  db-data:

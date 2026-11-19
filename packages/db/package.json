@@ -1,0 +1,12 @@
+{
+  "name": "@unoa/db",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "node src/migrate.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  }
+}

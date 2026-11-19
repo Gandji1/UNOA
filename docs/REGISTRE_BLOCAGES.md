@@ -20,3 +20,7 @@ Ne jamais déclarer `VERIFIE_PRODUCTION` une fonctionnalité qui nécessite une 
 **Pour toute ligne** : ajouter responsable, date, preuve, composant concerné, résultat sandbox et conditions de sortie. Ne pas bloquer l'ensemble du développement à cause d'un seul service externe.
 
 19 novembre 2026 — EXT-005. Le tableau de bord Vercel demande une connexion. Le dépôt documente le répertoire racine, la branche et le contrôle HTTP après déploiement.
+
+19 novembre 2026 — EXT-005. Le blocage d’accès au tableau de bord Vercel est levé.
+Le site web est déployé depuis master. L’hébergement PostgreSQL institutionnel
+et les identifiants OIDC restent à fournir pour la recette intégrée.

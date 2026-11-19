@@ -1,0 +1,53 @@
+name: Vérifications UNOA
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: unoa_ci
+          POSTGRES_PASSWORD: unoa_ci_ephemeral
+        options: >-
+          --health-cmd "pg_isready -U unoa_ci -d postgres"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 15
+        ports:
+          - 5432/tcp
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm trace
+      - run: pnpm test
+      - run: pnpm test:integration
+        env:
+          UNOA_TEST_DATABASE_URL: postgresql://unoa_ci:unoa_ci_ephemeral@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
+      - run: pnpm build
+      - name: Recette HTTP du campus compilé
+        shell: bash
+        run: |
+          pnpm --filter @unoa/web start --hostname 127.0.0.1 --port 3912 >web.log 2>&1 &
+          trap 'cat web.log' EXIT
+          curl --retry 12 --retry-connrefused --retry-delay 1 --fail --silent --show-error --output /dev/null http://127.0.0.1:3912/api/v1/health/ready
+          UNOA_TEST_URL=http://127.0.0.1:3912 node tests/smoke.mjs
