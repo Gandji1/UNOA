@@ -29,3 +29,30 @@ Pour `pnpm test:integration`, définir `UNOA_TEST_DATABASE_URL` avec un compte d
 test autorisé à créer une base éphémère sur un serveur réservé à la recette.
 Ne placer aucune URL de connexion dans le dépôt. Séparer les futurs accès
 applicatifs des accès de migration.
+
+## Connexion institutionnelle
+
+Le site public fonctionne en attendant l’activation de la connexion. La page
+`/connexion` indique son état. Le raccordement suit ce parcours :
+
+1. Appliquer les migrations sur PostgreSQL, puis créer un rôle de service
+   dédié, sans privilège d’administration. Avec le compte de migration, exécuter
+   `psql -v web_role=<rôle-de-service> -f infra/postgres/grant-web.psql`.
+2. Enregistrer un client OIDC confidentiel auprès du fournisseur institutionnel.
+   Déclarer le rappel exact `<origine-du-site>/api/v1/auth/callback` et activer
+   Authorization Code, PKCE S256, RS256 et `client_secret_basic`. Définir le
+   niveau d’assurance MFA reconnu par le fournisseur. Il doit être renvoyé
+   dans le champ `acr` du jeton d’identité.
+3. Configurer les valeurs du fichier `.env.example` dans l’environnement
+   serveur Vercel, uniquement pour le site correspondant. Pour
+   `UNOA_OIDC_TRANSACTION_KEY`, générer 32 octets aléatoires encodés en
+   base64url. L’URL PostgreSQL du rôle de service doit inclure
+   `sslmode=verify-full` en production.
+4. Rattacher chaque compte habilité au couple `(issuer, subject)` vérifié dans
+   `unoa.login_identity`. Vérifier la connexion sur un compte de recette,
+   les autorisations par portée et la fermeture de session avant l’ouverture.
+
+La commande `pnpm --filter @unoa/web test:iam` utilise le même serveur de
+recette PostgreSQL que les autres tests d’intégration. Son compte doit pouvoir
+créer une base et un rôle temporaires. L’émetteur local de recette et ses
+identités fictives ne sont pas déployés.

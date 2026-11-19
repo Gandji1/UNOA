@@ -24,3 +24,8 @@ Ne jamais déclarer `VERIFIE_PRODUCTION` une fonctionnalité qui nécessite une 
 19 novembre 2026 — EXT-005. Le blocage d’accès au tableau de bord Vercel est levé.
 Le site web est déployé depuis master. L’hébergement PostgreSQL institutionnel
 et les identifiants OIDC restent à fournir pour la recette intégrée.
+
+19 novembre 2026 — Connexion institutionnelle. La recette avec PostgreSQL et
+un fournisseur OIDC de test précède le raccordement de production. Restent à
+renseigner le fournisseur choisi, le client OIDC, le niveau MFA vérifié et les
+identifiants du rôle de service PostgreSQL.

@@ -2,16 +2,8 @@
 
 ## 19 novembre 2026
 
-Le lot 001 a publié l’accueil et les deux sondes web dans le projet Vercel
-unoa-web. L’accueil, le lien Formations et les sondes ont été contrôlés sur
-`https://unoa-web.vercel.app`. Vercel suit la branche master pour la production.
+- Lot 001. Accueil et sondes web publiés et contrôlés sur `https://unoa-web.vercel.app`.
+- Lot 002. Migrations PostgreSQL, structure des portées, droits par portée et journal d’audit. Recette PostgreSQL et publication de la version web depuis master.
+- Lot 003. Connexion institutionnelle, session révocable et vérification HTTP des droits. L’entrée « Mon espace » indique l’état de connexion. Le fournisseur et la base institutionnels conditionnent son activation.
 
-Le lot 002 apporte les migrations PostgreSQL, une structure de portées
-configurable, les premiers contrôles d’autorisations par portée et un journal
-d’audit en ajout seul. La recette utilise deux territoires fictifs et une base
-éphémère. Voir [la fiche de lot](LOT_002.md) et le journal d’implémentation.
-Les exigences concernées restent en cours jusqu’aux recettes intégrées.
-
-Le prochain incrément reliera les identités à un fournisseur OIDC et les droits
-à l’API institutionnelle. Le studio de configuration pourra ensuite réutiliser
-le moteur de résolution et les contrôles d’accès côté serveur.
+Le studio de configuration pourra réutiliser les sessions et les vérifications de portée. Voir la matrice, le journal d’implémentation et [la fiche du lot 003](LOT_003.md).

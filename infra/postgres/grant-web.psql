@@ -1,0 +1,12 @@
+\set ON_ERROR_STOP on
+BEGIN;
+GRANT USAGE ON SCHEMA unoa TO :"web_role";
+GRANT SELECT (id, disabled_at, session_epoch) ON unoa.account TO :"web_role";
+GRANT SELECT (issuer, subject, account_id) ON unoa.login_identity TO :"web_role";
+GRANT SELECT (token_hash, account_id, account_epoch, expires_at, revoked_at),
+      INSERT (token_hash, account_id, account_epoch, expires_at),
+      UPDATE (revoked_at) ON unoa.login_session TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.has_scope_permission(uuid, text, uuid) TO :"web_role";
+GRANT INSERT (actor_id, action, correlation_id, resource_id, outcome)
+ON unoa.audit_event TO :"web_role";
+COMMIT;

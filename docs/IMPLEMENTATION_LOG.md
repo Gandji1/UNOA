@@ -30,3 +30,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Modification, suppression et vidage du journal d’audit refusés par PostgreSQL.
 - Le site public reste opérationnel sans configuration PostgreSQL. Aucune migration appliquée à une base institutionnelle.
 - Le compte applicatif, le raccordement OIDC et les écrans protégés sont à intégrer. Les exigences restent en cours.
+
+## 19 novembre 2026 — Lot 003
+
+- Connexion, rappel OIDC, espace connecté et déconnexion via Next.js. Routes `/api/v1/me` et `/api/v1/access/check`.
+- Migration 0003, sessions à empreinte, compte de service restreint. Révocation du droit ou de la session visible sur la requête suivante.
+- Tests HTTP sur PostgreSQL 18.6 et fournisseur protocolaire de recette. Voir LOT_003.md et ADR-0003.
+- Fournisseur institutionnel et secret à configurer avant activation. Récupération et gestion administrative des sessions restent à traiter.

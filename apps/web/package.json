@@ -1,1 +1,25 @@
-{"name":"@unoa/web","private":true,"scripts":{"dev":"next dev","build":"next build --webpack","start":"next start"},"dependencies":{"next":"16.4.6","react":"19.2.7","react-dom":"19.2.7"},"devDependencies":{"typescript":"5.9.3","@types/react":"19.2.2","@types/node":"24.10.0"}}
+{
+  "name": "@unoa/web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "test:iam": "node --test test/iam.test.mjs"
+  },
+  "dependencies": {
+    "jose": "6.2.18",
+    "next": "16.4.6",
+    "openid-client": "6.9.0",
+    "pg": "8.23.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}

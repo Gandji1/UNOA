@@ -10,3 +10,18 @@ h1,h2{font-family:Georgia,serif;font-weight:400;line-height:1.14}h1{font-size:cl
 .action{background:var(--orange);color:#281a11;text-decoration:none;border-radius:.45rem;padding:.7rem 1rem;display:inline-block;font-weight:650}
 :focus-visible{outline:3px solid #4d89e9;outline-offset:3px}.skip{position:absolute;top:-5rem;background:white;padding:.5rem}.skip:focus{top:0}
 @media(max-width:40rem){.welcome{grid-template-columns:1fr}.welcome img{max-height:10rem}nav{gap:1rem}}
+
+.account-panel {
+  max-width: 42rem;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+.account-panel h1 { margin-top: 0; color: var(--navy); }
+.account-panel form { margin-top: 1.25rem; }
+button.action { border: 0; cursor: pointer; font-family: inherit; font-size: 1rem; }
+@media (max-width: 28rem) {
+  header { gap: 1rem; }
+  nav { flex-wrap: wrap; gap: .4rem 1rem; }
+}
