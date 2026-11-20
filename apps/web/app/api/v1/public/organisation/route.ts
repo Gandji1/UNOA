@@ -1,5 +1,5 @@
 import { iamSettings } from '@/lib/iam/settings';
-import { problem } from '@/lib/iam/responses';
+import { problem } from '@/lib/server/responses';
 import { publicOrganisation } from '@/lib/org/store';
 import { publicJson } from '@/lib/catalog/public';
 

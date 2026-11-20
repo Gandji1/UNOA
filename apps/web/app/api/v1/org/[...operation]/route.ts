@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
-import { ConfigProblem, uuid } from '@/lib/config/validation';
-import { studioGet, studioPost } from '@/lib/studio/route';
+import { Problem, uuid } from '@/lib/shared/validation';
+import { studioGet, studioPost } from '@/lib/server/route';
 import {
   appoint, createPosition, decideChange, decideUnit, endAppointment, orgContexts, orgDetails,
   proposeUnit, recordCapacity, requestChange, updateUnit,
@@ -32,6 +32,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     if (resource === 'positions' && action === 'appointments') return appoint(settings, actor, id, input, correlation);
     if (resource === 'appointments' && action === 'end') return endAppointment(settings, actor, id, input, correlation);
     if (resource === 'changes' && action === 'decide') return decideChange(settings, actor, id, input, correlation);
-    throw new ConfigProblem(404, 'Opération inconnue');
+    throw new Problem(404, 'Opération inconnue');
   });
 }

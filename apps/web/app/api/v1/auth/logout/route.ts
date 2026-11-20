@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { cookieName, cookieOptions, iamSettings } from '@/lib/iam/settings';
 import { revokeSession } from '@/lib/iam/sessions';
-import { problem, redirectTo, unavailable } from '@/lib/iam/responses';
+import { problem, redirectTo, unavailable } from '@/lib/server/responses';
 
 const path = '/api/v1/auth/logout';
 

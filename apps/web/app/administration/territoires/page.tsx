@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { cookieName, iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { readableTerritories, scopeTypeCatalogue, territoryDetails } from '@/lib/territory/store';
-import { ConfigProblem } from '@/lib/config/validation';
+import { Problem } from '@/lib/shared/validation';
 import {
   AttachmentClosure, AttachmentEditor, ChildEditor, formatTime, isEstablishment,
   kindLabels, LabelEditor, natureLabels, TerritoryEditor, TypeEditor,
@@ -60,7 +60,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
 
   const data = await territoryDetails(settings, actor, selectedId, isScope(childAfter) ? childAfter : undefined)
     .catch(error => {
-      if (error instanceof ConfigProblem && [403, 404].includes(error.status)) return null;
+      if (error instanceof Problem && [403, 404].includes(error.status)) return null;
       throw error;
     });
   if (!data) {

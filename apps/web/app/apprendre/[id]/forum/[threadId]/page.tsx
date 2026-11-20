@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { scopeIdFormat } from '@/lib/iam/settings';
-import { forumThread } from '@/lib/lms/store';
+import { forumThread } from '@/lib/lms/forum';
 import { ActionForm, Badge, formatTime, Notice } from '../../../../administration/forms';
 import { learner, refusedAs } from '../../../session';
 

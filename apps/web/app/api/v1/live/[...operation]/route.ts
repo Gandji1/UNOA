@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
-import { ConfigProblem, requireConfig } from '@/lib/config/validation';
+import { Problem, ensure } from '@/lib/shared/validation';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { privateJson, problem, redirectTo, unavailable } from '@/lib/iam/responses';
-import { storageError } from '@/lib/studio/requests';
-import { auditDenial } from '@/lib/studio/db';
-import { studioGet, studioPost } from '@/lib/studio/route';
+import { privateJson, problem, redirectTo, unavailable } from '@/lib/server/responses';
+import { storageError } from '@/lib/server/request';
+import { auditDenial } from '@/lib/server/db';
+import { studioGet, studioPost } from '@/lib/server/route';
 import { changeSession, joinSession, scheduleSession, sessionRoster } from '@/lib/live/store';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   return studioPost(request, operation, options, async ({ settings, actor, correlation }, input) => {
     if (resource === 'offerings' && action === 'sessions') return scheduleSession(settings, actor, id, input, correlation);
     if (resource === 'sessions' && actions.includes(action)) return changeSession(settings, actor, id, action, input, correlation);
-    throw new ConfigProblem(404, 'Opération inconnue');
+    throw new Problem(404, 'Opération inconnue');
   });
 }
 
@@ -44,7 +44,7 @@ async function join(request: NextRequest, id: string) {
   let actor: string | null = null;
   try {
     actor = await sessionAccount(settings, request.cookies.get(cookieName(settings, 'session'))?.value);
-    requireConfig(actor, 401, 'Session institutionnelle requise');
+    ensure(actor, 401, 'Session institutionnelle requise');
     const url = await joinSession(settings, actor, id, correlation);
     return browser ? NextResponse.redirect(url, { status: 303, headers: { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' } })
       : privateJson({ url });

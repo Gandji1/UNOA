@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { issueMessages, simulatePlan } from '@unoa/domain/curriculum';
 import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
-import { publicSheet, sheetModel } from '@/lib/catalog/store';
+import { publicSheet, sheetModel } from '@/lib/catalog/public';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
 export const dynamic = 'force-dynamic';

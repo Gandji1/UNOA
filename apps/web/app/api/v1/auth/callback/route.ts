@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import { callbackPath, cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
 import { verifiedSubject } from '@/lib/iam/oidc';
 import { openSession } from '@/lib/iam/sessions';
-import { redirectTo, unavailable } from '@/lib/iam/responses';
+import { redirectTo, unavailable } from '@/lib/server/responses';
 
 export async function GET(request: NextRequest) {
   const settings = iamSettings();

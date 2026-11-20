@@ -3,8 +3,11 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cookieName, iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { ConfigProblem } from '@/lib/config/validation';
-import { catalogContexts, catalogOverview, programDetails, versionDetails } from '@/lib/catalog/store';
+import { Problem } from '@/lib/shared/validation';
+import { catalogContexts } from '@/lib/catalog/access';
+import { versionDetails } from '@/lib/catalog/curriculum';
+import { programDetails } from '@/lib/catalog/programs';
+import { catalogOverview } from '@/lib/catalog/references';
 import { Notice } from '../forms';
 import { Overview } from './overview';
 import { ProgramView } from './program';
@@ -18,7 +21,7 @@ const field = (value: Search[string]) => typeof value === 'string' ? value : '';
 const list = (value: Search[string]) => (Array.isArray(value) ? value : value ? [value] : []).filter(item => scopeIdFormat.test(item));
 
 function refused(error: unknown) {
-  if (error instanceof ConfigProblem) return null;
+  if (error instanceof Problem) return null;
   throw error;
 }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveParameter} from '../packages/config/src/resolve.ts';
+import {resolveParameter} from '../src/resolve.ts';
 
 const at = '2026-11-19T09:00:00Z';
 const globalRule = {key:'duration',scope:'global',effectiveFrom:'2026-01-01T00:00:00Z',state:'published',version:1,value:16};

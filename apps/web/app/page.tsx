@@ -1,5 +1,5 @@
 import { iamSettings } from '@/lib/iam/settings';
-import { publicPrograms } from '@/lib/catalog/store';
+import { publicPrograms } from '@/lib/catalog/public';
 
 export const dynamic = 'force-dynamic';
 

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { ConfigProblem } from '@/lib/config/validation';
+import { Problem } from '@/lib/shared/validation';
 
 export async function learner() {
   const settings = iamSettings();
@@ -15,7 +15,7 @@ export async function learner() {
 
 export function refusedAs<T>(fallback: T) {
   return (error: unknown) => {
-    if (error instanceof ConfigProblem) return fallback;
+    if (error instanceof Problem) return fallback;
     throw error;
   };
 }

@@ -5,8 +5,9 @@ import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { readableScopes } from '@/lib/config/store';
 import { readableTerritories } from '@/lib/territory/store';
 import { orgContexts } from '@/lib/org/store';
-import { catalogContexts } from '@/lib/catalog/store';
-import { lmsContexts, myOfferings } from '@/lib/lms/store';
+import { catalogContexts } from '@/lib/catalog/access';
+import { myOfferings } from '@/lib/lms/offerings';
+import { lmsContexts } from '@/lib/lms/studio';
 import { sessionAccount } from '@/lib/iam/sessions';
 
 export const metadata: Metadata = { title: 'Mon espace · UNOA' };

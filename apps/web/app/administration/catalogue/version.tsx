@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { issueMessages, simulatePlan, type Issue } from '@unoa/domain/curriculum';
-import type { versionDetails } from '@/lib/catalog/store';
+import type { versionDetails } from '@/lib/catalog/curriculum';
 import { ActionForm, Badge, Editor, Panel, Table } from '../forms';
 import { regulatoryBadge, requirementLabels, stateBadge } from './labels';
 

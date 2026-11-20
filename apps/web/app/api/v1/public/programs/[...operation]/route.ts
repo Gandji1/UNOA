@@ -1,8 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { simulatePlan } from '@unoa/domain/curriculum';
 import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
-import { problem } from '@/lib/iam/responses';
-import { publicPrograms, publicSheet, sheetModel } from '@/lib/catalog/store';
+import { problem } from '@/lib/server/responses';
+import { publicPrograms, publicSheet, sheetModel } from '@/lib/catalog/public';
 import { publicJson } from '@/lib/catalog/public';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };

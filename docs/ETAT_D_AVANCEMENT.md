@@ -8,13 +8,13 @@
 
 - Lot 004. Catalogue typé, consultation par portée et date, prévisualisation
   puis publication programmée avec contrôle par un autre compte. Voir
-  [la fiche de lot](LOT_004.md). Le studio s’ouvre avec les habilitations
+  [la fiche de lot](lots/LOT_004.md). Le studio s’ouvre avec les habilitations
   et la connexion institutionnelles.
 
 - Lot 005. Registre territorial : natures de portée, hiérarchie déclarée en base,
   fuseaux, monnaies et formats régionaux vérifiés contre les référentiels du
   moteur, désignations traduites, fenêtres de présence et rattachements multiples
-  des établissements. Voir [la fiche de lot](LOT_005.md) et
+  des établissements. Voir [la fiche de lot](lots/LOT_005.md) et
   [l’ADR](ADR/0004-registre-territorial.md). Le studio des territoires s’ouvre
   avec les habilitations et la connexion institutionnelles.
 
@@ -24,7 +24,7 @@
   0001 à 0005 et droits du rôle web vérifiés dans les branches `recette`
   et `production`. Production vierge. La connexion du rôle et le fournisseur
   d’identité sont à activer avant la validation applicative sur Neon.
-  [Contrôles et limites de la recette](LOT_006.md).
+  [Contrôles et limites de la recette](lots/LOT_006.md).
 
 - Lot 007. Structures académiques et catalogue : composantes proposées puis
   validées par une autre personne, postes et nominations datés, capacités,
@@ -32,10 +32,10 @@
   versions, périodes, UE, cours mutualisés, options, prérequis sans cycle,
   compétences, stages et mémoires, revue, publication immuable, équivalences,
   simulation et contrôle réglementaire avant candidatures. Catalogue public et
-  organigramme public. [Fiche](LOT_007.md), [ADR-0005](ADR/0005-structures-et-catalogue.md).
+  organigramme public. [Fiche](lots/LOT_007.md), [ADR-0005](ADR/0005-structures-et-catalogue.md).
 
 - Lot 008. Studio de cours (syllabus, modules, leçons vidéo/audio/pages/documents/activités, revue à trois
   attestations, versions immuables, variantes, export/import), offres par promotion, parcours séquentiel ou
   conditionnel, progression, notes, forum modéré, échéances, séances de visioconférence planifiées par
   l'enseignant avec lien signé, consentement d'enregistrement, présences, replays et notifications.
-  [Fiche](LOT_008.md). Fournisseur de visioconférence réel à contractualiser (EXT-004).
+  [Fiche](lots/LOT_008.md). Fournisseur de visioconférence réel à contractualiser (EXT-004).

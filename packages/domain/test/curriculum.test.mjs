@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { checkCurriculum, findCycle, simulatePlan } from '../packages/domain/src/curriculum.ts';
+import { checkCurriculum, findCycle, simulatePlan } from '../src/curriculum.ts';
 
 // Two fictitious structures with contradictory rules: Alpha in semesters with
 // fractional credits, Bêta in modules with a different credit unit and totals.

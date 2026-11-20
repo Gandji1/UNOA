@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import type { catalogContexts, catalogOverview } from '@/lib/catalog/store';
+import type { catalogContexts } from '@/lib/catalog/access';
+import type { catalogOverview } from '@/lib/catalog/references';
 import { ActionForm, Badge, Editor, Panel, Table } from '../forms';
 import { regulatoryBadge, stateBadge } from './labels';
 

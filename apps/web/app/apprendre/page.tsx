@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { formatInZone } from '@unoa/domain/time';
-import { myOfferings, notifications } from '@/lib/lms/store';
+import { myOfferings } from '@/lib/lms/offerings';
+import { notifications } from '@/lib/notifications/store';
 import { ActionForm, Badge, formatTime, Notice } from '../administration/forms';
 import { learner, roleLabels } from './session';
 

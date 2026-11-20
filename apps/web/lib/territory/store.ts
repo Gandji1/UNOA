@@ -2,10 +2,10 @@ import 'server-only';
 import type { Pool, PoolClient } from 'pg';
 import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
-import { boundedText, requireConfig, utcTime, uuid, type Input } from '@/lib/config/validation';
+import { audit, transaction, type Queryable } from '@/lib/server/db';
+import { boundedText, ensure, utcTime, uuid, type Input } from '@/lib/shared/validation';
 import { attachmentKind, attributes, language, typeCode, typeInput, type Nature } from './validation';
 
-type Queryable = Pool | PoolClient;
 
 export interface TerritoryScope {
   id: string;
@@ -99,7 +99,7 @@ export async function scopeTypeCatalogue(settings: IamSettings) {
 export async function territoryDetails(settings: IamSettings, actor: string, scopeId: string, after?: string) {
   const store = database(settings);
   const scope = await getTerritory(store, actor, scopeId);
-  requireConfig(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Portée inaccessible');
   const [children, labels, attachments, hosted] = await Promise.all([
     store.query<TerritoryScope>(`
       SELECT ${scopeFields}
@@ -139,47 +139,19 @@ export async function territoryDetails(settings: IamSettings, actor: string, sco
   };
 }
 
-export async function auditTerritoryDenial(settings: IamSettings, actor: string, correlation: string) {
-  await database(settings).query(`
-    INSERT INTO unoa.audit_event(actor_id, action, correlation_id, outcome)
-    VALUES ($1, 'territory.access', $2, 'denied')
-  `, [actor, correlation]);
-}
 
-async function audit(store: Queryable, actor: string, scope: string, action: string, correlation: string, resource?: string) {
-  await store.query(`
-    INSERT INTO unoa.audit_event(actor_id, scope_id, action, correlation_id, resource_id, outcome)
-    VALUES ($1, $2, $3, $4, $5, 'allowed')
-  `, [actor, scope, action, correlation, resource ?? null]);
-}
 
-async function transactional<T>(settings: IamSettings, key: string, change: (store: PoolClient) => Promise<T>) {
-  const store = await database(settings).connect();
-  try {
-    await store.query('BEGIN');
-    // Serialize decisions touching the same branch of the territorial tree.
-    await store.query("SELECT pg_advisory_xact_lock(hashtextextended('unoa.territory.' || $1, 0))", [key]);
-    const result = await change(store);
-    await store.query('COMMIT');
-    return result;
-  } catch (error) {
-    await store.query('ROLLBACK');
-    throw error;
-  } finally {
-    store.release();
-  }
-}
 
 export async function createScopeType(settings: IamSettings, actor: string, input: Input, correlation: string) {
   const scopeId = uuid(input.scopeId);
   const item = typeInput(input);
-  return transactional(settings, 'types', async store => {
+  return transaction(settings, 'unoa.territory.' + 'types', async store => {
     const scope = await getTerritory(store, actor, scopeId);
-    requireConfig(scope?.root && scope.define, 403, 'Définition de type non autorisée');
+    ensure(scope?.root && scope.define, 403, 'Définition de type non autorisée');
     const created = await store.query(`
       INSERT INTO unoa.scope_type(code, label, nature) VALUES ($1, $2, $3) ON CONFLICT (code) DO NOTHING
     `, [item.code, item.label, item.nature]);
-    requireConfig(created.rowCount === 1, 409, 'Ce code de type existe déjà');
+    ensure(created.rowCount === 1, 409, 'Ce code de type existe déjà');
     for (const parent of item.parentTypes) {
       await store.query(
         'INSERT INTO unoa.scope_type_parent(type_code, parent_type_code) VALUES ($1, $2)', [item.code, parent],
@@ -195,12 +167,12 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
   const kind = typeCode(input.typeCode);
   const item = attributes(input);
   const presentFrom = utcTime(input.presentFrom);
-  return transactional(settings, parentId, async store => {
+  return transaction(settings, 'unoa.territory.' + parentId, async store => {
     const parent = await getTerritory(store, actor, parentId);
-    requireConfig(parent?.write, 403, 'Création de portée non autorisée');
+    ensure(parent?.write, 403, 'Création de portée non autorisée');
     // Academic units are proposed and approved through the organisation studio.
     const nature = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
-    requireConfig(nature.rows[0]?.nature !== 'academic_unit', 422, 'Une unité académique se crée dans le studio des structures');
+    ensure(nature.rows[0]?.nature !== 'academic_unit', 422, 'Une unité académique se crée dans le studio des structures');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, time_zone, currency, locale,
                              legal_name, contact, present_from, present_until)
@@ -215,9 +187,9 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
 export async function updateTerritory(settings: IamSettings, actor: string, id: string, input: Input, correlation: string) {
   const scopeId = uuid(id);
   const item = attributes(input);
-  return transactional(settings, scopeId, async store => {
+  return transaction(settings, 'unoa.territory.' + scopeId, async store => {
     const scope = await getTerritory(store, actor, scopeId);
-    requireConfig(scope?.write, 403, 'Modification non autorisée');
+    ensure(scope?.write, 403, 'Modification non autorisée');
     await store.query(`
       UPDATE unoa.scope SET label = $2, time_zone = $3, currency = $4, locale = $5,
         legal_name = $6, contact = $7, present_until = $8 WHERE id = $1
@@ -232,9 +204,9 @@ export async function setTerritoryLabel(settings: IamSettings, actor: string, id
   const scopeId = uuid(id);
   const tag = language(input.language);
   const label = boundedText(input.label, 160, 'Désignation');
-  return transactional(settings, scopeId, async store => {
+  return transaction(settings, 'unoa.territory.' + scopeId, async store => {
     const scope = await getTerritory(store, actor, scopeId);
-    requireConfig(scope?.write, 403, 'Traduction non autorisée');
+    ensure(scope?.write, 403, 'Traduction non autorisée');
     await store.query(`
       INSERT INTO unoa.scope_label(scope_id, language, label) VALUES ($1, $2, $3)
       ON CONFLICT (scope_id, language) DO UPDATE SET label = excluded.label, updated_at = now()
@@ -251,11 +223,11 @@ export async function attachTerritory(settings: IamSettings, actor: string, id: 
   const reason = boundedText(input.reason, 500, 'Justification');
   const effectiveFrom = utcTime(input.effectiveFrom);
   const effectiveUntil = input.effectiveUntil ? utcTime(input.effectiveUntil) : null;
-  return transactional(settings, scopeId, async store => {
+  return transaction(settings, 'unoa.territory.' + scopeId, async store => {
     const scope = await getTerritory(store, actor, scopeId);
-    requireConfig(scope?.write, 403, 'Rattachement non autorisé');
+    ensure(scope?.write, 403, 'Rattachement non autorisé');
     // The target must also be visible, so no establishment claims an unseen territory.
-    requireConfig(await getTerritory(store, actor, territoryId), 403, 'Territoire de rattachement inaccessible');
+    ensure(await getTerritory(store, actor, territoryId), 403, 'Territoire de rattachement inaccessible');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope_attachment(scope_id, territory_id, kind, reason, effective_from, effective_until)
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
@@ -269,14 +241,14 @@ export async function closeAttachment(settings: IamSettings, actor: string, id: 
   const scopeId = uuid(input.scopeId);
   const attachmentId = uuid(id);
   const effectiveUntil = utcTime(input.effectiveUntil);
-  return transactional(settings, scopeId, async store => {
+  return transaction(settings, 'unoa.territory.' + scopeId, async store => {
     const scope = await getTerritory(store, actor, scopeId);
-    requireConfig(scope?.write, 403, 'Clôture non autorisée');
+    ensure(scope?.write, 403, 'Clôture non autorisée');
     const closed = await store.query(`
       UPDATE unoa.scope_attachment SET effective_until = $3
       WHERE id = $1 AND scope_id = $2 AND effective_until IS NULL
     `, [attachmentId, scopeId, effectiveUntil]);
-    requireConfig(closed.rowCount === 1, 409, 'Ce rattachement est déjà clos ou introuvable');
+    ensure(closed.rowCount === 1, 409, 'Ce rattachement est déjà clos ou introuvable');
     await audit(store, actor, scopeId, 'territory.detached', correlation, attachmentId);
     return { scopeId, id: attachmentId };
   });

@@ -43,7 +43,7 @@ jobs:
       - run: pnpm test:integration
         env:
           UNOA_TEST_DATABASE_URL: postgresql://unoa_ci:unoa_ci_ephemeral@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
-      - run: pnpm --filter @unoa/web test:iam
+      - run: pnpm test:http
         env:
           UNOA_TEST_DATABASE_URL: postgresql://unoa_ci:unoa_ci_ephemeral@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
       - run: pnpm build
@@ -53,4 +53,4 @@ jobs:
           pnpm --filter @unoa/web start --hostname 127.0.0.1 --port 3912 >web.log 2>&1 &
           trap 'cat web.log' EXIT
           curl --retry 12 --retry-connrefused --retry-delay 1 --fail --silent --show-error --output /dev/null http://127.0.0.1:3912/api/v1/health/ready
-          UNOA_TEST_URL=http://127.0.0.1:3912 node tests/smoke.mjs
+          UNOA_TEST_URL=http://127.0.0.1:3912 pnpm test:e2e

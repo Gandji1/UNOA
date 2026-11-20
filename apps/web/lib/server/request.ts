@@ -1,11 +1,11 @@
 import 'server-only';
-import { ConfigProblem, requireConfig, type Input } from '@/lib/config/validation';
+import { Problem, ensure, type Input } from '@/lib/shared/validation';
 
 // Shared by the configuration and territory studios: both accept a browser form
 // submission and a JSON call on the same endpoint.
 export async function readInput(request: Request, form: boolean, repeated: string[] = []): Promise<Input> {
   const reader = request.body?.getReader();
-  requireConfig(reader, 400, 'Corps de requête requis');
+  ensure(reader, 400, 'Corps de requête requis');
   const bytes: Uint8Array[] = [];
   let size = 0;
   while (true) {
@@ -14,7 +14,7 @@ export async function readInput(request: Request, form: boolean, repeated: strin
     size += value.byteLength;
     if (size > 16_384) {
       await reader.cancel();
-      throw new ConfigProblem(413, 'Requête trop volumineuse');
+      throw new Problem(413, 'Requête trop volumineuse');
     }
     bytes.push(value);
   }
@@ -30,18 +30,18 @@ export async function readInput(request: Request, form: boolean, repeated: strin
   } catch {
     // Return the same error for malformed JSON and non-object payloads.
   }
-  throw new ConfigProblem(400, 'Objet JSON invalide');
+  throw new Problem(400, 'Objet JSON invalide');
 }
 
 export function storageError(error: unknown, label: string, unavailable: string) {
-  if (error instanceof ConfigProblem) return error;
+  if (error instanceof Problem) return error;
   const code = typeof error === 'object' && error && 'code' in error ? error.code : undefined;
   if (code === '23514' || code === '23503' || code === 'P0002') {
-    return new ConfigProblem(422, 'Valeur ou transition incompatible avec la règle en vigueur');
+    return new Problem(422, 'Valeur ou transition incompatible avec la règle en vigueur');
   }
   if (code === '23505') {
-    return new ConfigProblem(409, 'Une publication existe déjà à cette date ou la requête est déjà enregistrée');
+    return new Problem(409, 'Une publication existe déjà à cette date ou la requête est déjà enregistrée');
   }
   console.error(label, typeof code === 'string' && /^[A-Z0-9]{5}$/.test(code) ? code : 'unknown');
-  return new ConfigProblem(503, unavailable);
+  return new Problem(503, unavailable);
 }

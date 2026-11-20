@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { formatInZone } from '@unoa/domain/time';
 import { scopeIdFormat } from '@/lib/iam/settings';
-import { canModerate, canTeach, offeringView } from '@/lib/lms/store';
+import { canModerate, canTeach, offeringView } from '@/lib/lms/offerings';
 import { ActionForm, Badge, Editor, Notice, Panel, shortId, Table } from '../../administration/forms';
 import { learner, refusedAs, roleLabels } from '../session';
 

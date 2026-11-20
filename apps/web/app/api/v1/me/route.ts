@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { privateJson, problem, unavailable } from '@/lib/iam/responses';
+import { privateJson, problem, unavailable } from '@/lib/server/responses';
 
 export async function GET(request: NextRequest) {
   const path = '/api/v1/me';

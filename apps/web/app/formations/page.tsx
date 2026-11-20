@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { iamSettings } from '@/lib/iam/settings';
-import { publicPrograms, type PublicProgram } from '@/lib/catalog/store';
+import { publicPrograms, type PublicProgram } from '@/lib/catalog/public';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
 export const metadata: Metadata = { title: 'Formations · UNOA', description: 'Catalogue des formations publiées' };

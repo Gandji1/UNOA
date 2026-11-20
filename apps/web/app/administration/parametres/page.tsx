@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation';
 import { cookieName, iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { catalogue, configurationDetails, readableScopes, scopeTypes } from '@/lib/config/store';
-import { ConfigProblem, configKey, utcTime } from '@/lib/config/validation';
+import { configKey } from '@/lib/config/validation';
+import { Problem, utcTime } from '@/lib/shared/validation';
 import { DefinitionEditor, DraftEditor, formatTime, formatValue, kindLabels, stateLabels, VersionAction } from './components';
 
 export const metadata: Metadata = { title: 'Paramètres et versions · UNOA' };
@@ -69,7 +70,7 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
   const result = await catalogue(settings, actor, selectedScopeId,
     keyAfter.length <= 96 && configKey.test(keyAfter) ? keyAfter : undefined)
       .catch(error => {
-        if (error instanceof ConfigProblem && error.status === 403) return null;
+        if (error instanceof Problem && error.status === 403) return null;
         throw error;
       });
   if (!result) {
@@ -94,7 +95,7 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
     configurationDetails(settings, actor, scope, parameterKey, at, isScope(preview) ? preview : undefined, historyCursor);
   let data = key.length <= 96 && configKey.test(key)
     ? await readDetails(key).catch(error => {
-      if (error instanceof ConfigProblem && error.status === 404) return null;
+      if (error instanceof Problem && error.status === 404) return null;
       throw error;
     })
     : null;

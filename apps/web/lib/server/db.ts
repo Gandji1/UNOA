@@ -38,13 +38,4 @@ export async function auditDenial(settings: IamSettings, actor: string, action: 
   `, [actor, action, correlation]);
 }
 
-export async function allowed(store: Queryable, actor: string, permission: string, scope: string) {
-  const { rows } = await store.query<{ allowed: boolean }>(
-    'SELECT unoa.has_scope_permission($1, $2, $3) AS allowed', [actor, permission, scope],
-  );
-  return rows[0]?.allowed === true;
-}
 
-export function optionalText(input: unknown) {
-  return input === undefined || input === null || (typeof input === 'string' && input.trim() === '') ? null : input;
-}

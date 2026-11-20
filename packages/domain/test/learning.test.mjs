@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lessonAccess, parseChapters, parseInline, parseMarkup } from '../packages/domain/src/learning.ts';
+import { lessonAccess, parseChapters, parseInline, parseMarkup } from '../src/learning.ts';
 
 test('Le balisage restreint produit titres, paragraphes, listes et liens HTTPS seulement', () => {
   const blocks = parseMarkup('# Titre\nUn **mot** et un [lien](https://example.test/a).\n\n- un\n- deux\n\nFin');
@@ -31,7 +31,7 @@ test('Les chapitres vidéo sont ordonnés et bornés', () => {
 });
 
 test('Une heure locale est convertie selon le fuseau IANA, changement d’heure compris', async () => {
-  const { zonedToUtc } = await import('../packages/domain/src/time.ts');
+  const { zonedToUtc } = await import('../src/time.ts');
   assert.equal(zonedToUtc('2027-01-15T10:00', 'Africa/Porto-Novo').toISOString(), '2027-01-15T09:00:00.000Z');
   assert.equal(zonedToUtc('2027-01-15T10:00', 'America/Toronto').toISOString(), '2027-01-15T15:00:00.000Z');
   assert.equal(zonedToUtc('2027-07-15T10:00', 'America/Toronto').toISOString(), '2027-07-15T14:00:00.000Z');

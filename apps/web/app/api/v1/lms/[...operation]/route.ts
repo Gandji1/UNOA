@@ -1,12 +1,10 @@
 import type { NextRequest } from 'next/server';
-import { ConfigProblem } from '@/lib/config/validation';
-import { studioGet, studioPost } from '@/lib/studio/route';
-import {
-  closeOffering, completeLesson, courseDetails, courseVersionDetails, createCourseVersion, createOffering,
-  editCourseVersion, exportCourseVersion, forumAction, forumThread, importCourseVersion, lessonView, lmsContexts,
-  lmsOverview, manageMember, markRead, myOfferings, notifications, offeringView, removeFromCourseVersion, saveNote,
-  setDue, transitionCourseVersion,
-} from '@/lib/lms/store';
+import { Problem } from '@/lib/shared/validation';
+import { studioGet, studioPost } from '@/lib/server/route';
+import { forumAction, forumThread } from '@/lib/lms/forum';
+import { closeOffering, completeLesson, createOffering, lessonView, manageMember, myOfferings, offeringView, saveNote, setDue } from '@/lib/lms/offerings';
+import { courseDetails, courseVersionDetails, createCourseVersion, editCourseVersion, exportCourseVersion, importCourseVersion, lmsContexts, lmsOverview, removeFromCourseVersion, transitionCourseVersion } from '@/lib/lms/studio';
+import { markRead, notifications } from '@/lib/notifications/store';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 const options = {
@@ -56,6 +54,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       return forumAction(settings, actor, id, action, input, correlation);
     }
     if (resource === 'notifications' && action === 'read') return markRead(settings, actor, id);
-    throw new ConfigProblem(404, 'Opération inconnue');
+    throw new Problem(404, 'Opération inconnue');
   });
 }

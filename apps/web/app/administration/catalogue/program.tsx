@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { programDetails } from '@/lib/catalog/store';
+import type { programDetails } from '@/lib/catalog/programs';
 import { regulatoryLabels } from '@/lib/catalog/public';
 import { ActionForm, Badge, Editor, formatTime, Panel, Table } from '../forms';
 import { regulatoryBadge, stateBadge } from './labels';

@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation';
 import { formatOffset } from '@unoa/domain/learning';
 import { cookieName, iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { ConfigProblem } from '@/lib/config/validation';
-import { courseDetails, courseVersionDetails, lmsContexts, lmsOverview } from '@/lib/lms/store';
+import { Problem } from '@/lib/shared/validation';
+import { courseDetails, courseVersionDetails, lmsContexts, lmsOverview } from '@/lib/lms/studio';
 import { Markup } from '@/lib/lms/markup';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, Table } from '../forms';
 
@@ -25,7 +25,7 @@ const states: Record<string, [string, 'ok' | 'warn' | 'muted' | 'info']> = {
 const State = ({ state }: { state: string }) => <Badge tone={states[state][1]}>{states[state][0]}</Badge>;
 
 function refused(error: unknown) {
-  if (error instanceof ConfigProblem) return null;
+  if (error instanceof Problem) return null;
   throw error;
 }
 

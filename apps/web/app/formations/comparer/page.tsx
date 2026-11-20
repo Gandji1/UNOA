@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
-import { publicSheet, type PublicSheet } from '@/lib/catalog/store';
+import { publicSheet, type PublicSheet } from '@/lib/catalog/public';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
 export const metadata: Metadata = { title: 'Comparer des formations · UNOA' };

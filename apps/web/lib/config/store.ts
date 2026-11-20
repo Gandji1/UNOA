@@ -3,10 +3,11 @@ import type { Pool, PoolClient } from 'pg';
 import { resolveParameter, type ParameterVersion } from '@unoa/config';
 import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
-import { boundedText, definitionInput, keyName, requireConfig, typedValue, utcTime, uuid } from './validation';
-import type { ConfigKind, ConfigValue, Input } from './validation';
+import { audit, transaction, type Queryable } from '@/lib/server/db';
+import { definitionInput, keyName, typedValue } from './validation';
+import { boundedText, ensure, utcTime, uuid, type Input } from '@/lib/shared/validation';
+import type { ConfigKind, ConfigValue } from './validation';
 
-type Queryable = Pool | PoolClient;
 
 interface Scope {
   id: string;
@@ -84,7 +85,7 @@ export async function scopeTypes(settings: IamSettings) {
 export async function catalogue(settings: IamSettings, actor: string, scopeId: string, after?: string) {
   const store = database(settings);
   const scope = await getScope(store, actor, scopeId);
-  requireConfig(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Portée inaccessible');
   const { rows } = await store.query<Definition>(`
     SELECT key, label, description, kind, default_value, minimum, maximum,
            choices, allowed_types, inherits, allow_override
@@ -98,7 +99,7 @@ export async function catalogue(settings: IamSettings, actor: string, scopeId: s
 
 async function definition(store: Queryable, key: string) {
   const { rows } = await store.query<Definition>('SELECT * FROM unoa.config_definition WHERE key = $1', [key]);
-  requireConfig(rows[0], 404, 'Paramètre introuvable');
+  ensure(rows[0], 404, 'Paramètre introuvable');
   return rows[0];
 }
 
@@ -135,9 +136,9 @@ async function effective(store: Queryable, def: Definition, scopeId: string, at:
 export async function resolveConfiguration(settings: IamSettings, actor: string, scopeId: string, key: string, at: string) {
   const store = database(settings);
   const scope = await getScope(store, actor, scopeId);
-  requireConfig(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Portée inaccessible');
   const def = await definition(store, key);
-  requireConfig(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
+  ensure(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
   return { key, scopeId, at, ...(await effective(store, def, scopeId, at)) };
 }
 
@@ -145,9 +146,9 @@ export async function configurationDetails(
   settings: IamSettings, actor: string, scope: Scope, key: string, at: string, previewId?: string, before?: number,
 ) {
   const store = database(settings);
-  requireConfig(await getScope(store, actor, scope.id), 403, 'Portée inaccessible');
+  ensure(await getScope(store, actor, scope.id), 403, 'Portée inaccessible');
   const def = await definition(store, key);
-  requireConfig(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
+  ensure(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
   const result = await effective(store, def, scope.id, at);
   const { rows: versions } = await store.query<Version>(`
     SELECT * FROM unoa.config_value WHERE definition_key = $1 AND scope_id = $2
@@ -168,47 +169,19 @@ export async function configurationDetails(
   return { definition: def, result, versions: versions.slice(0, 24), next: versions.length > 24 ? versions[23].version : null, preview };
 }
 
-export async function auditConfigDenial(settings: IamSettings, actor: string, correlation: string) {
-  await database(settings).query(`
-    INSERT INTO unoa.audit_event(actor_id, action, correlation_id, outcome)
-    VALUES ($1, 'config.access', $2, 'denied')
-  `, [actor, correlation]);
-}
 
-async function audit(store: Queryable, actor: string, scope: string, action: string, correlation: string, resource?: string) {
-  await store.query(`
-    INSERT INTO unoa.audit_event(actor_id, scope_id, action, correlation_id, resource_id, outcome)
-    VALUES ($1, $2, $3, $4, $5, 'allowed')
-  `, [actor, scope, action, correlation, resource || null]);
-}
 
-async function transactional<T>(settings: IamSettings, key: string, change: (store: PoolClient) => Promise<T>) {
-  const store = await database(settings).connect();
-  try {
-    await store.query('BEGIN');
-    // Serialize decisions for this key, including inheritance changes published by another scope.
-    await store.query("SELECT pg_advisory_xact_lock(hashtextextended('unoa.config.' || $1, 0))", [key]);
-    const result = await change(store);
-    await store.query('COMMIT');
-    return result;
-  } catch (error) {
-    await store.query('ROLLBACK');
-    throw error;
-  } finally {
-    store.release();
-  }
-}
 
 export async function createDefinition(settings: IamSettings, actor: string, input: Input, form: boolean, correlation: string) {
   const scopeId = uuid(input.scopeId);
   const item = definitionInput(input, form);
-  return transactional(settings, item.key, async store => {
+  return transaction(settings, 'unoa.config.' + item.key, async store => {
     const scope = await getScope(store, actor, scopeId);
-    requireConfig(scope?.root && scope.define, 403, 'Création de définition non autorisée');
+    ensure(scope?.root && scope.define, 403, 'Création de définition non autorisée');
     const { rows } = await store.query<{ count: number }>(
       'SELECT count(*)::int FROM unoa.scope_type WHERE code = ANY($1)', [item.types],
     );
-    requireConfig(rows[0].count === item.types.length, 400, 'Type de portée inconnu');
+    ensure(rows[0].count === item.types.length, 400, 'Type de portée inconnu');
     const result = await store.query(`
       INSERT INTO unoa.config_definition
         (key, label, description, kind, default_value, minimum, maximum, choices, allowed_types, inherits, allow_override, author_id)
@@ -216,7 +189,7 @@ export async function createDefinition(settings: IamSettings, actor: string, inp
       ON CONFLICT (key) DO NOTHING
     `, [item.key, item.label, item.description, item.kind, item.defaultValue === null ? null : JSON.stringify(item.defaultValue),
       item.minimum, item.maximum, item.options, item.types, item.inherits, item.allowOverride, actor]);
-    requireConfig(result.rowCount === 1, 409, 'Cette clé existe déjà');
+    ensure(result.rowCount === 1, 409, 'Cette clé existe déjà');
     await audit(store, actor, scopeId, 'config.definition_created', correlation);
     return { key: item.key, scopeId };
   });
@@ -228,11 +201,11 @@ export async function createValue(settings: IamSettings, actor: string, input: I
   const key = keyName(input.key);
   const reason = boundedText(input.reason, 500, 'Justification');
   const effectiveFrom = utcTime(input.effectiveFrom);
-  return transactional(settings, key, async store => {
+  return transaction(settings, 'unoa.config.' + key, async store => {
     const scope = await getScope(store, actor, scopeId);
-    requireConfig(scope?.write, 403, 'Rédaction non autorisée');
+    ensure(scope?.write, 403, 'Rédaction non autorisée');
     const def = await definition(store, key);
-    requireConfig(def.allowed_types.includes(scope.type_code) && (def.allow_override || scope.root), 422, 'Surcharge interdite pour cette portée');
+    ensure(def.allowed_types.includes(scope.type_code) && (def.allow_override || scope.root), 422, 'Surcharge interdite pour cette portée');
     const value = typedValue(def.kind, input.value, form);
     const json = JSON.stringify(value);
     const prior = await store.query<Version & { identical: boolean }>(`
@@ -241,10 +214,10 @@ export async function createValue(settings: IamSettings, actor: string, input: I
       FROM unoa.config_value WHERE request_id = $1
     `, [requestId, key, scopeId, json, reason, effectiveFrom, actor]);
     if (prior.rows[0]) {
-      requireConfig(prior.rows[0].identical, 409, 'Clé de requête déjà utilisée');
+      ensure(prior.rows[0].identical, 409, 'Clé de requête déjà utilisée');
       return { key, scopeId, id: prior.rows[0].id };
     }
-    requireConfig(Date.parse(effectiveFrom) > Date.now(), 422, 'Choisir une date d’effet future');
+    ensure(Date.parse(effectiveFrom) > Date.now(), 422, 'Choisir une date d’effet future');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.config_value (request_id, definition_key, scope_id, value, reason, effective_from, author_id)
       VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7) RETURNING id
@@ -264,31 +237,31 @@ const transitions = {
 export async function transitionValue(
   settings: IamSettings, actor: string, id: string, action: string, input: Input, correlation: string,
 ) {
-  requireConfig(Object.hasOwn(transitions, action), 404, 'Action inconnue');
+  ensure(Object.hasOwn(transitions, action), 404, 'Action inconnue');
   const transition = transitions[action as keyof typeof transitions];
   const scopeId = uuid(input.scopeId);
   const key = keyName(input.key);
 
-  return transactional(settings, key, async store => {
+  return transaction(settings, 'unoa.config.' + key, async store => {
     const scope = await getScope(store, actor, scopeId);
-    requireConfig(scope?.[transition.right], 403, 'Action non autorisée');
+    ensure(scope?.[transition.right], 403, 'Action non autorisée');
     const { rows } = await store.query<Version>(`
       SELECT * FROM unoa.config_value WHERE id = $1 AND definition_key = $2 AND scope_id = $3 FOR UPDATE
     `, [uuid(id), key, scopeId]);
     const version = rows[0];
-    requireConfig(version, 404, 'Version introuvable');
-    requireConfig(version.state === transition.state, 409, 'La version a changé depuis son affichage');
-    if (action === 'approve') requireConfig(version.author_id !== actor, 403, 'La revue doit être effectuée par une autre personne');
+    ensure(version, 404, 'Version introuvable');
+    ensure(version.state === transition.state, 409, 'La version a changé depuis son affichage');
+    if (action === 'approve') ensure(version.author_id !== actor, 403, 'La revue doit être effectuée par une autre personne');
     let baseVersion: number | null = null;
     if (action === 'approve' || action === 'publish') {
       const at = version.effective_from.toISOString();
-      requireConfig(Date.parse(at) > Date.now(), 422, 'La date d’effet est passée. Créer une nouvelle version');
+      ensure(Date.parse(at) > Date.now(), 422, 'La date d’effet est passée. Créer une nouvelle version');
       const def = await definition(store, key);
       baseVersion = (await effective(store, def, scopeId, at)).source?.version ?? null;
       const previewed = input.previewVersion === '' || input.previewVersion === null ? null : Number(input.previewVersion);
-      requireConfig(previewed === baseVersion, 409, 'La valeur de référence a changé. Refaire la prévisualisation');
+      ensure(previewed === baseVersion, 409, 'La valeur de référence a changé. Refaire la prévisualisation');
       if (action === 'publish') {
-        requireConfig(version.reviewed_against === baseVersion, 409, 'La valeur a changé depuis l’approbation. Renvoyer en revue');
+        ensure(version.reviewed_against === baseVersion, 409, 'La valeur a changé depuis l’approbation. Renvoyer en revue');
       }
     }
     await store.query(`

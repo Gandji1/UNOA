@@ -7,7 +7,7 @@ Utiliser Node.js 24 et la version de pnpm fixée dans package.json. Depuis la ra
 
 ## Vérification
 
-Exécuter `pnpm test`, `pnpm trace` et `pnpm build`. Démarrer le serveur compilé avec `pnpm --filter @unoa/web start --hostname 127.0.0.1 --port 3912` puis lancer `node tests/smoke.mjs` dans un second terminal.
+Exécuter `pnpm test`, `pnpm trace` et `pnpm build`. Démarrer le serveur compilé avec `pnpm --filter @unoa/web start --hostname 127.0.0.1 --port 3912` puis lancer `pnpm test:e2e` dans un second terminal.
 
 ## Livraison
 
@@ -52,7 +52,7 @@ Le site public fonctionne en attendant l’activation de la connexion. La page
    `unoa.login_identity`. Vérifier la connexion sur un compte de recette,
    les autorisations par portée et la fermeture de session avant l’ouverture.
 
-La commande `pnpm --filter @unoa/web test:iam` utilise le même serveur de
+La commande `pnpm test:http` utilise le même serveur de
 recette PostgreSQL que les autres tests d’intégration. Son compte doit pouvoir
 créer une base et un rôle temporaires. L’émetteur local de recette et ses
 identités fictives ne sont pas déployés.

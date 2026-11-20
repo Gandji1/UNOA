@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { cookieName, cookieOptions, iamSettings, loginDurationSeconds } from '@/lib/iam/settings';
 import { startLogin } from '@/lib/iam/oidc';
-import { problem, redirectTo, unavailable } from '@/lib/iam/responses';
+import { problem, redirectTo, unavailable } from '@/lib/server/responses';
 
 const path = '/api/v1/auth/login';
 

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { formatOffset } from '@unoa/domain/learning';
 import { formatInZone } from '@unoa/domain/time';
-import { ConfigProblem } from '@/lib/config/validation';
+import { Problem } from '@/lib/shared/validation';
 import { scopeIdFormat } from '@/lib/iam/settings';
-import { lessonView } from '@/lib/lms/store';
+import { lessonView } from '@/lib/lms/offerings';
 import { Markup } from '@/lib/lms/markup';
 import { ActionForm, Badge, Notice } from '../../../../administration/forms';
 import { learner } from '../../../session';
@@ -23,7 +23,7 @@ export default async function Lesson({ params, searchParams }: Props) {
   try {
     view = await lessonView(settings, actor, id, lessonId);
   } catch (error) {
-    if (!(error instanceof ConfigProblem)) throw error;
+    if (!(error instanceof Problem)) throw error;
     return <main id="contenu" className="studio"><section className="studio-panel"><h1>Leçon</h1>
       <p>{error.status === 423 ? 'Cette leçon est verrouillée : terminez d’abord les leçons requises.' : 'Leçon inaccessible.'}</p>
       <p><a href={`/apprendre/${id}`}>Revenir au cours</a></p></section></main>;

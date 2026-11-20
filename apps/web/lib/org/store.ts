@@ -1,27 +1,13 @@
 import 'server-only';
 import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
-import { boundedText, numeric, requireConfig, utcTime, uuid, type Input } from '@/lib/config/validation';
+import { boundedText, numeric, ensure, utcTime, uuid, type Input, businessCode, choice, flag, optionalText } from '@/lib/shared/validation';
 import { typeCode } from '@/lib/territory/validation';
-import { audit, optionalText, transaction, type Queryable } from '@/lib/studio/db';
+import { audit, transaction, type Queryable } from '@/lib/server/db';
 
-export const unitCode = /^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$/;
 export const capacities = ['titular', 'deputy', 'interim'] as const;
 export const changeKinds = ['closure', 'merger', 'transfer'] as const;
 
-export function code(input: unknown, label = 'Code') {
-  requireConfig(typeof input === 'string' && unitCode.test(input.trim()), 400, label + ' invalide');
-  return input.trim();
-}
-
-export function flag(input: unknown) {
-  return input === true || input === 'on' || input === 'true';
-}
-
-function choice<T extends string>(input: unknown, values: readonly T[], label: string): T {
-  requireConfig(values.includes(input as T), 400, label + ' invalide');
-  return input as T;
-}
 
 export interface OrgScope {
   id: string;
@@ -91,7 +77,7 @@ export interface PositionRow {
 export async function orgDetails(settings: IamSettings, actor: string, scopeId: string) {
   const store = database(settings);
   const scope = await orgScope(store, actor, uuid(scopeId));
-  requireConfig(scope, 403, 'Structure inaccessible');
+  ensure(scope, 403, 'Structure inaccessible');
   const [children, types, positions, capacity, changes, lineage] = await Promise.all([
     store.query<OrgScope>(`
       SELECT ${scopeFields}
@@ -153,13 +139,13 @@ export async function orgDetails(settings: IamSettings, actor: string, scopeId: 
 
 async function requireScope(store: Queryable, actor: string, scopeId: string, permission: 'org.write' | 'org.approve') {
   const scope = await orgScope(store, actor, scopeId);
-  requireConfig(scope && scope[permission === 'org.write' ? 'write' : 'approve'], 403, 'Action non autorisée');
+  ensure(scope && scope[permission === 'org.write' ? 'write' : 'approve'], 403, 'Action non autorisée');
   return scope;
 }
 
 async function requireLivingUnit(store: Queryable, actor: string, unitId: string, permission: 'org.write' | 'org.approve') {
   const scope = await requireScope(store, actor, unitId, permission);
-  requireConfig(scope.nature === 'academic_unit', 422, 'Cette action vise une unité académique');
+  ensure(scope.nature === 'academic_unit', 422, 'Cette action vise une unité académique');
   return scope;
 }
 
@@ -167,14 +153,14 @@ export async function proposeUnit(settings: IamSettings, actor: string, input: I
   const parentId = uuid(input.parentId);
   const kind = typeCode(input.typeCode);
   const label = boundedText(input.label, 160, 'Libellé');
-  const unit = code(input.code);
+  const unit = businessCode(input.code);
   const mission = optionalText(input.mission) === null ? null : boundedText(input.mission, 2000, 'Mission');
   const presentFrom = utcTime(input.presentFrom);
   return transaction(settings, 'unoa.org.' + parentId, async store => {
     const parent = await requireScope(store, actor, parentId, 'org.write');
-    requireConfig(parent.nature === 'institution' || parent.status === 'active', 422, 'La structure mère doit être active');
+    ensure(parent.nature === 'institution' || parent.status === 'active', 422, 'La structure mère doit être active');
     const { rows } = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
-    requireConfig(rows[0]?.nature === 'academic_unit', 422, 'Ce type n’est pas une unité académique');
+    ensure(rows[0]?.nature === 'academic_unit', 422, 'Ce type n’est pas une unité académique');
     const scope = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, present_from) VALUES ($1, $2, $3, $4) RETURNING id
     `, [kind, parentId, label, presentFrom]);
@@ -192,8 +178,8 @@ export async function decideUnit(settings: IamSettings, actor: string, id: strin
   const decision = choice(input.decision, ['approve', 'reject'] as const, 'Décision');
   return transaction(settings, 'unoa.org.' + unitId, async store => {
     const unit = await requireLivingUnit(store, actor, unitId, 'org.approve');
-    requireConfig(unit.status === 'proposed', 409, 'Cette unité a déjà été instruite');
-    requireConfig(unit.proposed_by !== actor, 403, 'Une proposition est validée par une autre personne');
+    ensure(unit.status === 'proposed', 409, 'Cette unité a déjà été instruite');
+    ensure(unit.proposed_by !== actor, 403, 'Une proposition est validée par une autre personne');
     await store.query(`
       UPDATE unoa.org_unit SET status = $2, decided_by = $3, decided_at = now() WHERE scope_id = $1
     `, [unitId, decision === 'approve' ? 'active' : 'rejected', actor]);
@@ -211,7 +197,7 @@ export async function updateUnit(settings: IamSettings, actor: string, id: strin
   const mission = optionalText(input.mission) === null ? null : boundedText(input.mission, 2000, 'Mission');
   return transaction(settings, 'unoa.org.' + unitId, async store => {
     const unit = await requireLivingUnit(store, actor, unitId, 'org.write');
-    requireConfig(unit.status === 'proposed' || unit.status === 'active', 409, 'Une unité close est archivée');
+    ensure(unit.status === 'proposed' || unit.status === 'active', 409, 'Une unité close est archivée');
     await store.query('UPDATE unoa.scope SET label = $2 WHERE id = $1', [unitId, label]);
     await store.query('UPDATE unoa.org_unit SET mission = $2, public = $3 WHERE scope_id = $1',
       [unitId, mission, flag(input.public)]);
@@ -224,10 +210,10 @@ export async function createPosition(settings: IamSettings, actor: string, id: s
   const unitId = uuid(id);
   const title = boundedText(input.title, 160, 'Intitulé');
   const seats = input.seats === undefined || input.seats === '' ? 1 : numeric(input.seats);
-  requireConfig(Number.isInteger(seats) && seats >= 1 && seats <= 500, 400, 'Nombre de sièges invalide');
+  ensure(Number.isInteger(seats) && seats >= 1 && seats <= 500, 400, 'Nombre de sièges invalide');
   return transaction(settings, 'unoa.org.' + unitId, async store => {
     const unit = await requireLivingUnit(store, actor, unitId, 'org.write');
-    requireConfig(unit.status === 'active', 422, 'Les postes se créent dans une unité active');
+    ensure(unit.status === 'active', 422, 'Les postes se créent dans une unité active');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.org_position(unit_id, title, is_head, seats, public, created_by)
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
@@ -239,7 +225,7 @@ export async function createPosition(settings: IamSettings, actor: string, id: s
 
 async function positionUnit(store: Queryable, positionId: string) {
   const { rows } = await store.query<{ unit_id: string }>('SELECT unit_id FROM unoa.org_position WHERE id = $1', [positionId]);
-  requireConfig(rows[0], 404, 'Poste introuvable');
+  ensure(rows[0], 404, 'Poste introuvable');
   return rows[0].unit_id;
 }
 
@@ -267,13 +253,13 @@ export async function appoint(settings: IamSettings, actor: string, id: string, 
 export async function endAppointment(settings: IamSettings, actor: string, id: string, input: Input, correlation: string) {
   const appointmentId = uuid(id);
   const effectiveUntil = utcTime(input.effectiveUntil);
-  requireConfig(new Date(effectiveUntil).getTime() >= Date.now() - 300_000, 422, 'Une fin de fonction n’est pas rétroactive');
+  ensure(new Date(effectiveUntil).getTime() >= Date.now() - 300_000, 422, 'Une fin de fonction n’est pas rétroactive');
   return transaction(settings, 'unoa.org.appointment.' + appointmentId, async store => {
     const { rows } = await store.query<{ unit_id: string }>(`
       SELECT position.unit_id FROM unoa.org_appointment AS appointment
       JOIN unoa.org_position AS position ON position.id = appointment.position_id WHERE appointment.id = $1
     `, [appointmentId]);
-    requireConfig(rows[0], 404, 'Nomination introuvable');
+    ensure(rows[0], 404, 'Nomination introuvable');
     await requireLivingUnit(store, actor, rows[0].unit_id, 'org.write');
     await store.query('UPDATE unoa.org_appointment SET effective_until = $2 WHERE id = $1', [appointmentId, effectiveUntil]);
     await audit(store, actor, rows[0].unit_id, 'org.appointment_ended', correlation, appointmentId);
@@ -285,13 +271,13 @@ export async function recordCapacity(settings: IamSettings, actor: string, id: s
   const unitId = uuid(id);
   const resource = boundedText(input.resource, 120, 'Ressource');
   const quantity = numeric(input.quantity);
-  requireConfig(quantity >= 0, 400, 'Quantité invalide');
+  ensure(quantity >= 0, 400, 'Quantité invalide');
   const measure = boundedText(input.measure, 60, 'Unité de mesure');
   const reason = boundedText(input.reason, 500, 'Motif');
   const effectiveFrom = utcTime(input.effectiveFrom);
   return transaction(settings, 'unoa.org.' + unitId, async store => {
     const unit = await requireLivingUnit(store, actor, unitId, 'org.write');
-    requireConfig(unit.status === 'active', 422, 'Les capacités concernent une unité active');
+    ensure(unit.status === 'active', 422, 'Les capacités concernent une unité active');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.org_capacity(unit_id, resource, quantity, measure, reason, effective_from, recorded_by)
       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
@@ -312,7 +298,7 @@ export async function requestChange(settings: IamSettings, actor: string, id: st
     if (targetId) {
       // A transfer needs the right to create under the new parent; a merger needs to see the absorbing unit.
       const target = await orgScope(store, actor, targetId);
-      requireConfig(target && (kind === 'merger' || target.write), 403, 'Structure cible non autorisée');
+      ensure(target && (kind === 'merger' || target.write), 403, 'Structure cible non autorisée');
     }
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.org_change(unit_id, kind, target_id, reason, effective_at, requested_by)
@@ -330,7 +316,7 @@ export async function decideChange(settings: IamSettings, actor: string, id: str
   const { rows: found } = await database(settings).query<{ unit_id: string }>(
     'SELECT unit_id FROM unoa.org_change WHERE id = $1', [changeId],
   );
-  requireConfig(found[0], 404, 'Demande introuvable');
+  ensure(found[0], 404, 'Demande introuvable');
   const unitId = found[0].unit_id;
   return transaction(settings, 'unoa.org.' + unitId, async store => {
     const unit = await requireLivingUnit(store, actor, unitId, 'org.approve');
@@ -338,14 +324,14 @@ export async function decideChange(settings: IamSettings, actor: string, id: str
       kind: string; target_id: string | null; effective_at: Date; state: string; requested_by: string;
     }>('SELECT kind, target_id, effective_at, state, requested_by FROM unoa.org_change WHERE id = $1 FOR UPDATE', [changeId]);
     const change = rows[0];
-    requireConfig(change.state === 'requested', 409, 'Cette demande a déjà été instruite');
-    requireConfig(change.requested_by !== actor, 403, 'Une réorganisation est approuvée par une autre personne');
+    ensure(change.state === 'requested', 409, 'Cette demande a déjà été instruite');
+    ensure(change.requested_by !== actor, 403, 'Une réorganisation est approuvée par une autre personne');
     let successor: string | null = null;
     if (decision === 'approve') {
-      requireConfig(change.effective_at.getTime() >= Date.now() - 300_000, 422, 'La date d’effet est dépassée');
+      ensure(change.effective_at.getTime() >= Date.now() - 300_000, 422, 'La date d’effet est dépassée');
       if (change.kind === 'transfer') {
         const target = await orgScope(store, actor, change.target_id!);
-        requireConfig(target?.approve, 403, 'Structure cible non autorisée');
+        ensure(target?.approve, 403, 'Structure cible non autorisée');
         const created = await store.query<{ id: string }>(`
           INSERT INTO unoa.scope(type_code, parent_id, label, time_zone, currency, locale, present_from)
           SELECT type_code, $2, label, time_zone, currency, locale, $3 FROM unoa.scope WHERE id = $1 RETURNING id

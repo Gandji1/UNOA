@@ -1,11 +1,10 @@
 import type { NextRequest } from 'next/server';
-import { ConfigProblem, uuid } from '@/lib/config/validation';
-import { studioGet, studioPost } from '@/lib/studio/route';
-import {
-  archiveField, catalogContexts, catalogOverview, createCompetency, createCourse, createField, createProgram,
-  defineFieldType, defineProgramKind, editVersion, programDetails, recordAuthorization, removeFromVersion,
-  setProgramLabel, simulateVersion, transitionVersion, verifyAuthorization, versionDetails,
-} from '@/lib/catalog/store';
+import { Problem, uuid } from '@/lib/shared/validation';
+import { studioGet, studioPost } from '@/lib/server/route';
+import { catalogContexts } from '@/lib/catalog/access';
+import { editVersion, removeFromVersion, simulateVersion, transitionVersion, versionDetails } from '@/lib/catalog/curriculum';
+import { createProgram, programDetails, recordAuthorization, setProgramLabel, verifyAuthorization } from '@/lib/catalog/programs';
+import { archiveField, catalogOverview, createCompetency, createCourse, createField, defineFieldType, defineProgramKind } from '@/lib/catalog/references';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 const options = {
@@ -51,6 +50,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
       if (action === 'simulate') return simulateVersion(settings, actor, id, input);
       if (transitions.includes(action)) return transitionVersion(settings, actor, id, action, input, correlation);
     }
-    throw new ConfigProblem(404, 'Opération inconnue');
+    throw new Problem(404, 'Opération inconnue');
   });
 }

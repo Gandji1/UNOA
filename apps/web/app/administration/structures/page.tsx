@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cookieName, iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
-import { ConfigProblem } from '@/lib/config/validation';
+import { Problem } from '@/lib/shared/validation';
 import { orgContexts, orgDetails } from '@/lib/org/store';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, shortId, Table } from '../forms';
 
@@ -50,7 +50,7 @@ export default async function Structures({ searchParams }: { searchParams: Promi
     );
   }
   const data = await orgDetails(settings, actor, selected).catch(error => {
-    if (error instanceof ConfigProblem) return null;
+    if (error instanceof Problem) return null;
     throw error;
   });
   if (!data) {

@@ -9,11 +9,11 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import pg from 'pg';
 import { migrate } from '../../../packages/db/src/migrations.mjs';
-import { startIssuer } from './oidc-provider.fixture.mjs';
-import { exerciseConfiguration } from './configuration.fixture.mjs';
-import { exerciseTerritory } from './territory.fixture.mjs';
-import { exerciseAcademic } from './academic.fixture.mjs';
-import { exerciseLearning } from './learning.fixture.mjs';
+import { startIssuer } from './fixtures/oidc-provider.fixture.mjs';
+import { exerciseConfiguration } from './fixtures/configuration.fixture.mjs';
+import { exerciseTerritory } from './fixtures/territory.fixture.mjs';
+import { exerciseAcademic } from './fixtures/academic.fixture.mjs';
+import { exerciseLearning } from './fixtures/learning.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
