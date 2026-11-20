@@ -6,7 +6,7 @@ import { canModerate, canTeach, offeringView } from '@/lib/lms/offerings';
 import { ActionForm, Badge, Editor, Notice, Panel, shortId, Table } from '../../administration/forms';
 import { learner, refusedAs, roleLabels } from '../session';
 
-export const metadata: Metadata = { title: 'Cours · UNOA' };
+export const metadata: Metadata = { title: 'Cours' };
 export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; message?: string }> };

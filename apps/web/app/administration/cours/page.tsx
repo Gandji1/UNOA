@@ -9,7 +9,7 @@ import { courseDetails, courseVersionDetails, lmsContexts, lmsOverview } from '@
 import { Markup } from '@/lib/lms/markup';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, Table } from '../forms';
 
-export const metadata: Metadata = { title: 'Studio des cours · UNOA' };
+export const metadata: Metadata = { title: 'Studio des cours' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { iamSettings } from '@/lib/iam/settings';
 import { publicOrganisation } from '@/lib/org/store';
+import { currentSite } from '@/lib/site/store';
+import { SiteMissing } from '../site-missing';
 
-export const metadata: Metadata = { title: 'Structures · UNOA', description: 'Organigramme public de l’université' };
+export const metadata: Metadata = { title: 'Structures', description: 'Organigramme public de l’université' };
 export const dynamic = 'force-dynamic';
 
 const capacityLabels: Record<string, string> = { titular: '', deputy: 'suppléance', interim: 'intérim' };
@@ -29,7 +31,9 @@ function Branch({ parent, data }: { parent: string; data: Organisation }) {
 
 export default async function Structures() {
   const settings = iamSettings();
-  const data = settings ? await publicOrganisation(settings).catch(() => null) : null;
+  const site = await currentSite();
+  if (!settings || !site) return <SiteMissing />;
+  const data = await publicOrganisation(settings, site.site_id).catch(() => null);
   const institutions: [string, string][] = data ? [...new Map<string, string>(data.units.map(unit => [unit.institution_id, unit.institution_label] as [string, string])).entries()] : [];
   return (
     <main id="contenu">

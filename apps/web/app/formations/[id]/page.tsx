@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { issueMessages, simulatePlan } from '@unoa/domain/curriculum';
 import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { publicSheet, sheetModel } from '@/lib/catalog/public';
+import { currentSite } from '@/lib/site/store';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
 export const dynamic = 'force-dynamic';
@@ -11,12 +12,14 @@ type Params = { params: Promise<{ id: string }>; searchParams: Promise<{ choice?
 async function load(id: string) {
   const settings = iamSettings();
   if (!settings || !scopeIdFormat.test(id)) return null;
-  return publicSheet(settings, id).catch(() => null);
+  const site = await currentSite();
+  if (!site) return null;
+  return publicSheet(settings, site.site_id, id).catch(() => null);
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const sheet = await load((await params).id);
-  return { title: sheet ? `${sheet.version.title} · UNOA` : 'Formation · UNOA' };
+  return { title: sheet ? `${sheet.version.title}` : 'Formation' };
 }
 
 const kindLabels: Record<string, string> = { internship: 'Stage', thesis: 'Mémoire', defense: 'Soutenance', project: 'Projet', other: 'Autre' };

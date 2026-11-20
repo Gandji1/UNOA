@@ -13,7 +13,7 @@ import { Overview } from './overview';
 import { ProgramView } from './program';
 import { VersionView } from './version';
 
-export const metadata: Metadata = { title: 'Catalogue des formations · UNOA' };
+export const metadata: Metadata = { title: 'Catalogue des formations' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;

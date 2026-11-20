@@ -368,15 +368,15 @@ export async function decideChange(settings: IamSettings, actor: string, id: str
   });
 }
 
-export async function publicOrganisation(settings: IamSettings) {
+export async function publicOrganisation(settings: IamSettings, siteId: string) {
   const store = database(settings);
   const [units, positions] = await Promise.all([
     store.query<{
       id: string; parent_id: string; institution_id: string; institution_label: string;
       label: string; type_label: string; code: string; mission: string | null;
-    }>('SELECT * FROM unoa.public_org_units()'),
+    }>('SELECT * FROM unoa.public_org_units($1)', [siteId]),
     store.query<{ unit_id: string; title: string; is_head: boolean; holder: string; capacity: string }>(
-      'SELECT * FROM unoa.public_org_positions()',
+      'SELECT * FROM unoa.public_org_positions($1)', [siteId],
     ),
   ]);
   return { units: units.rows, positions: positions.rows };

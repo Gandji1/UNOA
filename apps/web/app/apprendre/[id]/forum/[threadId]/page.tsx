@@ -5,7 +5,7 @@ import { forumThread } from '@/lib/lms/forum';
 import { ActionForm, Badge, formatTime, Notice } from '../../../../administration/forms';
 import { learner, refusedAs } from '../../../session';
 
-export const metadata: Metadata = { title: 'Forum · UNOA' };
+export const metadata: Metadata = { title: 'Forum' };
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string; threadId: string }>; searchParams: Promise<{ error?: string; message?: string }> };
 

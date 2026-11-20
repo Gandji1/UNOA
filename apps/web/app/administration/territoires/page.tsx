@@ -10,7 +10,7 @@ import {
   kindLabels, LabelEditor, natureLabels, TerritoryEditor, TypeEditor,
 } from './components';
 
-export const metadata: Metadata = { title: 'Territoires et implantations · UNOA' };
+export const metadata: Metadata = { title: 'Territoires et implantations' };
 export const dynamic = 'force-dynamic';
 
 const path = '/administration/territoires';

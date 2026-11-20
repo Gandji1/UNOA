@@ -7,7 +7,7 @@ import { Problem } from '@/lib/shared/validation';
 import { orgContexts, orgDetails } from '@/lib/org/store';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, shortId, Table } from '../forms';
 
-export const metadata: Metadata = { title: 'Structures académiques · UNOA' };
+export const metadata: Metadata = { title: 'Structures académiques' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;

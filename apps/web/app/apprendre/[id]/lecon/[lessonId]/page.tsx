@@ -10,7 +10,7 @@ import { ActionForm, Badge, Notice } from '../../../../administration/forms';
 import { learner } from '../../../session';
 import { Player } from './player';
 
-export const metadata: Metadata = { title: 'Leçon · UNOA' };
+export const metadata: Metadata = { title: 'Leçon' };
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string; lessonId: string }>; searchParams: Promise<{ error?: string; message?: string }> };
 

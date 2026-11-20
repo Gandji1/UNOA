@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { iamSettings } from '@/lib/iam/settings';
 import { publicPrograms, type PublicProgram } from '@/lib/catalog/public';
+import { currentSite } from '@/lib/site/store';
+import { SiteMissing } from '../site-missing';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
-export const metadata: Metadata = { title: 'Formations · UNOA', description: 'Catalogue des formations publiées' };
+export const metadata: Metadata = { title: 'Formations', description: 'Catalogue des formations publiées' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -12,9 +14,11 @@ const distinct = (values: string[]) => [...new Set(values)].sort((a, b) => a.loc
 
 export default async function Formations({ searchParams }: { searchParams: Promise<Search> }) {
   const settings = iamSettings();
+  const site = await currentSite();
+  if (!settings || !site) return <SiteMissing />;
   const search = await searchParams;
   let programs: PublicProgram[] | null = null;
-  if (settings) programs = await publicPrograms(settings).catch(() => null);
+  programs = await publicPrograms(settings, site.site_id).catch(() => null);
   const filters = { q: field(search.q), nature: field(search.nature), langue: field(search.langue), zone: field(search.zone), modalite: field(search.modalite) };
   const needle = filters.q.toLocaleLowerCase('fr');
   const shown = (programs ?? []).filter(item =>

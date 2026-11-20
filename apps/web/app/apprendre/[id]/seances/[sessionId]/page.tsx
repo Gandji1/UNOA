@@ -6,7 +6,7 @@ import { sessionRoster } from '@/lib/live/store';
 import { ActionForm, formatTime, Notice, shortId, Table } from '../../../../administration/forms';
 import { learner, refusedAs, roleLabels } from '../../../session';
 
-export const metadata: Metadata = { title: 'Présences · UNOA' };
+export const metadata: Metadata = { title: 'Présences' };
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string; sessionId: string }>; searchParams: Promise<{ error?: string; message?: string }> };
 const statusLabels: Record<string, string> = { present: 'Présent', absent: 'Absent', excused: 'Excusé' };

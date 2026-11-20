@@ -28,9 +28,7 @@ GRANT UPDATE (label, updated_at) ON unoa.scope_label TO :"web_role";
 GRANT SELECT, INSERT ON unoa.scope_attachment TO :"web_role";
 GRANT UPDATE (effective_until) ON unoa.scope_attachment TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.nearest_institution(uuid), unoa.academic_owner(uuid),
-      unoa.program_regulatory_status(uuid), unoa.program_admission_allowed(uuid),
-      unoa.public_org_units(), unoa.public_org_positions(),
-      unoa.public_programs(), unoa.public_program_sheet(uuid) TO :"web_role";
+      unoa.program_regulatory_status(uuid), unoa.program_admission_allowed(uuid) TO :"web_role";
 GRANT SELECT ON unoa.org_unit, unoa.org_position, unoa.org_appointment, unoa.org_capacity,
       unoa.org_change, unoa.org_succession TO :"web_role";
 GRANT INSERT (scope_id, code, mission, public, proposed_by, status, decided_by, decided_at),
@@ -97,4 +95,14 @@ GRANT INSERT, UPDATE (first_joined_at, joins, status, marked_by, marked_at) ON u
 GRANT INSERT, UPDATE (decision, decided_at) ON unoa.live_consent TO :"web_role";
 GRANT INSERT (session_id, title, url, shared_by) ON unoa.live_resource TO :"web_role";
 GRANT INSERT (account_id, kind, title, body, link), UPDATE (read_at) ON unoa.notification TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.scope_within(uuid, uuid), unoa.site_scope(uuid), unoa.public_site(text, text),
+      unoa.public_programs(uuid), unoa.public_program_sheet(uuid, uuid), unoa.public_org_units(uuid),
+      unoa.public_org_positions(uuid) TO :"web_role";
+GRANT SELECT ON unoa.site, unoa.site_host, unoa.site_text TO :"web_role";
+GRANT INSERT (scope_id, default_language, created_by), UPDATE (default_language, online, changed_by, changed_at)
+ON unoa.site TO :"web_role";
+GRANT INSERT (host, site_id, created_by), DELETE ON unoa.site_host TO :"web_role";
+GRANT INSERT (site_id, language, name, short_name, tagline, hero_title, hero_text, hero_image_url, about, contact,
+              legal_notice, privacy_notice, footer, author_id),
+      UPDATE (state, published_by, published_at) ON unoa.site_text TO :"web_role";
 COMMIT;

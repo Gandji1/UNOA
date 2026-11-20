@@ -93,3 +93,12 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   forum, présences), API `/api/v1/lms` et `/api/v1/live`, adaptateur de visioconférence JWT.
 - Vérifications : unitaires 16 PASS, PostgreSQL 7 PASS, HTTP 4 PASS, build PASS, traçabilité PASS.
 - Gate Done : FAIL (E2E navigateur, accessibilité, stockage de fichiers, fournisseur réel) — exigences EN_COURS.
+
+## 20 novembre 2026 — Lot 009
+
+- Audit des lots 001 à 008 (fiche `docs/lots/LOT_009.md`) et restructuration : `lib/shared`, `lib/server`,
+  découpage des modules catalogue et LMS, module notifications, pipeline HTTP unique, tests par paquet.
+- Contenu institutionnel retiré du code ; sites publics multi-établissements (migration 0009, studio
+  `/administration/site`, pages légales par site). ADR-0006, carte `docs/ARCHITECTURE.md`.
+- Vérifications : unitaires 16, PostgreSQL 7, HTTP 4, build, sonde, traçabilité : PASS.
+- Gate Done : FAIL (I18N, SEO, E2E navigateur) — exigences EN_COURS.

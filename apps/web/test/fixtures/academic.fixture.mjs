@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { exerciseSites } from './site.fixture.mjs';
 
 // Builds two fictitious establishments from an empty academic base: Alpha in
 // semesters with fractional credits, Bêta in modules with another credit unit.
@@ -11,12 +12,13 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   await database.query(`
     INSERT INTO unoa.access_role VALUES ('academic_admin'), ('academic_reviewer'), ('academic_local');
     INSERT INTO unoa.permission VALUES ('org.read'), ('org.write'), ('org.approve'),
-      ('catalog.read'), ('catalog.write'), ('catalog.review'), ('catalog.publish'), ('catalog.authorize'), ('catalog.define');
+      ('catalog.read'), ('catalog.write'), ('catalog.review'), ('catalog.publish'), ('catalog.authorize'), ('catalog.define'),
+      ('site.read'), ('site.write'), ('site.publish');
     INSERT INTO unoa.role_permission (role_code, permission_code)
-      SELECT 'academic_admin', code FROM unoa.permission WHERE code LIKE 'org.%' OR code LIKE 'catalog.%';
+      SELECT 'academic_admin', code FROM unoa.permission WHERE code LIKE 'org.%' OR code LIKE 'catalog.%' OR code IN ('site.read', 'site.write');
     INSERT INTO unoa.role_permission VALUES
       ('academic_reviewer', 'org.read'), ('academic_reviewer', 'org.approve'), ('academic_reviewer', 'catalog.read'),
-      ('academic_reviewer', 'catalog.review'), ('academic_reviewer', 'catalog.publish'), ('academic_reviewer', 'catalog.authorize'),
+      ('academic_reviewer', 'catalog.review'), ('academic_reviewer', 'site.read'), ('academic_reviewer', 'site.publish'), ('academic_reviewer', 'catalog.publish'), ('academic_reviewer', 'catalog.authorize'),
       ('academic_local', 'org.read'), ('academic_local', 'org.write'), ('academic_local', 'catalog.read'), ('academic_local', 'catalog.write');
   `);
   // Establishments are dated earlier so that units may start now.
@@ -54,7 +56,7 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   const post = (path, cookie, data) => call(path, {
     method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(data),
   });
-  const get = (path, cookie) => call(path, cookie ? { headers: { Cookie: cookie } } : undefined);
+  const get = (path, cookie, extra = {}) => call(path, { headers: { ...(cookie ? { Cookie: cookie } : {}), ...extra } });
   async function okay(response) {
     assert.equal(response.status, 200, response.ok ? '' : JSON.stringify(await response.clone().json()));
     return response.json();
@@ -63,7 +65,10 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   const at = hours => new Date(Date.now() + hours * 3_600_000).toISOString().slice(0, 16);
   const now = at(0);
 
-  // 0. An empty base publishes nothing.
+  // 0. Without a site no institutional text is shown; then each site starts empty.
+  assert.equal((await get('/api/v1/public/programs/all')).status, 404);
+  assert.match(await (await get('/')).text(), /Site public non configuré/);
+  const { betaOrigin } = await exerciseSites({ database, post, get, okay, status, origin, author: A, publisher: R, alphaUniv, betaUniv });
   assert.deepEqual((await okay(await get('/api/v1/public/programs/all'))).programs, []);
   assert.match(await (await get('/formations')).text(), /Aucune formation n’est encore publiée/);
   assert.match(await (await get('/structures')).text(), /Aucune composante n’est encore publiée/);
@@ -232,6 +237,10 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   assert.deepEqual(sheet.territories, ['Alpha']);
   const publicPlan = await okay(await get(`/api/v1/public/programs/${program.id}/simulate?choice=${id('U4')}`));
   assert.equal(publicPlan.total, 12);
+  // Tenant isolation: the Bêta site exposes nothing of Alpha.
+  assert.deepEqual((await (await fetch(betaOrigin + '/api/v1/public/programs/all')).json()).programs, []);
+  assert.equal((await fetch(betaOrigin + `/api/v1/public/programs/${program.id}`)).status, 404);
+  assert.doesNotMatch(await (await fetch(betaOrigin + '/structures')).text(), /Faculté des sciences appliquées/);
   const page = await (await get(`/formations/${program.id}`)).text();
   assert.match(page, /Licence d’informatique/);
   assert.match(page, /Statut réglementaire non vérifié/);

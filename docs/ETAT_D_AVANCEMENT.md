@@ -39,3 +39,7 @@
   conditionnel, progression, notes, forum modéré, échéances, séances de visioconférence planifiées par
   l'enseignant avec lien signé, consentement d'enregistrement, présences, replays et notifications.
   [Fiche](lots/LOT_008.md). Fournisseur de visioconférence réel à contractualiser (EXT-004).
+
+- Lot 009. Audit et restructuration du code ; aucun texte institutionnel dans le code ; sites publics
+  par établissement résolus par nom d'hôte, textes versionnés et publiés par un tiers, données publiques
+  isolées par site. [Fiche](lots/LOT_009.md), [architecture](ARCHITECTURE.md), [ADR-0006](ADR/0006-structure-et-sites.md).

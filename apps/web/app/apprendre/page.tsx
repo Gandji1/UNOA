@@ -5,7 +5,7 @@ import { notifications } from '@/lib/notifications/store';
 import { ActionForm, Badge, formatTime, Notice } from '../administration/forms';
 import { learner, roleLabels } from './session';
 
-export const metadata: Metadata = { title: 'Mes cours · UNOA' };
+export const metadata: Metadata = { title: 'Mes cours' };
 export const dynamic = 'force-dynamic';
 
 export default async function Apprendre({ searchParams }: { searchParams: Promise<{ error?: string; message?: string }> }) {

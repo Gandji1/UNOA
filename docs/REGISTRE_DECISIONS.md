@@ -18,3 +18,5 @@
 | DEC-011 | 2026-11-20 · Composantes académiques = portées `academic_unit` ; transfert par unité successeur | Pas de hiérarchie parallèle, droits et configuration hérités | RETENU | ORG | ADR-0005 | Réversible par migration additive |
 | DEC-012 | 2026-11-20 · Ouverture des candidatures conditionnée à une pièce vérifiée par un second compte | Capacité ≠ habilitation | OBLIGATOIRE | CAT/ADM | ADR-0005 | — |
 | DEC-013 | 2026-11-20 · Nomination par identifiant de compte en attendant l'annuaire IAM | Pas de profil personne encore | RÉVERSIBLE | ORG | LOT_007 | Remplacer par sélection dans l'annuaire |
+| DEC-014 | 2026-11-20 · Site public = donnée par portée, résolu par l'hôte ; textes versionnés publiés par un tiers | §1.3, multi-établissement | OBLIGATOIRE | CMS | ADR-0006 | — |
+| DEC-015 | 2026-11-20 · Libellés d'interface en français dans le code jusqu'au module I18N | Distinction interface / contenu | RÉVERSIBLE | I18N | ADR-0006 | Externaliser les libellés |

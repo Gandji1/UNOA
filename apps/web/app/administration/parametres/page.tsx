@@ -8,7 +8,7 @@ import { configKey } from '@/lib/config/validation';
 import { Problem, utcTime } from '@/lib/shared/validation';
 import { DefinitionEditor, DraftEditor, formatTime, formatValue, kindLabels, stateLabels, VersionAction } from './components';
 
-export const metadata: Metadata = { title: 'Paramètres et versions · UNOA' };
+export const metadata: Metadata = { title: 'Paramètres et versions' };
 export const dynamic = 'force-dynamic';
 
 const path = '/administration/parametres';

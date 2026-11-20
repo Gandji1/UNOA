@@ -27,8 +27,8 @@ export interface PublicProgram {
   regulatory_status: string; admission_open: boolean; published_at: Date;
 }
 
-export async function publicPrograms(settings: IamSettings) {
-  const { rows } = await database(settings).query<PublicProgram>('SELECT * FROM unoa.public_programs()');
+export async function publicPrograms(settings: IamSettings, siteId: string) {
+  const { rows } = await database(settings).query<PublicProgram>('SELECT * FROM unoa.public_programs($1)', [siteId]);
   return rows;
 }
 
@@ -54,9 +54,9 @@ export interface PublicSheet {
   }[];
 }
 
-export async function publicSheet(settings: IamSettings, programId: string) {
+export async function publicSheet(settings: IamSettings, siteId: string, programId: string) {
   const { rows } = await database(settings).query<{ sheet: PublicSheet | null }>(
-    'SELECT unoa.public_program_sheet($1) AS sheet', [programId],
+    'SELECT unoa.public_program_sheet($1, $2) AS sheet', [siteId, programId],
   );
   return rows[0]?.sheet ?? null;
 }

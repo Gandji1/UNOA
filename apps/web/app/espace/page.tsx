@@ -7,10 +7,11 @@ import { readableTerritories } from '@/lib/territory/store';
 import { orgContexts } from '@/lib/org/store';
 import { catalogContexts } from '@/lib/catalog/access';
 import { myOfferings } from '@/lib/lms/offerings';
+import { siteContexts } from '@/lib/site/store';
 import { lmsContexts } from '@/lib/lms/studio';
 import { sessionAccount } from '@/lib/iam/sessions';
 
-export const metadata: Metadata = { title: 'Mon espace · UNOA' };
+export const metadata: Metadata = { title: 'Mon espace' };
 export const dynamic = 'force-dynamic';
 
 export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string }> }) {
@@ -32,9 +33,10 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
     orgContexts(settings, account).catch(() => []),
     catalogContexts(settings, account).catch(() => []),
   ]);
-  const [learning, studio] = await Promise.all([
+  const [learning, studio, sites] = await Promise.all([
     myOfferings(settings, account).catch(() => []),
     lmsContexts(settings, account).catch(() => []),
+    siteContexts(settings, account).catch(() => []),
   ]);
   return (
     <main id="contenu">
@@ -48,6 +50,7 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
         {structures.length > 0 && <p><a href="/administration/structures">Structures académiques</a></p>}
         {catalogue.length > 0 && <p><a href="/administration/catalogue">Catalogue des formations</a></p>}
         {studio.length > 0 && <p><a href="/administration/cours">Studio des cours</a></p>}
+        {sites.length > 0 && <p><a href="/administration/site">Site public</a></p>}
         <p><a href="/apprendre">Mes cours{learning.length > 0 ? ` (${learning.length})` : ''}</a></p>
         <form action="/api/v1/auth/logout" method="post">
           <button className="action" type="submit">Se déconnecter</button>

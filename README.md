@@ -131,3 +131,14 @@ La visioconférence utilise un serveur compatible Jitsi avec authentification pa
 jeton : renseigner `UNOA_LIVE_JITSI_DOMAIN`, `UNOA_LIVE_JITSI_APP_ID` et
 `UNOA_LIVE_JITSI_SECRET` (au moins 32 caractères). Sans ces valeurs, les séances
 se planifient mais aucun lien n'est délivré.
+
+## Sites publics
+
+Après la migration 0009, relancer `grant-web.psql`. Aucun nom, aucun texte
+d'accueil et aucune mention légale ne sont écrits dans le code : dans
+« Mon espace › Site public », créer le site de la portée (plateforme, territoire
+ou établissement), déclarer ses noms d'hôte, rédiger les textes par langue, les
+faire publier par une seconde personne, puis mettre le site en ligne.
+Permissions : `site.read`, `site.write`, `site.publish`. Chaque site n'affiche
+que les formations et les structures publiées de sa portée.
+Voir aussi `docs/ARCHITECTURE.md` pour la carte du code.

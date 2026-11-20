@@ -1,17 +1,19 @@
 import type { Metadata } from 'next';
 import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { publicSheet, type PublicSheet } from '@/lib/catalog/public';
+import { currentSite } from '@/lib/site/store';
 import { regulatoryLabels } from '@/lib/catalog/public';
 
-export const metadata: Metadata = { title: 'Comparer des formations · UNOA' };
+export const metadata: Metadata = { title: 'Comparer des formations' };
 export const dynamic = 'force-dynamic';
 
 export default async function Comparer({ searchParams }: { searchParams: Promise<{ id?: string | string[] }> }) {
   const { id } = await searchParams;
   const ids = (Array.isArray(id) ? id : id ? [id] : []).filter(value => scopeIdFormat.test(value)).slice(0, 4);
   const settings = iamSettings();
-  const sheets = settings
-    ? (await Promise.all(ids.map(value => publicSheet(settings, value).catch(() => null)))).filter((item): item is PublicSheet => !!item)
+  const site = await currentSite();
+  const sheets = settings && site
+    ? (await Promise.all(ids.map(value => publicSheet(settings, site.site_id, value).catch(() => null)))).filter((item): item is PublicSheet => !!item)
     : [];
   const rows: [string, (sheet: PublicSheet) => string][] = [
     ['Nature', sheet => sheet.program.kind],
