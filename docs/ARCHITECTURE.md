@@ -58,7 +58,7 @@ prototype/                    Maquette visuelle de référence (non exécutée)
 | CAT | `catalog/` (access, references, programs, curriculum, public) | 0007 | `/catalog/*`, `/public/programs/*` | `/administration/catalogue`, `/formations` |
 | LMS | `lms/` (studio, offerings, forum) | 0008 | `/lms/*` | `/administration/cours`, `/apprendre` |
 | LIVE | `live/` (store, provider) | 0008 | `/live/*` | `/apprendre/{offre}` |
-| NOT | `notifications/` | 0008 | `/lms/notifications` | `/apprendre` |
+| NOT | `notifications/` (store, admin) ; `packages/jobs` ; `apps/worker` | 0008, 0012 | `/lms/notifications`, `/notifications/*`, `/jobs/run` | `/administration/notifications`, `/apprendre`, `/espace` |
 | CMS | `site/` | 0009 | `/site/*` | `/administration/site`, `/`, `/mentions-legales`, `/confidentialite`, `/a-propos` |
 | IAM | `iam/` (settings, oidc, sessions, navigation, admin) | 0002, 0003, 0011 | `/auth/*`, `/me`, `/iam/*` | `/administration`, `/administration/acces`, `/invitation/{jeton}`, `/espace` |
 | ADM | `admissions/` | 0010 | `/admissions/*`, `/admissions-documents/{id}` | `/administration/admissions`, `/candidature`, `/formations/{id}` |

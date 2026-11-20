@@ -20,6 +20,9 @@ importers:
       '@unoa/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@unoa/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       jose:
         specifier: 6.2.18
         version: 6.2.18
@@ -55,6 +58,15 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/worker:
+    dependencies:
+      '@unoa/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+
   packages/config: {}
 
   packages/db:
@@ -64,6 +76,15 @@ importers:
         version: 8.23.1
 
   packages/domain: {}
+
+  packages/jobs:
+    dependencies:
+      '@unoa/domain':
+        specifier: workspace:*
+        version: link:../domain
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
 
 packages:
 

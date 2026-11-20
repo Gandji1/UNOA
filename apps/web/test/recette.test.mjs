@@ -16,6 +16,7 @@ import { exerciseAcademic } from './fixtures/academic.fixture.mjs';
 import { exerciseLearning } from './fixtures/learning.fixture.mjs';
 import { exerciseAdmissions } from './fixtures/admissions.fixture.mjs';
 import { exerciseAdministration } from './fixtures/administration.fixture.mjs';
+import { exerciseNotifications, startRelay } from './fixtures/notifications.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -94,6 +95,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
   await new Promise(resolve => portReservation.close(resolve));
   const origin = 'http://127.0.0.1:' + port;
   // Test-only videoconference key: the adapter signs links, no real provider is called.
+  const relay = await startRelay();
+  context.after(() => relay.close());
+  const jobsToken = randomBytes(32).toString('base64url');
   const live = { domain: 'visio.recette.invalid', appId: 'unoa-recette', secret: randomBytes(32).toString('hex') };
   dataUrl.username = role;
   dataUrl.password = password;
@@ -113,6 +117,12 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
       UNOA_OIDC_MFA_ACR: 'test-mfa',
       UNOA_OIDC_TRANSACTION_KEY: randomBytes(32).toString('base64url'),
       UNOA_IAM_DATABASE_URL: dataUrl.href,
+      UNOA_EMAIL_ADAPTER: 'sandbox',
+      UNOA_SMS_ADAPTER: 'http',
+      UNOA_SMS_HTTP_URL: relay.url,
+      UNOA_SMS_HTTP_TOKEN: relay.token,
+      UNOA_JOBS_TOKEN: jobsToken,
+      UNOA_JOBS_DRAIN_AFTER_WRITE: 'off',
       UNOA_LIVE_JITSI_DOMAIN: live.domain,
       UNOA_LIVE_JITSI_APP_ID: live.appId,
       UNOA_LIVE_JITSI_SECRET: live.secret,
@@ -202,6 +212,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Admissions : campagnes, dossiers, instruction, décisions et recours', () =>
       exerciseAdmissions({ database, issuer, call, login, origin }),
+    );
+    await context.test('Notifications : modèles, consentements, file durable, relais, rejeu et confidentialité', () =>
+      exerciseNotifications({ database, issuer, call, login, origin, relay, jobsToken }),
     );
     await context.test('Administration des accès : amorçage, rôles, invitations, délégations, comptes et audit', () =>
       exerciseAdministration({ database, issuer, call, login, origin, root, alpha }),

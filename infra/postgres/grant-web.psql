@@ -135,4 +135,17 @@ GRANT EXECUTE ON FUNCTION unoa.can_grant(uuid, text, uuid, text), unoa.covers_ac
       unoa.revoke_invitation(uuid, uuid, uuid), unoa.set_account_state(uuid, uuid, boolean, text, uuid),
       unoa.revoke_account_sessions(uuid, uuid, uuid), unoa.iam_accounts(uuid, uuid, text), unoa.iam_account(uuid, uuid),
       unoa.iam_sessions(uuid, uuid), unoa.audit_trail(uuid, uuid, text, timestamptz), unoa.invitation_preview(bytea) TO :"web_role";
+-- 0012: notifications, consents, durable queue and delivery proof.
+GRANT SELECT ON unoa.notification_event, unoa.notification_template, unoa.contact_consent, unoa.notification_preference,
+      unoa.job, unoa.delivery_attempt, unoa.sandbox_message TO :"web_role";
+GRANT INSERT (scope_id, event_code, channel, language, subject, body, author_id), UPDATE (state, published_by, published_at)
+      ON unoa.notification_template TO :"web_role";
+GRANT SELECT (language, phone), UPDATE (language, phone) ON unoa.account TO :"web_role";
+GRANT INSERT (account_id, channel, granted, source) ON unoa.contact_consent TO :"web_role";
+GRANT INSERT (account_id, event_code, channel, enabled), UPDATE (enabled, updated_at) ON unoa.notification_preference TO :"web_role";
+GRANT INSERT (scope_id, template_id, language) ON unoa.notification TO :"web_role";
+GRANT INSERT (kind, payload, scope_id, idempotency_key, correlation_id),
+      UPDATE (state, attempts, run_after, locked_until, last_error, finished_at, replayed_by, replayed_at) ON unoa.job TO :"web_role";
+GRANT INSERT (job_id, notification_id, channel, adapter, recipient_masked, status, provider_ref, error) ON unoa.delivery_attempt TO :"web_role";
+GRANT INSERT (job_id, channel, recipient, subject, body) ON unoa.sandbox_message TO :"web_role";
 COMMIT;

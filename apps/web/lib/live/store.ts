@@ -5,7 +5,7 @@ import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
 import { boundedText, Problem, numeric, ensure, uuid, type Input, flag, optionalText } from '@/lib/shared/validation';
 import { canTeach, offeringFor, type OfferingRow } from '@/lib/lms/offerings';
-import { notify } from '@/lib/notifications/store';
+import { dispatch, offeringRecipients } from '@/lib/notifications/store';
 import { audit, transaction, type Queryable } from '@/lib/server/db';
 import { joinUrl, liveProvider } from './provider';
 
@@ -23,6 +23,10 @@ function schedule(input: Input, item: OfferingRow) {
 interface SessionRow {
   id: string; offering_id: string; title: string; starts_at: Date; ends_at: Date; state: string; room: string;
   recording_planned: boolean;
+}
+
+async function announce(store: Queryable, item: OfferingRow, actor: string, event: string, values: Record<string, string | null>, correlation: string, link: string) {
+  await dispatch(store, { event, scopeId: item.owner_scope_id, recipients: await offeringRecipients(store, item.id, actor), values, link, correlation });
 }
 
 async function session(store: Queryable, actor: string, sessionId: string) {
@@ -50,8 +54,8 @@ export async function scheduleSession(settings: IamSettings, actor: string, id: 
     `, [offeringId, title, agenda, startsAt, endsAt, randomBytes(20).toString('hex'), flag(input.recordingPlanned), actor]);
     await store.query(`INSERT INTO unoa.live_event(session_id, kind, actor_id, starts_at, ends_at) VALUES ($1, 'scheduled', $2, $3, $4)`,
       [rows[0].id, actor, startsAt, endsAt]);
-    await notify(store, offeringId, actor, 'live.scheduled', 'Séance planifiée : ' + title,
-      formatInZone(startsAt, item.time_zone) + (flag(input.recordingPlanned) ? ' · enregistrement annoncé' : ''), link(offeringId));
+    await announce(store, item, actor, 'live.scheduled', { title, start: formatInZone(startsAt, item.time_zone),
+      recording: flag(input.recordingPlanned) ? ' · enregistrement annoncé' : '' }, correlation, link(offeringId));
     await audit(store, actor, item.owner_scope_id, 'live.session_scheduled', correlation, rows[0].id);
     return { id: rows[0].id, offeringId };
   });
@@ -83,24 +87,23 @@ export async function changeSession(settings: IamSettings, actor: string, id: st
       await store.query('UPDATE unoa.live_session SET starts_at = $2, ends_at = $3 WHERE id = $1', [sessionId, startsAt, endsAt]);
       await store.query(`INSERT INTO unoa.live_event(session_id, kind, actor_id, starts_at, ends_at, detail) VALUES ($1, 'rescheduled', $2, $3, $4, $5)`,
         [sessionId, actor, startsAt, endsAt, reason]);
-      await notify(store, item.id, actor, 'live.rescheduled', 'Séance reportée : ' + found.session.title,
-        'Nouvel horaire : ' + formatInZone(startsAt, item.time_zone) + '. ' + reason, link(item.id));
+      await announce(store, item, actor, 'live.rescheduled', { title: found.session.title, start: formatInZone(startsAt, item.time_zone), reason },
+        correlation, link(item.id));
     } else if (action === 'cancel') {
       ensure(reason, 400, 'Motiver l’annulation');
       await store.query("UPDATE unoa.live_session SET state = 'cancelled', cancel_reason = $2 WHERE id = $1", [sessionId, reason]);
       await store.query(`INSERT INTO unoa.live_event(session_id, kind, actor_id, detail) VALUES ($1, 'cancelled', $2, $3)`, [sessionId, actor, reason]);
-      await notify(store, item.id, actor, 'live.cancelled', 'Séance annulée : ' + found.session.title, reason, link(item.id));
+      await announce(store, item, actor, 'live.cancelled', { title: found.session.title, reason }, correlation, link(item.id));
     } else if (action === 'recording') {
       await store.query('UPDATE unoa.live_session SET recording_planned = true WHERE id = $1', [sessionId]);
       await store.query(`INSERT INTO unoa.live_event(session_id, kind, actor_id, detail) VALUES ($1, 'recording_announced', $2, $3)`, [sessionId, actor, reason]);
-      await notify(store, item.id, actor, 'live.recording', 'Enregistrement annoncé : ' + found.session.title,
-        'Indiquez votre consentement avant la séance.', link(item.id));
+      await announce(store, item, actor, 'live.recording', { title: found.session.title }, correlation, link(item.id));
     } else if (action === 'replay') {
       const url = String(input.url ?? '');
       ensure(/^https:\/\/[^\s]+$/.test(url) && url.length <= 2000, 400, 'Adresse HTTPS requise');
       await store.query('UPDATE unoa.live_session SET replay_url = $2, replay_published_at = now() WHERE id = $1', [sessionId, url]);
       await store.query(`INSERT INTO unoa.live_event(session_id, kind, actor_id) VALUES ($1, 'replay_published', $2)`, [sessionId, actor]);
-      await notify(store, item.id, actor, 'live.replay', 'Replay disponible : ' + found.session.title, null, link(item.id));
+      await announce(store, item, actor, 'live.replay', { title: found.session.title }, correlation, link(item.id));
     } else if (action === 'resources') {
       const url = String(input.url ?? '');
       ensure(/^https:\/\/[^\s]+$/.test(url) && url.length <= 2000, 400, 'Adresse HTTPS requise');

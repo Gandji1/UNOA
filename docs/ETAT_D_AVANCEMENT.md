@@ -54,3 +54,7 @@
   rôles composés par l'administration, attributions justifiées, invitations, délégations, comptes,
   sessions et journal d'audit ; création de compte par site. [Fiche](lots/LOT_011.md),
   [ADR-0007](ADR/0007-administration-des-acces.md), [plan des lots](PLAN_DES_LOTS.md).
+
+- Lot 012. File durable (outbox, worker, rejeu) et notifications multicanal : modèles par portée et
+  langue, consentements, préférences, courriel/SMS par adaptateurs, preuve de livraison, export.
+  [Fiche](lots/LOT_012.md), [ADR-0008](ADR/0008-file-durable-et-notifications.md), [audit des écarts](AUDIT_ECARTS.md).

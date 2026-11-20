@@ -123,7 +123,7 @@ export async function exerciseAdmissions({ database, issuer, login, call, origin
   assert.match(view.application.receipt, /^ADM-\d{4}-[0-9A-F]{12}$/);
   assert.equal(view.revisions.length, 1);
   await status(await post(`${api}applications/${first}/answers`, 'first', { nom: 'Après dépôt', courriel: 'un@example.test', serie: 'C' }), 409, 'dossier figé');
-  const { rows: inbox } = await database.query("SELECT title FROM unoa.notification WHERE account_id = $1 AND kind = 'adm.update'", [ids.first]);
+  const { rows: inbox } = await database.query("SELECT title FROM unoa.notification WHERE account_id = $1 AND kind = 'adm.receipt'", [ids.first]);
   assert.match(inbox[0].title, /Accusé de réception/);
 
   // 4. Instruction: complement, re-submission, document check, reviews.

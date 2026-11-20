@@ -34,5 +34,9 @@ SELECT current_database() AS base,
        NOT has_any_column_privilege(:'web_role', 'unoa.access_role', 'INSERT, UPDATE') AS roles_through_functions,
        NOT has_table_privilege(:'web_role', 'unoa.role_permission', 'INSERT, DELETE') AS role_permissions_protected,
        has_function_privilege(:'web_role', 'unoa.grant_role(uuid,uuid,text,uuid,boolean,timestamptz,text,uuid)', 'EXECUTE') AS checked_grants,
+       NOT has_table_privilege(:'web_role', 'unoa.delivery_attempt', 'UPDATE, DELETE, TRUNCATE') AS deliveries_append_only,
+       NOT has_table_privilege(:'web_role', 'unoa.contact_consent', 'UPDATE, DELETE, TRUNCATE') AS consents_append_only,
+       NOT has_column_privilege(:'web_role', 'unoa.notification_template', 'body', 'UPDATE') AS templates_versioned,
+       NOT has_column_privilege(:'web_role', 'unoa.job', 'payload', 'UPDATE') AS job_payload_frozen,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;

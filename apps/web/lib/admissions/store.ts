@@ -9,6 +9,7 @@ import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
 import { boundedText, choice, ensure, optional, Problem, text, utcTime, uuid, type Input } from '@/lib/shared/validation';
 import { audit, transaction, type Queryable } from '@/lib/server/db';
+import { dispatch } from '@/lib/notifications/store';
 
 // Admissions (module ADM). Staff rights are checked on the owner scope of the
 // programme; a candidate only reaches their own applications.
@@ -236,9 +237,10 @@ export async function applicationView(settings: IamSettings, actor: string, id: 
   };
 }
 
-async function notifyApplicant(store: Queryable, applicant: string, title: string, body: string | null, applicationId: string) {
-  await store.query(`INSERT INTO unoa.notification(account_id, kind, title, body, link) VALUES ($1, 'adm.update', $2, $3, $4)`,
-    [applicant, title, body, '/candidature/' + applicationId]);
+async function notifyApplicant(store: Queryable, campaign: RoundRow, applicant: string, event: string,
+  values: Record<string, string | null>, applicationId: string, correlation: string) {
+  await dispatch(store, { event, scopeId: campaign.owner_scope_id, recipients: [applicant],
+    values: { program: campaign.program_title, ...values }, link: '/candidature/' + applicationId, correlation });
 }
 
 export async function applicantAction(settings: IamSettings, actor: string, id: string, action: string, input: Input, correlation: string) {
@@ -265,7 +267,7 @@ export async function applicantAction(settings: IamSettings, actor: string, id: 
       await store.query('INSERT INTO unoa.application_revision(application_id, revision, answers, documents) VALUES ($1, $2, $3, $4)',
         [applicationId, revision, JSON.stringify(application.answers), JSON.stringify(documents)]);
       await store.query('UPDATE unoa.application_request SET answered_at = now() WHERE application_id = $1 AND answered_at IS NULL', [applicationId]);
-      await notifyApplicant(store, actor, 'Accusé de réception · ' + receipt, campaign.program_title + ' — dossier déposé (version ' + revision + ').', applicationId);
+      await notifyApplicant(store, campaign, actor, 'adm.receipt', { receipt, revision: String(revision) }, applicationId, correlation);
     } else if (action === 'withdraw') {
       await store.query("UPDATE unoa.application SET state = 'withdrawn' WHERE id = $1", [applicationId]);
     } else if (action === 'accept' || action === 'decline') {
@@ -340,7 +342,7 @@ export async function staffAction(settings: IamSettings, actor: string, id: stri
       const message = boundedText(input.message, 2000, 'Demande');
       await store.query('INSERT INTO unoa.application_request(application_id, message, requested_by) VALUES ($1, $2, $3)', [applicationId, message, actor]);
       await store.query("UPDATE unoa.application SET state = 'incomplete' WHERE id = $1", [applicationId]);
-      await notifyApplicant(store, application.applicant_id, 'Complément demandé', message, applicationId);
+      await notifyApplicant(store, campaign, application.applicant_id, 'adm.complement', { message }, applicationId, correlation);
     } else if (action === 'review') {
       ensure(open, 409, 'Candidature hors instruction');
       const kind = choice(input.kind, ['administrative', 'academic'] as const, 'Instruction');
@@ -357,7 +359,7 @@ export async function staffAction(settings: IamSettings, actor: string, id: stri
       await store.query(`INSERT INTO unoa.application_interview(application_id, kind, scheduled_at, place, outcome, scheduled_by)
         VALUES ($1, $2, $3, $4, $5, $6)`, [applicationId, boundedText(input.kind, 120, 'Nature'), utcTime(input.scheduledAt),
         boundedText(input.place, 500, 'Lieu ou lien'), optional(input.outcome, text(2000, 'Résultat')), actor]);
-      await notifyApplicant(store, application.applicant_id, 'Convocation : ' + String(input.kind).slice(0, 100), String(input.place).slice(0, 500), applicationId);
+      await notifyApplicant(store, campaign, application.applicant_id, 'adm.interview', { kind: String(input.kind).slice(0, 100), place: String(input.place).slice(0, 500) }, applicationId, correlation);
     } else if (action === 'decide') {
       ensure(open, 409, 'Candidature hors instruction');
       const { rows: reviewed } = await store.query('SELECT 1 FROM unoa.application_review WHERE application_id = $1 LIMIT 1', [applicationId]);
@@ -369,7 +371,7 @@ export async function staffAction(settings: IamSettings, actor: string, id: stri
       await store.query(`INSERT INTO unoa.application_decision(application_id, decision, reason, conditions, decided_by, supersedes)
         VALUES ($1, $2, $3, $4, $5, $6)`, [applicationId, decision, boundedText(input.reason, 2000, 'Motif'), conditions, actor, prior[0]?.id ?? null]);
       await store.query("UPDATE unoa.application SET state = 'decided', decision = $2 WHERE id = $1", [applicationId, decision]);
-      await notifyApplicant(store, application.applicant_id, 'Décision sur votre candidature', campaign.program_title, applicationId);
+      await notifyApplicant(store, campaign, application.applicant_id, 'adm.decision', {}, applicationId, correlation);
     } else if (action === 'rule') {
       const ruling = choice(input.ruling, ['upheld', 'granted'] as const, 'Décision sur recours');
       const updated = await store.query(`UPDATE unoa.application_appeal SET state = $2, ruled_by = $3, ruled_at = now(), ruling = $4
@@ -377,7 +379,7 @@ export async function staffAction(settings: IamSettings, actor: string, id: stri
       ensure(updated.rowCount === 1, 404, 'Aucun recours en attente');
       // A granted appeal reopens the instruction; the prior decision stays in the history.
       if (ruling === 'granted') await store.query("UPDATE unoa.application SET state = 'review', decision = NULL WHERE id = $1", [applicationId]);
-      await notifyApplicant(store, application.applicant_id, 'Réponse à votre recours', ruling === 'granted' ? 'Recours accueilli : réexamen' : 'Décision maintenue', applicationId);
+      await notifyApplicant(store, campaign, application.applicant_id, 'adm.appeal_ruled', { outcome: ruling === 'granted' ? 'Recours accueilli : réexamen' : 'Décision maintenue' }, applicationId, correlation);
     } else {
       throw new Problem(404, 'Opération inconnue');
     }

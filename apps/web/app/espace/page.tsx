@@ -11,6 +11,7 @@ import { siteContexts } from '@/lib/site/store';
 import { lmsContexts } from '@/lib/lms/studio';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { accountDetails } from '@/lib/iam/admin';
+import { contactSettings } from '@/lib/notifications/admin';
 import { navigation } from '@/lib/iam/navigation';
 import { ActionForm, Badge, formatTime, Notice } from '../administration/forms';
 
@@ -30,7 +31,7 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
   if (!account) redirect('/connexion');
 
   const { statut, error, message } = await searchParams;
-  const [me, menu] = await Promise.all([accountDetails(settings, account, account), navigation()]);
+  const [me, menu, contact] = await Promise.all([accountDetails(settings, account, account), navigation(), contactSettings(settings, account)]);
   const administration = menu.groups.some(group => group.label === 'Administration');
   const own = me.grants.filter(item => !item.revoked_at && !item.delegated_from && (!item.effective_until || new Date(item.effective_until) > new Date()));
   const [configuration, territories, structures, catalogue] = await Promise.all([
@@ -84,6 +85,30 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
           )}
         </section>
       )}
+      <section className="account-panel" aria-labelledby="contact">
+        <h2 id="contact">Langue, coordonnées et notifications</h2>
+        <ActionForm action="/api/v1/notifications/contact" back="/espace" submit="Enregistrer">
+          <label>Langue des messages<select name="language" defaultValue={contact.language ?? ''}><option value="">Langue du site</option>
+            <option value="fr">Français</option><option value="en">English</option></select></label>
+          <label>Téléphone (format international)<input name="phone" type="tel" defaultValue={contact.phone ?? ''} placeholder="+229…" maxLength={20} /></label>
+        </ActionForm>
+        {(['email', 'sms'] as const).map(channel => (
+          <p key={channel}>{channel === 'email' ? 'Courriel' : 'SMS'} : {contact.current[channel] ? <Badge tone="ok">accepté</Badge> : <Badge tone="muted">refusé</Badge>}{' '}
+            <ActionForm inline action="/api/v1/notifications/consent" back="/espace" hidden={{ channel, granted: contact.current[channel] ? 'false' : 'true' }}
+              submit={contact.current[channel] ? 'Retirer mon consentement' : 'Accepter de recevoir des messages'} /></p>
+        ))}
+        {(contact.current.email || contact.current.sms) && (
+          <details><summary>Choisir les messages reçus hors de la plateforme</summary>
+            <ul>{contact.events.flatMap(item => (['email', 'sms'] as const).filter(channel => contact.current[channel]).map(channel => {
+              const enabled = contact.preferences.find(pref => pref.event_code === item.code && pref.channel === channel)?.enabled ?? true;
+              return <li key={item.code + channel}><code>{item.code}</code> · {channel === 'email' ? 'courriel' : 'SMS'} : {enabled ? 'activé' : 'désactivé'}{' '}
+                <ActionForm inline action="/api/v1/notifications/preference" back="/espace" hidden={{ event: item.code, channel, enabled: enabled ? 'false' : 'true' }}
+                  submit={enabled ? 'Désactiver' : 'Activer'} /></li>;
+            }))}</ul>
+          </details>
+        )}
+        <p><a href="/api/v1/notifications/contact/export">Exporter mes consentements et préférences (JSON)</a></p>
+      </section>
       <section className="account-panel" aria-labelledby="sessions">
         <h2 id="sessions">Sessions</h2>
         <p>Identifiant de compte : <code>{account}</code></p>

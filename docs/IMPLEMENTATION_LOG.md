@@ -121,3 +121,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   `/administration` et `/administration/acces`, invitations, inscription par site, profil et délégation.
 - Vérifications : unitaires 20, PostgreSQL 7, HTTP 7 (dont administration), build, traçabilité : PASS.
 - Gate Done : FAIL (E2E navigateur, a11y, envoi courriel EXT-004) — exigences EN_COURS.
+
+## 20 novembre 2026 — Audit des écarts et lot 012
+
+- Audit `docs/AUDIT_ECARTS.md` : étapes P0–P2 non démarrées et éléments manquants des lots EN_COURS, plan 012 à 020.
+- Lot 012 : migration 0012, `packages/jobs`, `apps/worker`, `/api/v1/jobs/run`, `/administration/notifications`,
+  préférences et export dans `/espace`, événements ADM et LIVE via le moteur.
+- Vérifications : unitaires 23, PostgreSQL 7, HTTP 8 (dont notifications), build, traçabilité : PASS.
+- Environnements : Vercel en ligne (sondes 200) ; clé Neon refusée par l'API (« not authenticated »).

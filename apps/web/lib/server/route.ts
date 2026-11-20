@@ -7,6 +7,7 @@ import { privateJson, problem, redirectTo, unavailable } from '@/lib/server/resp
 import { ensure, Problem, type Input } from '@/lib/shared/validation';
 import { readInput, storageError } from '@/lib/server/request';
 import { auditDenial } from '@/lib/server/db';
+import { drainSoon } from '@/lib/server/jobs';
 
 // One HTTP pipeline for every authenticated studio route:
 // session → origin check (writes) → input size and format → module handler →
@@ -131,6 +132,7 @@ export async function studioPost(
       input = await readInput(request, form, options.repeated);
     }
     const result = await handle({ settings, actor, operation, correlation, form, request }, input);
+    drainSoon(settings);
     if (!form) return privateJson(result);
     const url = back(settings, options, input, result as Record<string, unknown>, operation);
     url.searchParams.set('message', 'saved');

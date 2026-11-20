@@ -14,7 +14,8 @@
     "test:integration": "pnpm --filter @unoa/db test",
     "test:http": "pnpm --filter @unoa/web test:http",
     "test:e2e": "node tests/e2e/smoke.mjs",
-    "db:bootstrap": "pnpm --filter @unoa/db bootstrap"
+    "db:bootstrap": "pnpm --filter @unoa/db bootstrap",
+    "worker": "pnpm --filter @unoa/worker start"
   },
   "devDependencies": {
     "turbo": "2.5.8"

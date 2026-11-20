@@ -1,0 +1,13 @@
+{
+  "name": "@unoa/jobs",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/runner.ts",
+    "./adapters": "./src/adapters.ts"
+  },
+  "dependencies": {
+    "@unoa/domain": "workspace:*",
+    "pg": "8.23.1"
+  }
+}
