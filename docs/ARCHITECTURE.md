@@ -60,6 +60,7 @@ prototype/                    Maquette visuelle de référence (non exécutée)
 | LIVE | `live/` (store, provider) | 0008 | `/live/*` | `/apprendre/{offre}` |
 | NOT | `notifications/` | 0008 | `/lms/notifications` | `/apprendre` |
 | CMS | `site/` | 0009 | `/site/*` | `/administration/site`, `/`, `/mentions-legales`, `/confidentialite`, `/a-propos` |
+| ADM | `admissions/` | 0010 | `/admissions/*`, `/admissions-documents/{id}` | `/administration/admissions`, `/candidature`, `/formations/{id}` |
 
 ## 4. Couches et dépendances
 

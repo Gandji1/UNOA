@@ -102,3 +102,14 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   `/administration/site`, pages légales par site). ADR-0006, carte `docs/ARCHITECTURE.md`.
 - Vérifications : unitaires 16, PostgreSQL 7, HTTP 4, build, sonde, traçabilité : PASS.
 - Gate Done : FAIL (I18N, SEO, E2E navigateur) — exigences EN_COURS.
+
+## 20 novembre 2026 — Lot 010
+
+- TDR relus : §6.1, 6.2, 10.3, 11, 17, 18, module ADM, CAT-017 ; fiche `LOT_010.md`.
+- Migration 0010 : campagnes, candidatures, révisions, pièces (format, signature, SHA-256, jamais réécrites),
+  compléments, avis, convocations, décisions append-only, recours tranchés par un tiers ; `public_rounds`.
+- Moteur de formulaires `packages/domain/src/forms.ts` ; module `lib/admissions` ; API `/api/v1/admissions`,
+  téléchargement `/api/v1/admissions-documents/{id}` ; pipeline HTTP étendu au multipart borné.
+- Écrans : `/candidature`, `/candidature/{id}`, `/administration/admissions`, bouton « Candidater » sur la fiche.
+- Vérifications : unitaires 20 PASS, PostgreSQL 7 PASS, HTTP 6 PASS (dont admissions), build PASS, traçabilité PASS.
+- Gate Done : FAIL (E2E navigateur, accessibilité, antivirus/stockage, envoi externe EXT-004) — exigences EN_COURS.

@@ -5,6 +5,8 @@ import { iamSettings, scopeIdFormat } from '@/lib/iam/settings';
 import { publicSheet, sheetModel } from '@/lib/catalog/public';
 import { currentSite } from '@/lib/site/store';
 import { regulatoryLabels } from '@/lib/catalog/public';
+import { openRounds } from '@/lib/admissions/store';
+import { formatTime, Hidden } from '../../administration/forms';
 
 export const dynamic = 'force-dynamic';
 type Params = { params: Promise<{ id: string }>; searchParams: Promise<{ choice?: string | string[]; simuler?: string }> };
@@ -14,7 +16,10 @@ async function load(id: string) {
   if (!settings || !scopeIdFormat.test(id)) return null;
   const site = await currentSite();
   if (!site) return null;
-  return publicSheet(settings, site.site_id, id).catch(() => null);
+  const sheet = await publicSheet(settings, site.site_id, id).catch(() => null);
+  if (!sheet) return null;
+  const rounds = await openRounds(settings, site.site_id, id).catch(() => []);
+  return { ...sheet, rounds };
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -63,6 +68,19 @@ export default async function Formation({ params, searchParams }: Params) {
 
       {version.objectives && <section><h2>Objectifs</h2><p>{version.objectives}</p></section>}
       {version.admission && <section><h2>Admission</h2><p>{version.admission}</p></section>}
+      {sheet.rounds.length > 0 && <section aria-labelledby="campagnes"><h2 id="campagnes">Campagnes de candidature</h2>
+        <ul className="program-grid">{sheet.rounds.map(round => (
+          <li key={round.round_id} className="program-card">
+            <h3>{round.label}</h3>
+            <p className="muted">Du {formatTime(round.opens_at)} au {formatTime(round.closes_at)}</p>
+            {round.instructions && <p>{round.instructions}</p>}
+            <form method="post" action={`/api/v1/admissions/rounds/${round.round_id}/apply`}>
+              <Hidden values={{ return: '/candidature' }} />
+              <button className="action" type="submit">Candidater</button>
+            </form>
+            <p className="muted">Une session institutionnelle est requise : <a href="/connexion">se connecter</a>.</p>
+          </li>
+        ))}</ul></section>}
       {sheet.competencies.length > 0 && <section><h2>Compétences visées</h2>
         <ul>{sheet.competencies.map(item => <li key={item.code}>{item.label}</li>)}</ul></section>}
 

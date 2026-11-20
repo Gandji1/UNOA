@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 import { cookieName, iamSettings, scopeIdFormat, type IamSettings } from '@/lib/iam/settings';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { privateJson, problem, redirectTo, unavailable } from '@/lib/server/responses';
-import { ensure, type Input } from '@/lib/shared/validation';
+import { ensure, Problem, type Input } from '@/lib/shared/validation';
 import { readInput, storageError } from '@/lib/server/request';
 import { auditDenial } from '@/lib/server/db';
 
@@ -29,8 +29,29 @@ export interface StudioOptions {
   label: string;
   repeated?: string[];
   returns?: string[];
+  // Maximum body size of a multipart upload; multipart is refused without it.
+  multipart?: number;
   // Query of the studio view a form returns to when it names none.
   view?: (input: Input, result: Record<string, unknown> | null, operation: string[]) => Record<string, string>;
+}
+
+// Reads a body up to a fixed size, whatever the declared length.
+async function readBody(request: NextRequest, limit: number) {
+  const reader = request.body?.getReader();
+  ensure(reader, 400, 'Corps de requête requis');
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel();
+      throw new Problem(413, 'Requête trop volumineuse');
+    }
+    parts.push(value);
+  }
+  return Buffer.concat(parts);
 }
 
 function failure(error: unknown, options: StudioOptions) {
@@ -93,14 +114,22 @@ export async function studioPost(
   }
   const correlation = randomUUID();
   const type = request.headers.get('content-type')?.split(';', 1)[0].trim();
-  const form = type === 'application/x-www-form-urlencoded';
+  const multipart = type === 'multipart/form-data' && !!options.multipart;
+  const form = type === 'application/x-www-form-urlencoded' || multipart;
   let actor: string | null = null;
   let input: Input | null = null;
   try {
     actor = await sessionAccount(settings, request.cookies.get(cookieName(settings, 'session'))?.value);
     ensure(actor, 401, 'Session institutionnelle requise');
     ensure(form || type === 'application/json', 415, 'Format de requête non pris en charge');
-    input = await readInput(request, form, options.repeated);
+    if (multipart) {
+      const body = await readBody(request, options.multipart!);
+      const parsed = new Response(body, { headers: { 'content-type': request.headers.get('content-type') ?? '' } });
+      const entries = await parsed.formData().catch(() => { throw new Problem(400, 'Formulaire invalide'); });
+      input = Object.fromEntries(entries.entries());
+    } else {
+      input = await readInput(request, form, options.repeated);
+    }
     const result = await handle({ settings, actor, operation, correlation, form, request }, input);
     if (!form) return privateJson(result);
     const url = back(settings, options, input, result as Record<string, unknown>, operation);

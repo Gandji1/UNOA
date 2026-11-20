@@ -105,4 +105,19 @@ GRANT INSERT (host, site_id, created_by), DELETE ON unoa.site_host TO :"web_role
 GRANT INSERT (site_id, language, name, short_name, tagline, hero_title, hero_text, hero_image_url, about, contact,
               legal_notice, privacy_notice, footer, author_id),
       UPDATE (state, published_by, published_at) ON unoa.site_text TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.public_rounds(uuid, uuid) TO :"web_role";
+GRANT SELECT ON unoa.admission_round, unoa.application, unoa.application_revision, unoa.application_document,
+      unoa.application_request, unoa.application_review, unoa.application_interview, unoa.application_decision,
+      unoa.application_appeal TO :"web_role";
+GRANT INSERT (version_id, label, opens_at, closes_at, form, documents, criteria, instructions, created_by),
+      UPDATE (label, opens_at, closes_at, form, documents, criteria, instructions, state, opened_by) ON unoa.admission_round TO :"web_role";
+GRANT INSERT (round_id, applicant_id), UPDATE (state, answers, receipt, submitted_at, revision, decision) ON unoa.application TO :"web_role";
+GRANT INSERT ON unoa.application_revision TO :"web_role";
+GRANT INSERT (application_id, document_key, filename, format, size_bytes, sha256, content), UPDATE (state, note, checked_by)
+ON unoa.application_document TO :"web_role";
+GRANT INSERT (application_id, message, requested_by), UPDATE (answered_at) ON unoa.application_request TO :"web_role";
+GRANT INSERT (application_id, kind, reviewer_id, scores, score, recommendation, note) ON unoa.application_review TO :"web_role";
+GRANT INSERT (application_id, kind, scheduled_at, place, outcome, scheduled_by), UPDATE (outcome) ON unoa.application_interview TO :"web_role";
+GRANT INSERT (application_id, decision, reason, conditions, decided_by, supersedes) ON unoa.application_decision TO :"web_role";
+GRANT INSERT (application_id, decision_id, reason), UPDATE (state, ruled_by, ruled_at, ruling) ON unoa.application_appeal TO :"web_role";
 COMMIT;

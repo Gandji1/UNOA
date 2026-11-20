@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +14,7 @@ import { exerciseConfiguration } from './fixtures/configuration.fixture.mjs';
 import { exerciseTerritory } from './fixtures/territory.fixture.mjs';
 import { exerciseAcademic } from './fixtures/academic.fixture.mjs';
 import { exerciseLearning } from './fixtures/learning.fixture.mjs';
+import { exerciseAdmissions } from './fixtures/admissions.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -120,6 +121,8 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
   let serverLog = '';
   web.stdout.on('data', value => { serverLog += value; });
   web.stderr.on('data', value => { serverLog += value; });
+  // Optional copy of the server output for diagnosis.
+  if (process.env.UNOA_TEST_SERVER_LOG) context.after(() => writeFile(process.env.UNOA_TEST_SERVER_LOG, serverLog));
   const call = (path, options) => fetch(new URL(path, origin), { redirect: 'manual', ...options });
   for (let attempt = 0; attempt < 45; attempt++) {
     if ((await call('/api/v1/health/ready').catch(() => null))?.ok) break;
@@ -194,10 +197,13 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     await context.test('Studio de cours, apprentissage et classes virtuelles', () =>
       exerciseLearning({ database, issuer, call, login, origin, alpha, live }),
     );
+    await context.test('Admissions : campagnes, dossiers, instruction, décisions et recours', () =>
+      exerciseAdmissions({ database, issuer, call, login, origin }),
+    );
     const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));
     if (storageLog.length) context.diagnostic(storageLog.join('\n'));
   } catch (error) {
-    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage|territory-storage|org-storage|catalog-storage|public-)/.test(line));
+    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage|territory-storage|org-storage|catalog-storage|public-|adm-)/.test(line));
     context.diagnostic(diagnostic.join('\n'));
     throw error;
   }

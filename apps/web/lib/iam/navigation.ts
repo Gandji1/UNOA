@@ -13,6 +13,7 @@ const administration: [string, NavItem][] = [
   ['org.read', { href: '/administration/structures', label: 'Structures académiques', icon: 'landmark' }],
   ['catalog.read', { href: '/administration/catalogue', label: 'Catalogue des formations', icon: 'book' }],
   ['lms.read', { href: '/administration/cours', label: 'Studio des cours', icon: 'studio' }],
+  ['adm.read', { href: '/administration/admissions', label: 'Admissions', icon: 'inbox' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Territoires', icon: 'map' }],
   ['config.read', { href: '/administration/parametres', label: 'Paramètres', icon: 'sliders' }],
@@ -37,7 +38,10 @@ export const navigation = cache(async () => {
         'SELECT unoa.account_permissions($1) AS permissions', [actor],
       ).catch(() => ({ rows: [{ permissions: [] as string[] }] }));
       const held = new Set(rows[0]?.permissions ?? []);
-      groups.push({ label: 'Apprentissage', items: [{ href: '/apprendre', label: 'Mes cours et séances', icon: 'play' }] });
+      groups.push({ label: 'Apprentissage', items: [
+        { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
+        { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
+      ] });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
       if (admin.length) groups.push({ label: 'Administration', items: admin });
     }

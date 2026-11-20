@@ -43,3 +43,9 @@
 - Lot 009. Audit et restructuration du code ; aucun texte institutionnel dans le code ; sites publics
   par établissement résolus par nom d'hôte, textes versionnés et publiés par un tiers, données publiques
   isolées par site. [Fiche](lots/LOT_009.md), [architecture](ARCHITECTURE.md), [ADR-0006](ADR/0006-structure-et-sites.md).
+
+- Lot 010. Admissions : campagnes par version publiée et autorisée, formulaire, pièces et grille définis
+  sans code, espace candidat (brouillon, pièces contrôlées, complétude, accusé), instruction administrative
+  et académique séparées, compléments historisés, convocations, décisions motivées, acceptation, recours
+  tranché par un tiers, tableau de bord. [Fiche](lots/LOT_010.md). Antivirus, stockage objet et envoi
+  courriel/SMS : EXT-004.
