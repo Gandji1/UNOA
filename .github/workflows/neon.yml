@@ -1,0 +1,66 @@
+name: Base Neon (migrations et droits)
+
+# Applies the migrations to the Neon project linked by the Neon GitHub
+# integration (Neon console → Integrations → GitHub), which provides the
+# NEON_API_KEY secret and the NEON_PROJECT_ID variable. Nothing is copied by hand.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['packages/db/migrations/**', 'infra/postgres/**', '.github/workflows/neon.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      DATABASE_NAME: unoa
+      PGSSLROOTCERT: system
+    steps:
+      - name: Intégration Neon présente
+        run: |
+          if [ -z "$NEON_API_KEY" ] || [ -z "$NEON_PROJECT_ID" ]; then
+            echo "::error::Relier le dépôt à Neon : console Neon → Integrations → GitHub → Gandji1/UNOA."
+            exit 1
+          fi
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile --filter @unoa/db
+      - name: Adresse de connexion du propriétaire (branche par défaut)
+        run: |
+          api=https://console.neon.tech/api/v2/projects/$NEON_PROJECT_ID
+          auth="Authorization: Bearer $NEON_API_KEY"
+          branch=$(curl -sf -H "$auth" "$api/branches" | jq -r '.branches[] | select(.default) | .id')
+          owner=$(curl -sf -H "$auth" "$api/branches/$branch/databases/$DATABASE_NAME" | jq -r '.database.owner_name')
+          uri=$(curl -sf -H "$auth" "$api/connection_uri?branch_id=$branch&database_name=$DATABASE_NAME&role_name=$owner&pooled=false" | jq -r '.uri')
+          case "$uri" in postgresql://*) ;; *) echo "::error::Base $DATABASE_NAME introuvable"; exit 1;; esac
+          uri="${uri%%\?*}?sslmode=verify-full"
+          echo "::add-mask::$uri"
+          echo "UNOA_MIGRATION_DATABASE_URL=$uri" >> "$GITHUB_ENV"
+          echo "Branche $branch, base $DATABASE_NAME, propriétaire $owner"
+      - name: Migrations
+        run: node packages/db/src/migrate.mjs
+      - name: Rôle web restreint et droits
+        run: |
+          psql "$UNOA_MIGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'unoa_web') THEN CREATE ROLE unoa_web NOLOGIN; END IF; END \$\$;"
+          psql "$UNOA_MIGRATION_DATABASE_URL" -q -v web_role=unoa_web -f infra/postgres/grant-web.psql
+      - name: Contrôle des droits
+        run: |
+          psql "$UNOA_MIGRATION_DATABASE_URL" -x -v web_role=unoa_web -f infra/postgres/verify-web.psql | tee verify.txt
+          if grep -Eq '\| f$' verify.txt; then echo "::error::Un contrôle de droits a échoué"; exit 1; fi

@@ -143,7 +143,15 @@ Permissions : `site.read`, `site.write`, `site.publish`. Chaque site n'affiche
 que les formations et les structures publiées de sa portée.
 Voir aussi `docs/ARCHITECTURE.md` pour la carte du code.
 
-## Mise à jour de Neon (migrations 0001 à 0011), premier administrateur et connexion SSL
+## Base Neon par GitHub (méthode recommandée)
+
+1. Console Neon, projet UNOA → **Integrations** → **GitHub** → **Add** → choisir le dépôt `Gandji1/UNOA`.
+   Neon dépose lui-même le secret `NEON_API_KEY` et la variable `NEON_PROJECT_ID` dans le dépôt.
+2. Le traitement GitHub « Base Neon (migrations et droits) » (`.github/workflows/neon.yml`) applique
+   alors les migrations sur la base `unoa` de la branche par défaut, crée le rôle restreint `unoa_web`,
+   applique ses droits et les vérifie, en SSL `verify-full`. Il se relance à chaque nouvelle migration.
+
+## Mise à jour de Neon à la main (éditeur SQL), premier administrateur et connexion SSL
 
 Depuis la racine du dépôt, générer les trois scripts (non versionnés) :
 
