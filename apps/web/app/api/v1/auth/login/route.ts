@@ -12,9 +12,16 @@ export async function POST(request: NextRequest) {
     return problem(403, 'Origine de la demande refusée', path);
   }
   try {
+    const form = request.headers.get('content-type')?.startsWith('application/x-www-form-urlencoded')
+      ? new URLSearchParams((await request.text()).slice(0, 2048)) : null;
+    const invitation = form?.get('invitation') ?? '';
     const { target, cookie } = await startLogin(settings);
     const response = redirectTo(target);
     response.cookies.set(cookieName(settings, 'login'), cookie, cookieOptions(settings, loginDurationSeconds));
+    // An invitation travels with the sign-in, never in the provider URL.
+    if (/^[\w-]{43}$/.test(invitation)) {
+      response.cookies.set(cookieName(settings, 'invitation'), invitation, cookieOptions(settings, loginDurationSeconds));
+    }
     return response;
   } catch {
     return redirectTo(new URL('/connexion?statut=indisponible', settings.origin));

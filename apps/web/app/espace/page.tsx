@@ -10,11 +10,14 @@ import { myOfferings } from '@/lib/lms/offerings';
 import { siteContexts } from '@/lib/site/store';
 import { lmsContexts } from '@/lib/lms/studio';
 import { sessionAccount } from '@/lib/iam/sessions';
+import { accountDetails } from '@/lib/iam/admin';
+import { navigation } from '@/lib/iam/navigation';
+import { ActionForm, Badge, formatTime, Notice } from '../administration/forms';
 
 export const metadata: Metadata = { title: 'Mon espace' };
 export const dynamic = 'force-dynamic';
 
-export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string }> }) {
+export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string; error?: string; message?: string }> }) {
   const settings = iamSettings();
   if (!settings) redirect('/connexion');
   const token = (await cookies()).get(cookieName(settings, 'session'))?.value;
@@ -26,7 +29,10 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
   }
   if (!account) redirect('/connexion');
 
-  const { statut } = await searchParams;
+  const { statut, error, message } = await searchParams;
+  const [me, menu] = await Promise.all([accountDetails(settings, account, account), navigation()]);
+  const administration = menu.groups.some(group => group.label === 'Administration');
+  const own = me.grants.filter(item => !item.revoked_at && !item.delegated_from && (!item.effective_until || new Date(item.effective_until) > new Date()));
   const [configuration, territories, structures, catalogue] = await Promise.all([
     readableScopes(settings, account).catch(() => []),
     readableTerritories(settings, account).catch(() => []),
@@ -45,13 +51,44 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
         {statut === 'indisponible'
           ? <p role="status">La déconnexion a échoué. Réessayez.</p>
           : <p>Votre session institutionnelle est active.</p>}
-        {configuration.length > 0 && <p><a href="/administration/parametres">Paramètres et versions</a></p>}
-        {territories.length > 0 && <p><a href="/administration/territoires">Territoires et implantations</a></p>}
-        {structures.length > 0 && <p><a href="/administration/structures">Structures académiques</a></p>}
-        {catalogue.length > 0 && <p><a href="/administration/catalogue">Catalogue des formations</a></p>}
-        {studio.length > 0 && <p><a href="/administration/cours">Studio des cours</a></p>}
-        {sites.length > 0 && <p><a href="/administration/site">Site public</a></p>}
-        <p><a href="/apprendre">Mes cours{learning.length > 0 ? ` (${learning.length})` : ''}</a></p>
+        <Notice error={error} message={message} />
+        {administration && <p><a className="action" href="/administration">Console d’administration</a></p>}
+        <p><a href="/apprendre">Mes cours{learning.length > 0 ? ` (${learning.length})` : ''}</a> · <a href="/candidature">Mes candidatures</a></p>
+        {[configuration, territories, structures, catalogue, studio, sites].every(list => list.length === 0) && !administration &&
+          <p className="muted">Aucun rôle d’administration ne vous est attribué.</p>}
+      </section>
+      <section className="account-panel" aria-labelledby="profil">
+        <h2 id="profil">Profil</h2>
+        <ActionForm action="/api/v1/iam/profile" back="/espace" submit="Enregistrer le profil">
+          <label>Nom complet<input name="displayName" required maxLength={200} defaultValue={me.account.display_name ?? ''} /></label>
+          <label>Courriel de contact<input name="email" type="email" maxLength={254} defaultValue={me.account.email ?? ''} /></label>
+        </ActionForm>
+      </section>
+      {me.grants.length > 0 && (
+        <section className="account-panel" aria-labelledby="roles">
+          <h2 id="roles">Mes rôles</h2>
+          <ul>{me.grants.map(item => (
+            <li key={item.grant_id}>{item.role_label ?? item.role_code} — {item.scope_label}
+              {item.effective_until && ' (jusqu’au ' + formatTime(item.effective_until) + ')'}{' '}
+              {item.revoked_at ? <Badge tone="muted">retiré</Badge> : item.delegated_from ? <Badge tone="info">délégation reçue</Badge> : null}</li>
+          ))}</ul>
+          {own.length > 0 && (
+            <details><summary>Déléguer temporairement un rôle</summary>
+              <ActionForm action="/api/v1/iam/delegate" back="/espace" submit="Déléguer" confirm="La délégation est limitée à 90 jours, justifiée, auditée, et prend fin avec votre propre rôle.">
+                <label>Rôle<select name="grantId">{own.map(item => <option key={item.grant_id} value={item.grant_id}>{item.role_label ?? item.role_code} — {item.scope_label}</option>)}</select></label>
+                <label>Identifiant du compte bénéficiaire<input name="accountId" required pattern="[0-9a-fA-F-]{36}" /></label>
+                <label>Fin (UTC)<input type="datetime-local" name="effectiveUntil" required /></label>
+                <label>Justification<input name="reason" required maxLength={500} /></label>
+              </ActionForm>
+            </details>
+          )}
+        </section>
+      )}
+      <section className="account-panel" aria-labelledby="sessions">
+        <h2 id="sessions">Sessions</h2>
+        <p>Identifiant de compte : <code>{account}</code></p>
+        <p>{me.sessions.filter(item => !item.revoked_at && new Date(item.expires_at) > new Date()).length} session(s) active(s).</p>
+        <ActionForm inline action="/api/v1/iam/sessions" back="/connexion" hidden={{ accountId: account }} submit="Fermer toutes mes sessions" />
         <form action="/api/v1/auth/logout" method="post">
           <button className="action" type="submit">Se déconnecter</button>
         </form>

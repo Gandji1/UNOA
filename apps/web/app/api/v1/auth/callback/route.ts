@@ -2,6 +2,8 @@ import type { NextRequest } from 'next/server';
 import { callbackPath, cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
 import { verifiedSubject } from '@/lib/iam/oidc';
 import { openSession } from '@/lib/iam/sessions';
+import { provisionIdentity } from '@/lib/iam/admin';
+import { siteForRequest } from '@/lib/site/store';
 import { redirectTo, unavailable } from '@/lib/server/responses';
 
 export async function GET(request: NextRequest) {
@@ -16,6 +18,8 @@ export async function GET(request: NextRequest) {
     const identity = loginCookie && await verifiedSubject(settings, request.nextUrl.search, loginCookie);
     if (identity) {
       try {
+        const site = await siteForRequest(request).catch(() => null);
+        await provisionIdentity(settings, identity, request.cookies.get(cookieName(settings, 'invitation'))?.value, site?.site_id ?? null);
         token = await openSession(settings, identity);
       } catch {
         status = 'indisponible';
@@ -27,6 +31,7 @@ export async function GET(request: NextRequest) {
   }
   const response = redirectTo(new URL(token ? '/espace' : '/connexion?statut=' + status, settings.origin));
   response.cookies.set(loginName, '', cookieOptions(settings, 0));
+  response.cookies.set(cookieName(settings, 'invitation'), '', cookieOptions(settings, 0));
   if (token) {
     response.cookies.set(cookieName(settings, 'session'), token, cookieOptions(settings, sessionDurationSeconds));
   }

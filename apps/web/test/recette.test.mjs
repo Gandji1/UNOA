@@ -15,6 +15,7 @@ import { exerciseTerritory } from './fixtures/territory.fixture.mjs';
 import { exerciseAcademic } from './fixtures/academic.fixture.mjs';
 import { exerciseLearning } from './fixtures/learning.fixture.mjs';
 import { exerciseAdmissions } from './fixtures/admissions.fixture.mjs';
+import { exerciseAdministration } from './fixtures/administration.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -72,7 +73,7 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     VALUES ('platform', 'Racine', 'platform'), ('territory', 'Territoire', 'territory');
     INSERT INTO unoa.scope_type_parent VALUES ('territory', 'platform'), ('territory', 'territory');
     INSERT INTO unoa.access_role VALUES ('local_reader');
-    INSERT INTO unoa.permission VALUES ('config.read');
+    INSERT INTO unoa.permission VALUES ('config.read') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission VALUES ('local_reader', 'config.read');
   `);
   await database.query("INSERT INTO unoa.scope(id, type_code, label) VALUES ($1, 'platform', 'Racine')", [root]);
@@ -131,19 +132,21 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     assert.ok(attempt < 44, 'Le serveur web ne répond pas.');
   }
 
-  async function login({ changeState = false } = {}) {
-    const begin = await call('/api/v1/auth/login', { method: 'POST', headers: { Origin: origin } });
+  async function login({ changeState = false, invitation } = {}) {
+    const begin = await call('/api/v1/auth/login', invitation
+      ? { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'invitation=' + invitation }
+      : { method: 'POST', headers: { Origin: origin } });
     assert.equal(begin.status, 303);
     const target = new URL(begin.headers.get('location'));
     assert.equal(target.origin, issuer.origin);
-    const cookie = begin.headers.get('set-cookie');
-    assert.match(cookie, /HttpOnly/i);
-    assert.match(cookie, /SameSite=lax/i);
+    const cookie = begin.headers.getSetCookie().map(item => item.split(';', 1)[0]).join('; ');
+    assert.match(begin.headers.get('set-cookie'), /HttpOnly/i);
+    assert.match(begin.headers.get('set-cookie'), /SameSite=lax/i);
     const authorization = await fetch(target, { redirect: 'manual' });
     assert.equal(authorization.status, 302);
     const callback = new URL(authorization.headers.get('location'));
     if (changeState) callback.searchParams.set('state', 'wrong-test-state');
-    return call(callback, { headers: { Cookie: cookie.split(';', 1)[0] } });
+    return call(callback, { headers: { Cookie: cookie } });
   }
 
   try {
@@ -199,6 +202,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Admissions : campagnes, dossiers, instruction, décisions et recours', () =>
       exerciseAdmissions({ database, issuer, call, login, origin }),
+    );
+    await context.test('Administration des accès : amorçage, rôles, invitations, délégations, comptes et audit', () =>
+      exerciseAdministration({ database, issuer, call, login, origin, root, alpha }),
     );
     const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));
     if (storageLog.length) context.diagnostic(storageLog.join('\n'));

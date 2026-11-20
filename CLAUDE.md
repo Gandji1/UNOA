@@ -5,7 +5,7 @@
 ## 0. Démarrage obligatoire
 
 1. Lire **entièrement** `TDR_UNOA_Cahier_des_Charges_Claude_Code.md` au démarrage de la mission. À chaque reprise de contexte, relire au minimum sections 1–3, 16–24 et les modules concernés ; pour chaque lot, effectuer une nouvelle recherche dans **tout le TDR** des exigences affectées.
-2. Lire `docs/00_PROJET_INSTITUTIONNEL_REFERENCE.md`, `docs/MATRICE_EXIGENCES.csv`, `docs/PLAN_EXECUTION_AUTONOME.md`, `docs/CONTRATS_API_DONNEES.md`, `docs/PARAMETRAGE_REGIONAL.md`, `docs/MATRICE_ACCES.md`, `docs/PLAN_TESTS_ET_RECETTE.md`, `docs/CARTOGRAPHIE_ECRANS.md`, `docs/ARCHITECTURE.md` (carte du code) ; vérifier les ADR existantes et les fiches `docs/lots/`.
+2. Lire `docs/00_PROJET_INSTITUTIONNEL_REFERENCE.md`, `docs/MATRICE_EXIGENCES.csv`, `docs/PLAN_EXECUTION_AUTONOME.md`, `docs/CONTRATS_API_DONNEES.md`, `docs/PARAMETRAGE_REGIONAL.md`, `docs/MATRICE_ACCES.md`, `docs/PLAN_TESTS_ET_RECETTE.md`, `docs/CARTOGRAPHIE_ECRANS.md`, `docs/ARCHITECTURE.md` (carte du code), `docs/PLAN_DES_LOTS.md` (suivi par phase) ; vérifier les ADR existantes et les fiches `docs/lots/`.
 3. Inventorier le dépôt et les fonctionnalités déjà implémentées ; ne jamais détruire l'existant valide par défaut.
 4. Lire `docs/IMPLEMENTATION_LOG.md`, `docs/REGISTRE_DECISIONS.md` et `docs/REGISTRE_BLOCAGES.md`. La matrice d'exigences constitue le backlog normatif : chaque ligne doit aboutir à une preuve.
 5. **Avant le code :** écrire la fiche de lot (IDs `REQ-*`, dépendances, écrans, entités, droits, États/événements, tests et risques). Préparer tests positifs et négatifs. Après seulement, coder.

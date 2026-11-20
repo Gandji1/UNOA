@@ -143,7 +143,7 @@ Permissions : `site.read`, `site.write`, `site.publish`. Chaque site n'affiche
 que les formations et les structures publiées de sa portée.
 Voir aussi `docs/ARCHITECTURE.md` pour la carte du code.
 
-## Mise à jour de Neon (migrations 0006 à 0009) et connexion SSL
+## Mise à jour de Neon (migrations 0001 à 0011), premier administrateur et connexion SSL
 
 Depuis la racine du dépôt, générer les trois scripts (non versionnés) :
 
@@ -156,7 +156,17 @@ sed -e '/^\\set/d' -e "s/:'web_role'/'unoa_web'/g" infra/postgres/verify-web.psq
 Dans l'éditeur SQL de Neon, branche `recette` puis `production`, base `unoa`,
 avec le compte propriétaire : exécuter `unoa-schema.sql`, puis
 `unoa-grants-neon.sql`, puis `unoa-verify-neon.sql` (toutes les colonnes doivent
-valoir `t`, `migrations` = 9). Pour ouvrir la connexion du rôle web :
+valoir `t`, `migrations` = 11). Pour ouvrir la connexion du rôle web :
 `ALTER ROLE unoa_web LOGIN PASSWORD '<mot de passe généré>';` (le mot de passe
 n'est jamais écrit dans le dépôt). Dans Vercel, `UNOA_IAM_DATABASE_URL` vaut
 `postgresql://unoa_web:<mot de passe>@<hôte pooler Neon>/unoa?sslmode=verify-full`.
+
+Premier administrateur (une seule fois, compte propriétaire) : générer l'instruction puis la coller
+dans l'éditeur SQL de Neon. L'émetteur et l'identifiant sont ceux du fournisseur OIDC institutionnel.
+
+```sh
+pnpm db:bootstrap -- --sql --issuer https://<émetteur OIDC> --subject <identifiant> --name "<Nom>" --platform-label "<Nom de la plateforme>"
+```
+
+L'administrateur se connecte ensuite et configure tout depuis `/administration` ; il invite les autres
+responsables depuis `/administration/acces` (voir `docs/PLAN_DES_LOTS.md`).

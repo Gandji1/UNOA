@@ -49,3 +49,8 @@
   et académique séparées, compléments historisés, convocations, décisions motivées, acceptation, recours
   tranché par un tiers, tableau de bord. [Fiche](lots/LOT_010.md). Antivirus, stockage objet et envoi
   courriel/SMS : EXT-004.
+
+- Lot 011. Administration des accès : amorçage du premier administrateur, console `/administration`,
+  rôles composés par l'administration, attributions justifiées, invitations, délégations, comptes,
+  sessions et journal d'audit ; création de compte par site. [Fiche](lots/LOT_011.md),
+  [ADR-0007](ADR/0007-administration-des-acces.md), [plan des lots](PLAN_DES_LOTS.md).

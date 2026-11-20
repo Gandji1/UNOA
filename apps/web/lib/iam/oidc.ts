@@ -65,5 +65,7 @@ export async function verifiedSubject(settings: IamSettings, search: string, log
   });
   const claims = tokens.claims();
   if (!claims || claims.acr !== settings.assurance) return null;
-  return { issuer: claims.iss, subject: claims.sub };
+  const name = typeof claims.name === 'string' ? claims.name.slice(0, 200) : null;
+  const email = typeof claims.email === 'string' && claims.email_verified === true ? claims.email.slice(0, 254) : null;
+  return { issuer: claims.iss, subject: claims.sub, name, email };
 }

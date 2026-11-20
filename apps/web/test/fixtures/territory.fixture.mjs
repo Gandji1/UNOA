@@ -8,7 +8,7 @@ export async function exerciseTerritory({ database, issuer, login, call, origin,
   const local = randomUUID();
   await database.query(`
     INSERT INTO unoa.access_role VALUES ('territory_steward'), ('territory_local');
-    INSERT INTO unoa.permission VALUES ('territory.read'), ('territory.write'), ('territory.define');
+    INSERT INTO unoa.permission VALUES ('territory.read'), ('territory.write'), ('territory.define') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission (role_code, permission_code)
     SELECT 'territory_steward', code FROM unoa.permission WHERE code LIKE 'territory.%';
     INSERT INTO unoa.role_permission VALUES ('territory_local', 'territory.read'), ('territory_local', 'territory.write');
@@ -173,7 +173,7 @@ export async function exerciseTerritory({ database, issuer, login, call, origin,
   assert.match(rendered, /Cadre réglementaire/);
   const localView = await read(studio + '?scope=' + campus.scopeId, localCookie);
   assert.doesNotMatch(await localView.text(), /Campus Gamma de l’UNOA/);
-  assert.match(await (await read('/espace', stewardCookie)).text(), /Territoires et implantations/);
+  assert.match(await (await read('/administration', stewardCookie)).text(), /<a href="\/administration\/territoires"><strong>Territoires/);
 
   const trail = await database.query(
     "SELECT action, count(*)::int AS total FROM unoa.audit_event WHERE action LIKE 'territory.%' GROUP BY action ORDER BY action",

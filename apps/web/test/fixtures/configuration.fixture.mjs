@@ -6,7 +6,7 @@ export async function exerciseConfiguration({ database, issuer, login, call, ori
   const betaWriter = randomUUID();
   await database.query(`
     INSERT INTO unoa.access_role VALUES ('config_owner'), ('config_writer');
-    INSERT INTO unoa.permission VALUES ('config.write'), ('config.define'), ('config.review'), ('config.publish');
+    INSERT INTO unoa.permission VALUES ('config.write'), ('config.define'), ('config.review'), ('config.publish') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission (role_code, permission_code)
     SELECT 'config_owner', code FROM unoa.permission WHERE code LIKE 'config.%';
     INSERT INTO unoa.role_permission VALUES
@@ -55,7 +55,7 @@ export async function exerciseConfiguration({ database, issuer, login, call, ori
   await okay(await write('definitions', reviewCookie, definition));
   const catalogue = await okay(await read(api + 'definitions?scopeId=' + alpha, alphaCookie));
   assert.deepEqual(catalogue.definitions.map(item => item.key), [key]);
-  assert.match(await (await read('/espace', alphaCookie)).text(), /Paramètres et versions/);
+  assert.match(await (await read('/administration', alphaCookie)).text(), /<a href="\/administration\/parametres"><strong>Paramètres/);
 
   const at = new Date(Date.now() + 3_600_000).toISOString().slice(0, 16);
   const draft = { scopeId: alpha, key, value: 18, reason: 'Ajustement Alpha', effectiveFrom: at };

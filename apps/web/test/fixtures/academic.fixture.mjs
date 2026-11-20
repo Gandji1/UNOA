@@ -13,7 +13,7 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
     INSERT INTO unoa.access_role VALUES ('academic_admin'), ('academic_reviewer'), ('academic_local');
     INSERT INTO unoa.permission VALUES ('org.read'), ('org.write'), ('org.approve'),
       ('catalog.read'), ('catalog.write'), ('catalog.review'), ('catalog.publish'), ('catalog.authorize'), ('catalog.define'),
-      ('site.read'), ('site.write'), ('site.publish');
+      ('site.read'), ('site.write'), ('site.publish') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission (role_code, permission_code)
       SELECT 'academic_admin', code FROM unoa.permission WHERE code LIKE 'org.%' OR code LIKE 'catalog.%' OR code IN ('site.read', 'site.write');
     INSERT INTO unoa.role_permission VALUES

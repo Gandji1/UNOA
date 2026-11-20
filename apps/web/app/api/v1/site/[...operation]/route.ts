@@ -5,7 +5,7 @@ import { createSite, siteAction, siteContexts, siteDetails } from '@/lib/site/st
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 const options: StudioOptions = { path: '/api/v1/site', studio: '/administration/site', denial: 'site.access', label: 'site' };
-const actions = ['hosts', 'texts', 'publish', 'online'];
+const actions = ['hosts', 'texts', 'publish', 'online', 'registration'];
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const { operation } = await params;

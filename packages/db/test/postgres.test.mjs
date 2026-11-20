@@ -20,6 +20,7 @@ const catalogue = '0007_catalogue.sql';
 const learning = '0008_learning.sql';
 const sites = '0009_sites.sql';
 const admissions = '0010_admissions.sql';
+const administration = '0011_administration.sql';
 
 test('Socle PostgreSQL UNOA', async context => {
   const name = 'unoa_test_' + randomUUID().replaceAll('-', '');
@@ -74,7 +75,7 @@ test('Socle PostgreSQL UNOA', async context => {
       [campus, alpha],
     );
     const results = await Promise.all([migrate(database), migrate(database)]);
-    assert.deepEqual(results.flat(), [next, sessions, config, territories, organisation, catalogue, learning, sites, admissions]);
+    assert.deepEqual(results.flat(), [next, sessions, config, territories, organisation, catalogue, learning, sites, admissions, administration]);
     assert.deepEqual(await migrate(database), []);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.scope')).total, 4);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.account')).total, 0);
@@ -146,11 +147,12 @@ test('Socle PostgreSQL UNOA', async context => {
     await copyMigration(learning);
     await copyMigration(sites);
     await copyMigration(admissions);
+    await copyMigration(administration);
     const broken = join(directory, '0099_atomic.sql');
     await writeFile(broken, 'CREATE TABLE unoa.atomic_test (id int); SELECT 1 / 0;');
     await assert.rejects(migrate(database, directory), { code: '22012' });
     assert.equal((await one("SELECT to_regclass('unoa.atomic_test') AS relation")).relation, null);
-    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 10);
+    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 11);
     await writeFile(join(directory, initial), 'SELECT 1');
     await assert.rejects(migrate(database, directory), /Historique incohérent/);
 
@@ -193,7 +195,7 @@ test('Socle PostgreSQL UNOA', async context => {
     `, [actor]), { code: '23505' });
     await database.query(`
       INSERT INTO unoa.access_role(code) VALUES ('territory_reader');
-      INSERT INTO unoa.permission(code) VALUES ('config.read'), ('config.write');
+      INSERT INTO unoa.permission(code) VALUES ('config.read'), ('config.write') ON CONFLICT DO NOTHING;
       INSERT INTO unoa.role_permission VALUES ('territory_reader', 'config.read');
     `);
     await database.query(`
@@ -208,16 +210,23 @@ test('Socle PostgreSQL UNOA', async context => {
     for (const scope of [campus, beta, root, randomUUID()]) assert.equal(await canRead(scope), false);
     assert.equal(await canRead(alpha, 'config.write'), false);
     assert.equal(await canRead(alpha, 'config.read', randomUUID()), false);
-    await database.query('UPDATE unoa.role_grant SET include_descendants = true WHERE account_id = $1', [actor]);
+    // A grant is never rewritten (0011); the time windows below are explored
+    // by test-only rewrites that bypass the triggers.
+    await assert.rejects(database.query('UPDATE unoa.role_grant SET include_descendants = true WHERE account_id = $1', [actor]),
+      /only shortened or revoked/);
+    const rewrite = async sql => database.query(`BEGIN; SET LOCAL session_replication_role = replica; ${sql}; COMMIT;`);
+    await rewrite(`UPDATE unoa.role_grant SET include_descendants = true WHERE account_id = '${actor}'`);
     assert.equal(await canRead(campus), true);
     assert.equal(await canRead(beta), false);
     await database.query("UPDATE unoa.role_grant SET effective_until = now() - interval '1 minute'");
     assert.equal(await canRead(alpha), false);
-    await database.query("UPDATE unoa.role_grant SET effective_until = NULL, effective_from = now() + interval '1 hour'");
+    await rewrite("UPDATE unoa.role_grant SET effective_until = NULL, effective_from = now() + interval '1 hour'");
     assert.equal(await canRead(alpha), false);
-    await database.query("UPDATE unoa.role_grant SET effective_from = now() - interval '1 hour', revoked_at = now()");
+    await rewrite("UPDATE unoa.role_grant SET effective_from = now() - interval '1 hour'");
+    await database.query('UPDATE unoa.role_grant SET revoked_at = now()');
     assert.equal(await canRead(alpha), false);
-    await database.query('UPDATE unoa.role_grant SET revoked_at = NULL');
+    await assert.rejects(database.query('UPDATE unoa.role_grant SET revoked_at = NULL'), /only shortened or revoked/);
+    await rewrite('UPDATE unoa.role_grant SET revoked_at = NULL');
     await database.query('UPDATE unoa.account SET disabled_at = now() WHERE id = $1', [actor]);
     assert.equal(await canRead(alpha), false);
   });

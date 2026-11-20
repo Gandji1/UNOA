@@ -68,6 +68,12 @@ export default async function SiteStudio({ searchParams }: { searchParams: Promi
                 submit={site.online ? 'Mettre hors ligne' : 'Mettre en ligne'} />
             )}
             <p className="studio-help">La mise en ligne exige des textes publiés dans la langue par défaut.</p>
+            <p>Création de compte en libre accès (candidats, apprenants) : {site.open_registration ? <Badge tone="ok">ouverte</Badge> : <Badge tone="muted">fermée</Badge>}</p>
+            {rights.publish && (
+              <ActionForm inline action={`${api}sites/${site.id}/registration`} back={back} hidden={{ open: site.open_registration ? 'false' : 'true' }}
+                submit={site.open_registration ? 'Fermer la création de compte' : 'Ouvrir la création de compte'} />
+            )}
+            <p className="studio-help">Fermée, seuls les comptes invités par l’administration peuvent se connecter. Un compte créé ne reçoit aucun rôle.</p>
           </Panel>
           <Panel title="Noms d’hôte" id="hotes">
             {hosts.length === 0 ? <p>Aucun nom d’hôte : le site n’est joignable à aucune adresse.</p> : (

@@ -83,8 +83,8 @@ export async function siteDetails(settings: IamSettings, actor: string, scopeId:
   const granted = await rights(store, actor, uuid(scopeId));
   ensure(granted?.read, 403, 'Portée inaccessible');
   const { rows: scope } = await store.query<{ label: string }>('SELECT label FROM unoa.scope WHERE id = $1', [scopeId]);
-  const { rows: site } = await store.query<{ id: string; default_language: string; online: boolean }>(
-    'SELECT id, default_language, online FROM unoa.site WHERE scope_id = $1', [scopeId],
+  const { rows: site } = await store.query<{ id: string; default_language: string; online: boolean; open_registration: boolean }>(
+    'SELECT id, default_language, online, open_registration FROM unoa.site WHERE scope_id = $1', [scopeId],
   );
   if (!site[0]) return { scope: { id: scopeId, label: scope[0]?.label ?? '' }, rights: granted, site: null, hosts: [], texts: [] };
   const [hosts, texts] = await Promise.all([
@@ -166,6 +166,13 @@ export async function siteAction(settings: IamSettings, actor: string, id: strin
       const online = flag(input.online);
       await store.query('UPDATE unoa.site SET online = $2, changed_by = $3, changed_at = now() WHERE id = $1', [siteId, online, actor]);
       await audit(store, actor, site.scope_id, online ? 'site.online' : 'site.offline', correlation, siteId);
+      return { scopeId: site.scope_id, id: siteId };
+    }
+    if (action === 'registration') {
+      const { site } = await siteOf(store, actor, siteId, 'publish');
+      const open = flag(input.open);
+      await store.query('UPDATE unoa.site SET open_registration = $2, changed_by = $3, changed_at = now() WHERE id = $1', [siteId, open, actor]);
+      await audit(store, actor, site.scope_id, open ? 'site.registration_opened' : 'site.registration_closed', correlation, siteId);
       return { scopeId: site.scope_id, id: siteId };
     }
     ensure(false, 404, 'Opération inconnue');

@@ -9,7 +9,7 @@ export async function exerciseLearning({ database, issuer, login, call, origin, 
   const ids = Object.fromEntries(['author', 'reviewer', 'teacher', 'first', 'second', 'outsider'].map(name => [name, randomUUID()]));
   await database.query(`
     INSERT INTO unoa.access_role VALUES ('lms_author'), ('lms_reviewer');
-    INSERT INTO unoa.permission VALUES ('lms.read'), ('lms.write'), ('lms.review'), ('lms.manage');
+    INSERT INTO unoa.permission VALUES ('lms.read'), ('lms.write'), ('lms.review'), ('lms.manage') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission VALUES ('lms_author', 'lms.read'), ('lms_author', 'lms.write'), ('lms_author', 'lms.manage'),
       ('lms_reviewer', 'lms.read'), ('lms_reviewer', 'lms.review');
   `);

@@ -113,3 +113,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Écrans : `/candidature`, `/candidature/{id}`, `/administration/admissions`, bouton « Candidater » sur la fiche.
 - Vérifications : unitaires 20 PASS, PostgreSQL 7 PASS, HTTP 6 PASS (dont admissions), build PASS, traçabilité PASS.
 - Gate Done : FAIL (E2E navigateur, accessibilité, antivirus/stockage, envoi externe EXT-004) — exigences EN_COURS.
+
+## 20 novembre 2026 — Lot 011
+
+- Écart constaté : aucun administrateur ni rôle ne pouvait être créé sans SQL (phase P1 incomplète).
+- Migration 0011, fonctions contrôlées d'administration, amorçage `pnpm db:bootstrap`, console
+  `/administration` et `/administration/acces`, invitations, inscription par site, profil et délégation.
+- Vérifications : unitaires 20, PostgreSQL 7, HTTP 7 (dont administration), build, traçabilité : PASS.
+- Gate Done : FAIL (E2E navigateur, a11y, envoi courriel EXT-004) — exigences EN_COURS.

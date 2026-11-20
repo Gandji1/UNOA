@@ -12,7 +12,7 @@ export async function exerciseAdmissions({ database, issuer, login, call, origin
   const { rows: [univ] } = await database.query("SELECT id FROM unoa.scope WHERE label = 'Université Alpha'");
   await database.query(`
     INSERT INTO unoa.access_role VALUES ('adm_manager'), ('adm_reviewer'), ('adm_decider'), ('adm_appeals');
-    INSERT INTO unoa.permission VALUES ('adm.read'), ('adm.manage'), ('adm.review'), ('adm.decide'), ('adm.appeal');
+    INSERT INTO unoa.permission VALUES ('adm.read'), ('adm.manage'), ('adm.review'), ('adm.decide'), ('adm.appeal') ON CONFLICT DO NOTHING;
     INSERT INTO unoa.role_permission VALUES ('adm_manager', 'adm.read'), ('adm_manager', 'adm.manage'),
       ('adm_reviewer', 'adm.read'), ('adm_reviewer', 'adm.review'), ('adm_decider', 'adm.read'), ('adm_decider', 'adm.decide'),
       ('adm_appeals', 'adm.read'), ('adm_appeals', 'adm.appeal');

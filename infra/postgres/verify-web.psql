@@ -29,5 +29,10 @@ SELECT current_database() AS base,
        NOT has_column_privilege(:'web_role', 'unoa.forum_post', 'body', 'UPDATE') AS posts_unaltered,
        NOT has_table_privilege(:'web_role', 'unoa.application_document', 'DELETE, TRUNCATE') AS documents_preserved,
        NOT has_table_privilege(:'web_role', 'unoa.application_decision', 'UPDATE, DELETE') AS decisions_append_only,
+       NOT has_function_privilege(:'web_role', 'unoa.bootstrap_platform(text,text,text,text,text,text)', 'EXECUTE') AS bootstrap_private,
+       NOT has_column_privilege(:'web_role', 'unoa.invitation', 'token_hash', 'SELECT') AS invitation_tokens_private,
+       NOT has_any_column_privilege(:'web_role', 'unoa.access_role', 'INSERT, UPDATE') AS roles_through_functions,
+       NOT has_table_privilege(:'web_role', 'unoa.role_permission', 'INSERT, DELETE') AS role_permissions_protected,
+       has_function_privilege(:'web_role', 'unoa.grant_role(uuid,uuid,text,uuid,boolean,timestamptz,text,uuid)', 'EXECUTE') AS checked_grants,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;
