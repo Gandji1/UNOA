@@ -142,3 +142,21 @@ faire publier par une seconde personne, puis mettre le site en ligne.
 Permissions : `site.read`, `site.write`, `site.publish`. Chaque site n'affiche
 que les formations et les structures publiées de sa portée.
 Voir aussi `docs/ARCHITECTURE.md` pour la carte du code.
+
+## Mise à jour de Neon (migrations 0006 à 0009) et connexion SSL
+
+Depuis la racine du dépôt, générer les trois scripts (non versionnés) :
+
+```sh
+node packages/db/src/export-console.mjs unoa > unoa-schema.sql
+sed -e '/^\\set/d' -e 's/:"web_role"/unoa_web/g' infra/postgres/grant-web.psql > unoa-grants-neon.sql
+sed -e '/^\\set/d' -e "s/:'web_role'/'unoa_web'/g" infra/postgres/verify-web.psql > unoa-verify-neon.sql
+```
+
+Dans l'éditeur SQL de Neon, branche `recette` puis `production`, base `unoa`,
+avec le compte propriétaire : exécuter `unoa-schema.sql`, puis
+`unoa-grants-neon.sql`, puis `unoa-verify-neon.sql` (toutes les colonnes doivent
+valoir `t`, `migrations` = 9). Pour ouvrir la connexion du rôle web :
+`ALTER ROLE unoa_web LOGIN PASSWORD '<mot de passe généré>';` (le mot de passe
+n'est jamais écrit dans le dépôt). Dans Vercel, `UNOA_IAM_DATABASE_URL` vaut
+`postgresql://unoa_web:<mot de passe>@<hôte pooler Neon>/unoa?sslmode=verify-full`.
