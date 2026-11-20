@@ -35,3 +35,9 @@ et de production existent. Les cinq migrations sont vérifiées. Le rôle web
 est créé sans connexion. Le secret applicatif et le fournisseur OIDC restent
 à renseigner dans l’environnement de production. L’exercice de restauration
 reste à exécuter.
+
+20 novembre 2026 — EXT-004. Visioconférence : adaptateur compatible Jitsi par jeton JWT livré et
+vérifié en recette avec une clé de test. Pour l'activer, fournir un serveur Jitsi (ou équivalent
+compatible) avec authentification JWT, puis renseigner `UNOA_LIVE_JITSI_DOMAIN`,
+`UNOA_LIVE_JITSI_APP_ID` et `UNOA_LIVE_JITSI_SECRET` dans l'environnement serveur. Diffusion vidéo
+adaptative et stockage des enregistrements : à contractualiser.

@@ -7,6 +7,10 @@ export const formErrors: Record<string, string> = {
   '409': 'Cet enregistrement existe déjà ou son état a changé depuis son affichage.',
   '413': 'La demande dépasse la taille autorisée.',
   '415': 'Format de demande non pris en charge.',
+  '423': 'Cette leçon est verrouillée : terminez d’abord les leçons requises.',
+  '410': 'Cette séance a été annulée.',
+  '425': 'La salle ouvre 15 minutes avant le début de la séance et ferme à sa fin.',
+  '428': 'Indiquez d’abord votre choix concernant l’enregistrement de la séance.',
   '422': 'Une règle refuse cette opération : hiérarchie, période, état ou cohérence.',
   '503': 'Le service est temporairement indisponible. Réessayez.',
 };

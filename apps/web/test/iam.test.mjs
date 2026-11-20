@@ -13,6 +13,7 @@ import { startIssuer } from './oidc-provider.fixture.mjs';
 import { exerciseConfiguration } from './configuration.fixture.mjs';
 import { exerciseTerritory } from './territory.fixture.mjs';
 import { exerciseAcademic } from './academic.fixture.mjs';
+import { exerciseLearning } from './learning.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -90,6 +91,8 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
   const port = portReservation.address().port;
   await new Promise(resolve => portReservation.close(resolve));
   const origin = 'http://127.0.0.1:' + port;
+  // Test-only videoconference key: the adapter signs links, no real provider is called.
+  const live = { domain: 'visio.recette.invalid', appId: 'unoa-recette', secret: randomBytes(32).toString('hex') };
   dataUrl.username = role;
   dataUrl.password = password;
   web = spawn(process.execPath, [
@@ -108,6 +111,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
       UNOA_OIDC_MFA_ACR: 'test-mfa',
       UNOA_OIDC_TRANSACTION_KEY: randomBytes(32).toString('base64url'),
       UNOA_IAM_DATABASE_URL: dataUrl.href,
+      UNOA_LIVE_JITSI_DOMAIN: live.domain,
+      UNOA_LIVE_JITSI_APP_ID: live.appId,
+      UNOA_LIVE_JITSI_SECRET: live.secret,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -184,6 +190,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Structures académiques et catalogue des formations', () =>
       exerciseAcademic({ database, issuer, call, login, origin, root, alpha, beta }),
+    );
+    await context.test('Studio de cours, apprentissage et classes virtuelles', () =>
+      exerciseLearning({ database, issuer, call, login, origin, alpha, live }),
     );
     const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));
     if (storageLog.length) context.diagnostic(storageLog.join('\n'));

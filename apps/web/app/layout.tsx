@@ -21,6 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <a href="/">Accueil</a>
             <a href="/formations">Formations</a>
             <a href="/structures">Structures</a>
+            <a href="/apprendre">Mes cours</a>
             <a href="/espace" className="nav-account">Mon espace</a>
           </nav>
         </header>

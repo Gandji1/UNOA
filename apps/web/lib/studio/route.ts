@@ -21,6 +21,7 @@ interface Options {
   denial: string;
   label: string;
   repeated?: string[];
+  returns?: string[];
 }
 
 function failure(error: unknown, options: Options) {
@@ -28,9 +29,10 @@ function failure(error: unknown, options: Options) {
 }
 
 // A browser form names the studio view it returns to; only studio paths are accepted.
-function returnPath(input: Input, studio: string) {
+function returnPath(input: Input, studio: string, others: string[] = []) {
   const target = typeof input.return === 'string' ? input.return : '';
-  return target.startsWith(studio) && !target.includes('//') && !/[\r\n\\]/.test(target) ? target : studio;
+  const known = [studio, ...others].some(prefix => target === prefix || target.startsWith(prefix + '?') || target.startsWith(prefix + '/'));
+  return known && !target.includes('//') && !/[\r\n\\]/.test(target) ? target : studio;
 }
 
 export async function studioGet(
@@ -74,7 +76,7 @@ export async function studioPost(
     requireConfig(actor, 401, 'Session institutionnelle requise');
     requireConfig(form || type === 'application/json', 415, 'Format de requête non pris en charge');
     const input = await readInput(request, form, options.repeated);
-    if (form) back = returnPath(input, options.studio);
+    if (form) back = returnPath(input, options.studio, options.returns);
     const result = await handle({ settings, actor, operation, correlation }, input);
     if (!form) return privateJson(result);
     const url = new URL(back, settings.origin);

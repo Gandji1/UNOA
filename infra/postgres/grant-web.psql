@@ -69,4 +69,32 @@ GRANT INSERT (owner_scope_id, code, label, description, created_by) ON unoa.comp
 GRANT INSERT, UPDATE, DELETE ON unoa.program_period, unoa.option_group, unoa.teaching_unit, unoa.unit_volume,
       unoa.unit_course, unoa.unit_prerequisite, unoa.version_competency, unoa.unit_competency,
       unoa.version_requirement, unoa.version_territory, unoa.unit_equivalence TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.offering_role(uuid, uuid) TO :"web_role";
+GRANT SELECT ON unoa.course_version, unoa.course_module, unoa.lesson, unoa.course_offering, unoa.offering_member,
+      unoa.lesson_due, unoa.lesson_progress, unoa.learner_note, unoa.forum_thread, unoa.forum_post,
+      unoa.live_session, unoa.live_event, unoa.live_attendance, unoa.live_consent, unoa.live_resource,
+      unoa.notification TO :"web_role";
+GRANT INSERT (course_id, number, language, variant_of, variant_note, title, objectives, prerequisites, methods,
+              bibliography, expected_hours, author_id),
+      UPDATE (state, title, objectives, prerequisites, methods, bibliography, expected_hours, variant_note,
+              submitted_at, reviewer_id, discipline_checked, pedagogy_checked, rights_checked, review_note, published_at)
+ON unoa.course_version TO :"web_role";
+GRANT INSERT, UPDATE, DELETE ON unoa.course_module, unoa.lesson TO :"web_role";
+GRANT INSERT (course_version_id, owner_scope_id, label, time_zone, starts_on, ends_on, created_by),
+      UPDATE (state, label, ends_on) ON unoa.course_offering TO :"web_role";
+GRANT INSERT (offering_id, account_id, role, display_name, added_by), UPDATE (removed_at, removed_by)
+ON unoa.offering_member TO :"web_role";
+GRANT INSERT, UPDATE (due_at, set_by) ON unoa.lesson_due TO :"web_role";
+GRANT INSERT (offering_id, lesson_id, account_id) ON unoa.lesson_progress TO :"web_role";
+GRANT INSERT, UPDATE (body, bookmarked, updated_at) ON unoa.learner_note TO :"web_role";
+GRANT INSERT (offering_id, title, created_by), UPDATE (locked_at) ON unoa.forum_thread TO :"web_role";
+GRANT INSERT (thread_id, author_id, body), UPDATE (hidden_at, hidden_by, hidden_reason) ON unoa.forum_post TO :"web_role";
+GRANT INSERT (offering_id, title, agenda, starts_at, ends_at, room, recording_planned, created_by),
+      UPDATE (title, agenda, starts_at, ends_at, state, cancel_reason, recording_planned, replay_url, replay_published_at)
+ON unoa.live_session TO :"web_role";
+GRANT INSERT (session_id, kind, actor_id, starts_at, ends_at, detail) ON unoa.live_event TO :"web_role";
+GRANT INSERT, UPDATE (first_joined_at, joins, status, marked_by, marked_at) ON unoa.live_attendance TO :"web_role";
+GRANT INSERT, UPDATE (decision, decided_at) ON unoa.live_consent TO :"web_role";
+GRANT INSERT (session_id, title, url, shared_by) ON unoa.live_resource TO :"web_role";
+GRANT INSERT (account_id, kind, title, body, link), UPDATE (read_at) ON unoa.notification TO :"web_role";
 COMMIT;

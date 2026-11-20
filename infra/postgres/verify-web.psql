@@ -21,5 +21,8 @@ SELECT current_database() AS base,
        NOT has_table_privilege(:'web_role', 'unoa.program_authorization', 'DELETE, TRUNCATE') AS authorizations_preserved,
        NOT has_table_privilege(:'web_role', 'unoa.org_unit', 'DELETE, TRUNCATE') AS units_preserved,
        NOT has_column_privilege(:'web_role', 'unoa.org_unit', 'code', 'UPDATE') AS unit_code_frozen,
+       NOT has_table_privilege(:'web_role', 'unoa.live_session', 'DELETE, TRUNCATE') AS sessions_preserved,
+       NOT has_table_privilege(:'web_role', 'unoa.forum_post', 'DELETE, TRUNCATE') AS posts_preserved,
+       NOT has_column_privilege(:'web_role', 'unoa.forum_post', 'body', 'UPDATE') AS posts_unaltered,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;

@@ -33,3 +33,9 @@
   compétences, stages et mémoires, revue, publication immuable, équivalences,
   simulation et contrôle réglementaire avant candidatures. Catalogue public et
   organigramme public. [Fiche](LOT_007.md), [ADR-0005](ADR/0005-structures-et-catalogue.md).
+
+- Lot 008. Studio de cours (syllabus, modules, leçons vidéo/audio/pages/documents/activités, revue à trois
+  attestations, versions immuables, variantes, export/import), offres par promotion, parcours séquentiel ou
+  conditionnel, progression, notes, forum modéré, échéances, séances de visioconférence planifiées par
+  l'enseignant avec lien signé, consentement d'enregistrement, présences, replays et notifications.
+  [Fiche](LOT_008.md). Fournisseur de visioconférence réel à contractualiser (EXT-004).

@@ -83,3 +83,13 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Vérifications : unitaires 12 PASS, PostgreSQL 7 PASS, HTTP 3 PASS, build et sondes PASS, traçabilité PASS.
 - Écart : recette locale sur PostgreSQL 16.15 (binaire 18.6 non installable dans l'environnement), CI sur 18.6.
 - Gate Done : FAIL (E2E navigateur, accessibilité, i18n, tarifs et outbox ouverts) — exigences EN_COURS.
+
+## 20 novembre 2026 — Lot 008
+
+- TDR relus : §8, §14, §16.5 à 16.9, §17 à 19, modules LMS, LIVE, NOT ; fiche `LOT_008.md`.
+- Migration 0008 : versions pédagogiques, modules, leçons, offres, membres, échéances, progression,
+  notes privées, forum modéré, séances, événements, présences, consentements, ressources, notifications.
+- Studio `/administration/cours`, portail `/apprendre` (cours, leçon avec lecteur sous-titré et chapitré,
+  forum, présences), API `/api/v1/lms` et `/api/v1/live`, adaptateur de visioconférence JWT.
+- Vérifications : unitaires 16 PASS, PostgreSQL 7 PASS, HTTP 4 PASS, build PASS, traçabilité PASS.
+- Gate Done : FAIL (E2E navigateur, accessibilité, stockage de fichiers, fournisseur réel) — exigences EN_COURS.

@@ -6,6 +6,7 @@ import { readableScopes } from '@/lib/config/store';
 import { readableTerritories } from '@/lib/territory/store';
 import { orgContexts } from '@/lib/org/store';
 import { catalogContexts } from '@/lib/catalog/store';
+import { lmsContexts, myOfferings } from '@/lib/lms/store';
 import { sessionAccount } from '@/lib/iam/sessions';
 
 export const metadata: Metadata = { title: 'Mon espace · UNOA' };
@@ -30,6 +31,10 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
     orgContexts(settings, account).catch(() => []),
     catalogContexts(settings, account).catch(() => []),
   ]);
+  const [learning, studio] = await Promise.all([
+    myOfferings(settings, account).catch(() => []),
+    lmsContexts(settings, account).catch(() => []),
+  ]);
   return (
     <main id="contenu">
       <section className="account-panel">
@@ -41,6 +46,8 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
         {territories.length > 0 && <p><a href="/administration/territoires">Territoires et implantations</a></p>}
         {structures.length > 0 && <p><a href="/administration/structures">Structures académiques</a></p>}
         {catalogue.length > 0 && <p><a href="/administration/catalogue">Catalogue des formations</a></p>}
+        {studio.length > 0 && <p><a href="/administration/cours">Studio des cours</a></p>}
+        <p><a href="/apprendre">Mes cours{learning.length > 0 ? ` (${learning.length})` : ''}</a></p>
         <form action="/api/v1/auth/logout" method="post">
           <button className="action" type="submit">Se déconnecter</button>
         </form>

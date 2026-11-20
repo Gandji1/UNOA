@@ -118,3 +118,16 @@ structure, aucune filière et aucun programme ne sont fournis par le logiciel.
 
 Le catalogue public `/formations` et l'organigramme `/structures` n'affichent que
 les versions publiées et les unités actives déclarées publiques.
+
+## Cours en ligne et classes virtuelles
+
+Après la migration 0008, relancer `grant-web.psql`. Permissions sur la structure
+propriétaire du cours : `lms.read`, `lms.write` (rédaction), `lms.review`
+(attestations disciplinaire, pédagogique et de droits puis publication),
+`lms.manage` (offres par promotion et inscriptions). Les enseignants, tuteurs et
+apprenants agissent par leur appartenance à l'offre, depuis `/apprendre`.
+
+La visioconférence utilise un serveur compatible Jitsi avec authentification par
+jeton : renseigner `UNOA_LIVE_JITSI_DOMAIN`, `UNOA_LIVE_JITSI_APP_ID` et
+`UNOA_LIVE_JITSI_SECRET` (au moins 32 caractères). Sans ces valeurs, les séances
+se planifient mais aucun lien n'est délivré.

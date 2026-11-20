@@ -1,1 +1,1 @@
-{"name":"@unoa/domain","private":true,"type":"module","exports":{"./curriculum":"./src/curriculum.ts"}}
+{"name": "@unoa/domain", "private": true, "type": "module", "exports": {"./curriculum": "./src/curriculum.ts", "./learning": "./src/learning.ts", "./time": "./src/time.ts"}}
