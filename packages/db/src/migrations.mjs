@@ -4,21 +4,34 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const directory = fileURLToPath(new URL('../migrations/', import.meta.url));
-const migrationLock = 7843392887071801n;
+export const migrationLock = 7843392887071801n;
 
-export async function migrate(pool, migrationDirectory = directory) {
+export async function loadMigrations(migrationDirectory = directory) {
   const files = (await readdir(migrationDirectory))
     .filter(name => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
     .sort();
   if (!files.length || new Set(files.map(name => name.slice(0, 4))).size !== files.length) {
     throw new Error('Les numéros de migration doivent être uniques et le dossier ne peut pas être vide.');
   }
-  const migrations = await Promise.all(files.map(async name => {
+  return Promise.all(files.map(async name => {
     const sql = await readFile(join(migrationDirectory, name), 'utf8');
     const checksum = createHash('sha256').update(sql).digest('hex');
     return { name, sql, checksum };
   }));
+}
 
+export const migrationMetadataSql = `
+CREATE SCHEMA IF NOT EXISTS unoa_meta;
+REVOKE ALL ON SCHEMA unoa_meta FROM PUBLIC;
+CREATE TABLE IF NOT EXISTS unoa_meta.migration (
+  name text PRIMARY KEY,
+  checksum text NOT NULL,
+  applied_at timestamptz NOT NULL DEFAULT now()
+);
+`;
+
+export async function migrate(pool, migrationDirectory) {
+  const migrations = await loadMigrations(migrationDirectory);
   const client = await pool.connect();
   let connectionError;
   try {
@@ -26,15 +39,7 @@ export async function migrate(pool, migrationDirectory = directory) {
     await client.query("SET LOCAL lock_timeout = '30s'");
     await client.query("SET LOCAL search_path = pg_catalog, pg_temp");
     await client.query('SELECT pg_advisory_xact_lock($1)', [migrationLock]);
-    await client.query(`
-      CREATE SCHEMA IF NOT EXISTS unoa_meta;
-      REVOKE ALL ON SCHEMA unoa_meta FROM PUBLIC;
-      CREATE TABLE IF NOT EXISTS unoa_meta.migration (
-        name text PRIMARY KEY,
-        checksum text NOT NULL,
-        applied_at timestamptz NOT NULL DEFAULT now()
-      );
-    `);
+    await client.query(migrationMetadataSql);
     const { rows } = await client.query('SELECT name, checksum FROM unoa_meta.migration ORDER BY name');
     for (const [index, row] of rows.entries()) {
       const migration = migrations[index];

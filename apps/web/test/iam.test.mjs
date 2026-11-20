@@ -51,6 +51,13 @@ test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async c
   await migrate(database);
   const grants = await readFile(new URL('../../../infra/postgres/grant-web.psql', import.meta.url), 'utf8');
   await database.query(grants.replace(/^\\set[^\n]*\n/, '').replaceAll(':"web_role"', role));
+  const verifyGrants = await readFile(new URL('../../../infra/postgres/verify-web.psql', import.meta.url), 'utf8');
+  const roleChecks = await database.query(verifyGrants.replace(/^\\set[^\n]*\n/, '').replaceAll(":'web_role'", "'" + role + "'"));
+  const { base, postgres, migrations, ...privileges } = roleChecks.rows[0];
+  assert.equal(base, name);
+  assert.match(postgres, /^18\./);
+  assert.ok(Number(migrations) >= 4);
+  assert.ok(Object.values(privileges).every(allowed => allowed === true));
 
   const actor = randomUUID();
   const root = randomUUID();

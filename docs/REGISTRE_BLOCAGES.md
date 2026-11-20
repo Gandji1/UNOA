@@ -29,3 +29,9 @@ et les identifiants OIDC restent à fournir pour la recette intégrée.
 un fournisseur OIDC de test précède le raccordement de production. Restent à
 renseigner le fournisseur choisi, le client OIDC, le niveau MFA vérifié et les
 identifiants du rôle de service PostgreSQL.
+
+20 novembre 2026 — EXT-005. Le projet Neon UNOA et les branches de recette
+et de production existent. Les cinq migrations sont vérifiées. Le rôle web
+est créé sans connexion. Le secret applicatif et le fournisseur OIDC restent
+à renseigner dans l’environnement de production. L’exercice de restauration
+reste à exécuter.

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import pg from 'pg';
+import { generateConsoleSql } from '../src/console-sql.mjs';
 import { migrate } from '../src/migrations.mjs';
 
 const connectionString = process.env.UNOA_TEST_DATABASE_URL;
@@ -46,7 +47,10 @@ test('Socle PostgreSQL UNOA', async context => {
 
   await context.test('Migration sur base vierge puis peuplée et exécution concurrente', async () => {
     await copyMigration(initial);
-    assert.deepEqual(await migrate(database, directory), [initial]);
+    const sql = await generateConsoleSql(name, directory);
+    await database.query(sql);
+    await database.query(sql);
+    assert.deepEqual(await migrate(database, directory), []);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.scope')).total, 0);
     await database.query(`
       INSERT INTO unoa.scope_type(code, label)
@@ -139,6 +143,18 @@ test('Socle PostgreSQL UNOA', async context => {
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 5);
     await writeFile(join(directory, initial), 'SELECT 1');
     await assert.rejects(migrate(database, directory), /Historique incohérent/);
+
+    // Use an explicit client to roll back after a refused SQL editor transaction.
+    const editor = await database.connect();
+    try {
+      await assert.rejects(editor.query(await generateConsoleSql('autre_base')), /Base inattendue/);
+      await editor.query('ROLLBACK');
+      await assert.rejects(editor.query(await generateConsoleSql(name, directory)), /Historique des migrations incohérent/);
+      await editor.query('ROLLBACK');
+      await editor.query(await generateConsoleSql(name));
+    } finally {
+      editor.release();
+    }
   });
 
   await context.test('Parent inexistant, seconde racine et changement d’ascendance rejetés', async () => {

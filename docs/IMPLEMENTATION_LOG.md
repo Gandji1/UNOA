@@ -65,3 +65,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   refus est inscrit dans le journal d’audit.
 - Les découpages réels, juridictions, identités légales et contacts restent à fournir
   (EXT-001, EXT-002, EXT-012). REQ-TEN-008 dépend du dossier étudiant.
+
+## 20 novembre 2026 — Lot 006
+
+- Création du projet Neon UNOA à Francfort sur le plan gratuit et séparation de la recette et de la production.
+- Migrations 0001 à 0005 appliquées sur les deux branches. Les empreintes correspondent à master. Vérification de réexécution sur la recette.
+- Rôle web préparé et contrôlé sur les deux bases. Production vierge confirmée.
+- Les secrets de connexion et le fournisseur OIDC restent à configurer pour la recette du parcours avec Vercel.

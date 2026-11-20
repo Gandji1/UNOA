@@ -75,3 +75,26 @@ d’entrée se trouve dans « Mon espace ».
 La publication se fait depuis la prévisualisation. Les dates sont en UTC.
 Le choix d’un territoire n’accorde aucun droit. Les migrations n’ajoutent
 aucune définition ou valeur de démonstration.
+
+## Migrations hébergées sur Neon
+
+Le projet `unoa` possède les branches `recette` et `production`. Utiliser le
+compte propriétaire uniquement pour les migrations. Pour SQL Editor, produire
+le script depuis le checkout approuvé, puis vérifier la branche et la base
+sélectionnées avant l’exécution.
+
+```sh
+node packages/db/src/export-console.mjs unoa > unoa-schema.sql
+```
+
+Le script réutilise les fichiers versionnés, les empreintes SHA-256 et le même
+verrou transactionnel que `pnpm db:migrate`. Il refuse une base de nom différent
+ou un historique divergent. Exécuter d’abord en recette et comparer les
+empreintes attendues avec les lignes retournées.
+
+Les fichiers `infra/postgres/prepare-web.sql` et `grant-web.psql`
+préparent un rôle de service sans accès de connexion au départ. Le fichier
+`verify-web.psql`, exécuté par le propriétaire avec `-v web_role=unoa_web`,
+contrôle les droits accordés et interdits. En production, Vercel utilise
+uniquement le rôle de service dans `UNOA_IAM_DATABASE_URL`. La chaîne de
+connexion propriétaire reste réservée aux migrations.

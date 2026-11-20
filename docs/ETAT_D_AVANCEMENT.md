@@ -17,3 +17,11 @@
   des établissements. Voir [la fiche de lot](LOT_005.md) et
   [l’ADR](ADR/0004-registre-territorial.md). Le studio des territoires s’ouvre
   avec les habilitations et la connexion institutionnelles.
+
+## 20 novembre 2026
+
+- Lot 006. Base `unoa` sur Neon à Francfort, PostgreSQL 18.7. Migrations
+  0001 à 0005 et droits du rôle web vérifiés dans les branches `recette`
+  et `production`. Production vierge. La connexion du rôle et le fournisseur
+  d’identité sont à activer avant la validation applicative sur Neon.
+  [Contrôles et limites de la recette](LOT_006.md).
