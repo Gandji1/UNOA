@@ -45,6 +45,10 @@ plus tard » : un élément non livré reste explicitement `EN_COURS` ou `BLOQUE
 
 - Vercel : https://unoa-web.vercel.app — déployé depuis `master`, sondes `live` et `ready` en 200 ;
   connexion institutionnelle non configurée (variables `UNOA_IAM_*` absentes).
-- Neon : projet `raspy-pond-30211501` ; clé d'API enregistrée sur l'environnement, refusée par Neon
-  (« not authenticated ») au 20 novembre — à renouveler (EXT-005).
+- Neon : projet `raspy-pond-30211501` relié au dépôt par l'intégration GitHub de Neon ; le traitement
+  « Base Neon » (exécution 44743359866, 20 novembre 13:20 UTC) a appliqué les migrations 0001 à 0012 sur
+  la base `unoa`, créé le rôle `unoa_web` (sans connexion tant que son mot de passe n'est pas fixé) et
+  validé tous les contrôles de droits.
+- Reste pour mettre le site en service : mot de passe du rôle web et `UNOA_IAM_DATABASE_URL` dans Vercel,
+  fournisseur OIDC (EXT-001), amorçage du premier administrateur.
 - OIDC de production : non fourni (EXT-001).

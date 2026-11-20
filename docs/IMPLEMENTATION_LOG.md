@@ -129,3 +129,9 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   préférences et export dans `/espace`, événements ADM et LIVE via le moteur.
 - Vérifications : unitaires 23, PostgreSQL 7, HTTP 8 (dont notifications), build, traçabilité : PASS.
 - Environnements : Vercel en ligne (sondes 200) ; clé Neon refusée par l'API (« not authenticated »).
+
+## 20 novembre 2026 — Base Neon par GitHub Actions
+
+- Intégration GitHub de Neon activée par le propriétaire ; workflow `.github/workflows/neon.yml`.
+- Exécution 44743359866 : migrations 0001–0012 appliquées sur `unoa`, rôle `unoa_web` créé, droits
+  appliqués, `verify-web.psql` sans aucun contrôle en échec. SSL `verify-full`.
