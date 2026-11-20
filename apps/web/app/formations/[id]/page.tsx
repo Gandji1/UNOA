@@ -34,7 +34,7 @@ export default async function Formation({ params, searchParams }: Params) {
   const electives = sheet.periods.flatMap(period => period.units.filter(unit => unit.groupId));
   const codes = new Map(sheet.periods.flatMap(period => period.units.map(unit => [unit.id, unit.code] as const)));
   return (
-    <main id="contenu" className="sheet">
+    <main id="contenu" className="page sheet">
       <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/formations">Formations</a> › <span aria-current="page">{program.code}</span></nav>
       <section className="welcome compact">
         <div>

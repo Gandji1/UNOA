@@ -39,7 +39,7 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
     siteContexts(settings, account).catch(() => []),
   ]);
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <section className="account-panel">
         <h1>Mon espace</h1>
         {statut === 'indisponible'

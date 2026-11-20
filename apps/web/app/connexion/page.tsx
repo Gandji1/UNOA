@@ -10,7 +10,7 @@ export default async function Connexion({ searchParams }: { searchParams: Promis
   const { statut } = await searchParams;
   const settings = iamSettings();
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <section className="account-panel">
         <h1>Connexion</h1>
         {statut === 'deconnecte' && <p role="status">Vous êtes déconnecté.</p>}

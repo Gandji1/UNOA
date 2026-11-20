@@ -299,3 +299,20 @@ $$;
 REVOKE EXECUTE ON FUNCTION unoa.scope_within(uuid, uuid), unoa.site_scope(uuid), unoa.public_site(text, text),
     unoa.public_programs(uuid), unoa.public_program_sheet(uuid, uuid), unoa.public_org_units(uuid),
     unoa.public_org_positions(uuid) FROM PUBLIC;
+
+-- Navigation: the permission codes an account currently holds in any scope.
+-- It only shapes menus; every route still checks the permission in its scope.
+CREATE FUNCTION unoa.account_permissions(actor uuid) RETURNS text[]
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, unoa, pg_temp
+AS $$
+    SELECT coalesce(array_agg(DISTINCT allowed.permission_code ORDER BY allowed.permission_code), '{}')
+    FROM unoa.role_grant AS assignment
+    JOIN unoa.account ON account.id = assignment.account_id AND account.disabled_at IS NULL
+    JOIN unoa.role_permission AS allowed ON allowed.role_code = assignment.role_code
+    WHERE assignment.account_id = actor AND assignment.revoked_at IS NULL
+      AND assignment.effective_from <= statement_timestamp()
+      AND (assignment.effective_until IS NULL OR statement_timestamp() < assignment.effective_until);
+$$;
+
+REVOKE EXECUTE ON FUNCTION unoa.account_permissions(uuid) FROM PUBLIC;

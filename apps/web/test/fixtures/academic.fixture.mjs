@@ -331,6 +331,14 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   assert.doesNotMatch(await (await get(`/administration/catalogue?version=${v2}`, B)).text(), /Licence d’informatique \(2029\)/);
   assert.match(await (await get(`/administration/structures?scope=${faculty.scopeId}`, A)).text(), /Doyen/);
   assert.match(await (await get(`/administration/catalogue?version=${v1}&simuler=1&choice=${id('U3')}`, A)).text(), /Plan conforme à la maquette/);
+  // Menus follow permissions; the routes remain protected on the server.
+  assert.match(await (await get('/', A)).text(), /href="\/administration\/site"/);
+  const localMenu = await (await get('/', B)).text();
+  assert.doesNotMatch(localMenu, /href="\/administration\/site"/);
+  assert.match(localMenu, /href="\/administration\/catalogue"/);
+  assert.doesNotMatch(await (await get('/')).text(), /href="\/administration\//);
+  assert.equal((await get('/administration/site', B)).status, 200);
+  assert.match(await (await get('/administration/site', B)).text(), /Aucune portée ne vous est attribuée/);
   const espace = await (await get('/espace', A)).text();
   assert.match(espace, /Structures académiques/);
   assert.match(espace, /Catalogue des formations/);

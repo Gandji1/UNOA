@@ -3,7 +3,7 @@ import { iamSettings } from '@/lib/iam/settings';
 import { publicPrograms, type PublicProgram } from '@/lib/catalog/public';
 import { currentSite } from '@/lib/site/store';
 import { SiteMissing } from '../site-missing';
-import { regulatoryLabels } from '@/lib/catalog/public';
+import { ProgramCard } from '../program-card';
 
 export const metadata: Metadata = { title: 'Formations', description: 'Catalogue des formations publiées' };
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ export default async function Formations({ searchParams }: { searchParams: Promi
     (!filters.modalite || item.delivery_mode === filters.modalite));
   const all = programs ?? [];
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <section className="page-heading">
         <p className="eyebrow">Catalogue</p>
         <h1>Formations</h1>
@@ -55,19 +55,7 @@ export default async function Formations({ searchParams }: { searchParams: Promi
           </form>
           <p role="status" className="muted">{shown.length} formation(s)</p>
           <form method="get" action="/formations/comparer">
-            <ul className="program-grid">
-              {shown.map(item => (
-                <li key={item.program_id} className="program-card">
-                  <p className="eyebrow">{item.kind_label}{item.field_label ? ' · ' + item.field_label : ''}</p>
-                  <h2><a href={`/formations/${item.program_id}`}>{item.title}</a></h2>
-                  <p className="muted">{item.owner_label} · {item.institution_label}</p>
-                  <p>{item.duration} · {item.delivery_mode}{item.languages.length ? ' · ' + item.languages.join(', ') : ''}</p>
-                  <p><span className={'badge badge-' + (item.regulatory_status === 'authorized' ? 'ok' : 'muted')}>{regulatoryLabels[item.regulatory_status]}</span>
-                    {' '}<span className={'badge badge-' + (item.admission_open ? 'ok' : 'muted')}>{item.admission_open ? 'Candidatures ouvertes' : 'Candidatures fermées'}</span></p>
-                  <label className="compare"><input type="checkbox" name="id" value={item.program_id} /> Comparer</label>
-                </li>
-              ))}
-            </ul>
+            <ul className="program-grid">{shown.map(item => <ProgramCard key={item.program_id} item={item} compare />)}</ul>
             {shown.length > 1 && <button className="secondary" type="submit">Comparer la sélection</button>}
           </form>
         </>

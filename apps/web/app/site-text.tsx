@@ -8,7 +8,7 @@ export async function SiteTextPage({ field, title }: { field: keyof PublicSite; 
   if (!site) return <SiteMissing />;
   const value = site[field];
   return (
-    <main id="contenu" className="sheet">
+    <main id="contenu" className="page sheet">
       <section className="page-heading"><p className="eyebrow">{site.name}</p><h1>{title}</h1></section>
       {typeof value === 'string' ? <Markup source={value} /> : <p className="card-note">Ce texte n’est pas encore publié.</p>}
     </main>

@@ -1,7 +1,7 @@
 // Shown when no published, online site is declared for the requested host.
 export function SiteMissing() {
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <section className="account-panel">
         <h1>Site public non configuré</h1>
         <p>Aucun site public en ligne n’est déclaré pour cette adresse. L’administration habilitée le configure depuis

@@ -30,7 +30,7 @@ export default async function Comparer({ searchParams }: { searchParams: Promise
     ['Stages et mémoires', sheet => sheet.requirements.map(item => item.label).join(', ') || '—'],
   ];
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/formations">Formations</a> › Comparer</nav>
       <section className="page-heading"><h1>Comparer des formations</h1></section>
       {sheets.length < 2 ? <p className="card-note">Sélectionnez au moins deux formations publiées dans le catalogue.</p> : (

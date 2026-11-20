@@ -36,7 +36,7 @@ export default async function Structures() {
   const data = await publicOrganisation(settings, site.site_id).catch(() => null);
   const institutions: [string, string][] = data ? [...new Map<string, string>(data.units.map(unit => [unit.institution_id, unit.institution_label] as [string, string])).entries()] : [];
   return (
-    <main id="contenu">
+    <main id="contenu" className="page">
       <section className="page-heading"><p className="eyebrow">Université</p><h1>Structures</h1>
         <p>Facultés, écoles, instituts, départements et laboratoires publiés par l’université.</p></section>
       {!data ? <p className="card-note" role="status">L’organigramme est momentanément indisponible.</p>
