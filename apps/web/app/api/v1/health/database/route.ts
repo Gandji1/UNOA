@@ -22,7 +22,10 @@ export async function GET() {
     `);
     return Response.json({ database: 'connected', restricted: rows[0].restricted, schema: rows[0].schema,
       signIn: settings.oidc ? 'configured' : 'not_configured' }, { headers });
-  } catch {
-    return Response.json({ database: 'unavailable' }, { status: 503, headers });
+  } catch (error) {
+    // SQLSTATE or network error class only (e.g. 28P01, 42704, ECONNREFUSED): no address or credential.
+    const code = typeof error === 'object' && error && 'code' in error && /^[A-Z0-9_]{3,20}$/.test(String(error.code)) ? String(error.code) : 'unknown';
+    const tls = error instanceof Error && /certificate|self.signed|SSL|TLS/i.test(error.message) ? 'tls' : undefined;
+    return Response.json({ database: 'unavailable', code, tls, role: settings.databaseRole ? 'startup' : 'dedicated' }, { status: 503, headers });
   }
 }
