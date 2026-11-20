@@ -60,7 +60,14 @@ jobs:
           psql "$UNOA_MIGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'unoa_web') THEN CREATE ROLE unoa_web NOLOGIN; END IF; END \$\$;"
           psql "$UNOA_MIGRATION_DATABASE_URL" -q -v web_role=unoa_web -f infra/postgres/grant-web.psql
+          # The Neon-Vercel integration provides the owner URL: the site opens its
+          # sessions as unoa_web (startup parameter role), never with owner rights.
+          psql "$UNOA_MIGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 -c 'GRANT unoa_web TO CURRENT_USER WITH INHERIT FALSE, SET TRUE'
       - name: Contrôle des droits
         run: |
           psql "$UNOA_MIGRATION_DATABASE_URL" -x -v web_role=unoa_web -f infra/postgres/verify-web.psql | tee verify.txt
           if grep -Eq '\| f$' verify.txt; then echo "::error::Un contrôle de droits a échoué"; exit 1; fi
+          role=$(PGOPTIONS="-c role=unoa_web" psql "$UNOA_MIGRATION_DATABASE_URL" -Atc "SELECT current_user")
+          test "$role" = unoa_web || { echo "::error::Le site ne bascule pas sur unoa_web"; exit 1; }
+          PGOPTIONS="-c role=unoa_web" psql "$UNOA_MIGRATION_DATABASE_URL" -Atc "SELECT has_table_privilege('unoa.role_grant', 'INSERT')" | grep -qx f
+          echo "Session du site : $role, sans écriture directe des droits"

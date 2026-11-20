@@ -14,8 +14,12 @@ export function database(settings: IamSettings) {
       statement_timeout: 5000,
       idleTimeoutMillis: 5000,
       allowExitOnIdle: true,
+      // Owner URL from the hosting integration: the session starts as the
+      // restricted role (startup parameter; an unknown role refuses the connection).
+      ...(settings.databaseRole && /^[a-z_][a-z0-9_]{0,62}$/.test(settings.databaseRole) ? { options: '-c role=' + settings.databaseRole } : {}),
     });
     pool.on('error', () => console.error('unoa-iam-database-idle-error'));
+
   }
   return pool;
 }

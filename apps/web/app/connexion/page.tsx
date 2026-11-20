@@ -16,7 +16,7 @@ export default async function Connexion({ searchParams }: { searchParams: Promis
         {statut === 'deconnecte' && <p role="status">Vous êtes déconnecté.</p>}
         {statut === 'refuse' && <p role="status">Connexion refusée. Vérifiez votre compte institutionnel et réessayez.</p>}
         {statut === 'indisponible' && <p role="status">Service temporairement indisponible. Réessayez dans quelques instants.</p>}
-        {settings ? (
+        {settings?.oidc ? (
           <form action="/api/v1/auth/login" method="post">
             <button className="action" type="submit">Se connecter avec son compte institutionnel</button>
           </form>

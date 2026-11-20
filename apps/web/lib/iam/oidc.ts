@@ -1,19 +1,25 @@
 import 'server-only';
 import { EncryptJWT, jwtDecrypt } from 'jose';
 import * as oidc from 'openid-client';
-import { callbackPath, loginDurationSeconds, type IamSettings } from './settings';
+import { callbackPath, loginDurationSeconds, type IamSettings, type OidcSettings } from './settings';
+
+function configured(settings: IamSettings): OidcSettings {
+  if (!settings.oidc) throw new Error('OIDC not configured');
+  return settings.oidc;
+}
 
 let discovered: Promise<oidc.Configuration> | undefined;
 
 function provider(settings: IamSettings) {
+  const oidcSettings = configured(settings);
   if (!discovered) {
     const execute = [oidc.enableNonRepudiationChecks];
-    if (settings.issuer.protocol === 'http:') execute.push(oidc.allowInsecureRequests);
+    if (oidcSettings.issuer.protocol === 'http:') execute.push(oidc.allowInsecureRequests);
     discovered = oidc.discovery(
-      settings.issuer,
-      settings.clientId,
+      oidcSettings.issuer,
+      oidcSettings.clientId,
       { id_token_signed_response_alg: 'RS256' },
-      oidc.ClientSecretBasic(settings.clientSecret),
+      oidc.ClientSecretBasic(oidcSettings.clientSecret),
       { execute, timeout: 8 },
     ).catch(error => {
       discovered = undefined;
@@ -33,7 +39,7 @@ export async function startLogin(settings: IamSettings) {
     scope: 'openid',
     state,
     nonce,
-    acr_values: settings.assurance,
+    acr_values: configured(settings).assurance,
     code_challenge: await oidc.calculatePKCECodeChallenge(verifier),
     code_challenge_method: 'S256',
   });
@@ -41,12 +47,12 @@ export async function startLogin(settings: IamSettings) {
     .setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
     .setAudience('unoa-oidc-transaction')
     .setExpirationTime(Math.floor(Date.now() / 1000) + loginDurationSeconds)
-    .encrypt(settings.transactionKey);
+    .encrypt(configured(settings).transactionKey);
   return { target, cookie };
 }
 
 export async function verifiedSubject(settings: IamSettings, search: string, loginCookie: string) {
-  const { payload } = await jwtDecrypt(loginCookie, settings.transactionKey, {
+  const { payload } = await jwtDecrypt(loginCookie, configured(settings).transactionKey, {
     audience: 'unoa-oidc-transaction',
     keyManagementAlgorithms: ['dir'],
     contentEncryptionAlgorithms: ['A256GCM'],
@@ -64,7 +70,7 @@ export async function verifiedSubject(settings: IamSettings, search: string, log
     idTokenExpected: true,
   });
   const claims = tokens.claims();
-  if (!claims || claims.acr !== settings.assurance) return null;
+  if (!claims || claims.acr !== configured(settings).assurance) return null;
   const name = typeof claims.name === 'string' ? claims.name.slice(0, 200) : null;
   const email = typeof claims.email === 'string' && claims.email_verified === true ? claims.email.slice(0, 254) : null;
   return { issuer: claims.iss, subject: claims.sub, name, email };
