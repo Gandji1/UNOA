@@ -198,6 +198,9 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
   return transactional(settings, parentId, async store => {
     const parent = await getTerritory(store, actor, parentId);
     requireConfig(parent?.write, 403, 'Création de portée non autorisée');
+    // Academic units are proposed and approved through the organisation studio.
+    const nature = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
+    requireConfig(nature.rows[0]?.nature !== 'academic_unit', 422, 'Une unité académique se crée dans le studio des structures');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, time_zone, currency, locale,
                              legal_name, contact, present_from, present_until)

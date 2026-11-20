@@ -12,11 +12,12 @@ import { migrate } from '../../../packages/db/src/migrations.mjs';
 import { startIssuer } from './oidc-provider.fixture.mjs';
 import { exerciseConfiguration } from './configuration.fixture.mjs';
 import { exerciseTerritory } from './territory.fixture.mjs';
+import { exerciseAcademic } from './academic.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
 
-test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async context => {
+test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async context => {
   const suffix = randomUUID().replaceAll('-', '');
   const name = 'unoa_iam_' + suffix;
   const role = 'unoa_web_' + suffix;
@@ -55,7 +56,8 @@ test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async c
   const roleChecks = await database.query(verifyGrants.replace(/^\\set[^\n]*\n/, '').replaceAll(":'web_role'", "'" + role + "'"));
   const { base, postgres, migrations, ...privileges } = roleChecks.rows[0];
   assert.equal(base, name);
-  assert.match(postgres, /^18\./);
+  // CI pins PostgreSQL 18; a local run may declare another major explicitly.
+  assert.match(postgres, new RegExp('^' + (process.env.UNOA_TEST_POSTGRES_MAJOR ?? '18') + '\\.'));
   assert.ok(Number(migrations) >= 4);
   assert.ok(Object.values(privileges).every(allowed => allowed === true));
 
@@ -180,8 +182,13 @@ test('Connexion, droits et configuration via HTTP', { timeout: 90_000 }, async c
     await context.test('Territoires, hiérarchie et rattachements', () =>
       exerciseTerritory({ database, issuer, call, login, origin, root, alpha }),
     );
+    await context.test('Structures académiques et catalogue des formations', () =>
+      exerciseAcademic({ database, issuer, call, login, origin, root, alpha, beta }),
+    );
+    const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));
+    if (storageLog.length) context.diagnostic(storageLog.join('\n'));
   } catch (error) {
-    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage|territory-storage)/.test(line));
+    const diagnostic = serverLog.split('\n').filter(line => /unoa-(oidc-validation|config-storage|territory-storage|org-storage|catalog-storage|public-)/.test(line));
     context.diagnostic(diagnostic.join('\n'));
     throw error;
   }

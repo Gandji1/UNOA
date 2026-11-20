@@ -72,3 +72,14 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migrations 0001 à 0005 appliquées sur les deux branches. Les empreintes correspondent à master. Vérification de réexécution sur la recette.
 - Rôle web préparé et contrôlé sur les deux bases. Production vierge confirmée.
 - Les secrets de connexion et le fournisseur OIDC restent à configurer pour la recette du parcours avec Vercel.
+
+## 20 novembre 2026 — Lot 007
+
+- TDR relus : §1 à 5, 16 à 24, 26 (ORG, CAT, CMS) et annexes ; fiche `LOT_007.md`, ADR-0005.
+- Migrations 0006 (organisation) et 0007 (catalogue), droits du rôle web et contrôles `verify-web.psql`.
+- Studios `/administration/structures` et `/administration/catalogue`, API `/api/v1/org`, `/api/v1/catalog`,
+  pages publiques `/formations`, `/formations/{id}`, `/formations/comparer`, `/structures`.
+- Moteur pur de maquette `packages/domain` (cohérence, cycles, bornes de crédits, simulation).
+- Vérifications : unitaires 12 PASS, PostgreSQL 7 PASS, HTTP 3 PASS, build et sondes PASS, traçabilité PASS.
+- Écart : recette locale sur PostgreSQL 16.15 (binaire 18.6 non installable dans l'environnement), CI sur 18.6.
+- Gate Done : FAIL (E2E navigateur, accessibilité, i18n, tarifs et outbox ouverts) — exigences EN_COURS.

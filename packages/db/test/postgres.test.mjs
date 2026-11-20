@@ -15,6 +15,8 @@ const next = '0002_identity_audit.sql';
 const sessions = '0003_sessions.sql';
 const config = '0004_configuration.sql';
 const territories = '0005_territories.sql';
+const organisation = '0006_organisation.sql';
+const catalogue = '0007_catalogue.sql';
 
 test('Socle PostgreSQL UNOA', async context => {
   const name = 'unoa_test_' + randomUUID().replaceAll('-', '');
@@ -69,7 +71,7 @@ test('Socle PostgreSQL UNOA', async context => {
       [campus, alpha],
     );
     const results = await Promise.all([migrate(database), migrate(database)]);
-    assert.deepEqual(results.flat(), [next, sessions, config, territories]);
+    assert.deepEqual(results.flat(), [next, sessions, config, territories, organisation, catalogue]);
     assert.deepEqual(await migrate(database), []);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.scope')).total, 4);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.account')).total, 0);
@@ -136,11 +138,13 @@ test('Socle PostgreSQL UNOA', async context => {
     await copyMigration(sessions);
     await copyMigration(config);
     await copyMigration(territories);
-    const broken = join(directory, '0006_atomic.sql');
+    await copyMigration(organisation);
+    await copyMigration(catalogue);
+    const broken = join(directory, '0099_atomic.sql');
     await writeFile(broken, 'CREATE TABLE unoa.atomic_test (id int); SELECT 1 / 0;');
     await assert.rejects(migrate(database, directory), { code: '22012' });
     assert.equal((await one("SELECT to_regclass('unoa.atomic_test') AS relation")).relation, null);
-    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 5);
+    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 7);
     await writeFile(join(directory, initial), 'SELECT 1');
     await assert.rejects(migrate(database, directory), /Historique incohérent/);
 

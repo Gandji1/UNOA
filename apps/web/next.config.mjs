@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
 export default {
   poweredByHeader: false,
-  transpilePackages: ['@unoa/config'],
+  transpilePackages: ['@unoa/config', '@unoa/domain'],
 };

@@ -14,3 +14,7 @@
 | DEC-010 | Aucune IA décisionnelle autonome pour diplômes, notes finales, admission | Contrôle humain | OBLIGATOIRE | IA |
 
 **Mode d'ajout :** `DEC-011+ | date | problème | alternatives | choix | raisons | risques | impact | ADR associée | réversibilité`. Les décisions qui engagent juridiquement ou financièrement la personne morale demeurent `À_VALIDER_EXTERNE` sans empêcher les développements indépendants.
+
+| DEC-011 | 2026-11-20 · Composantes académiques = portées `academic_unit` ; transfert par unité successeur | Pas de hiérarchie parallèle, droits et configuration hérités | RETENU | ORG | ADR-0005 | Réversible par migration additive |
+| DEC-012 | 2026-11-20 · Ouverture des candidatures conditionnée à une pièce vérifiée par un second compte | Capacité ≠ habilitation | OBLIGATOIRE | CAT/ADM | ADR-0005 | — |
+| DEC-013 | 2026-11-20 · Nomination par identifiant de compte en attendant l'annuaire IAM | Pas de profil personne encore | RÉVERSIBLE | ORG | LOT_007 | Remplacer par sélection dans l'annuaire |

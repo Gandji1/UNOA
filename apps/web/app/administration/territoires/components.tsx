@@ -3,7 +3,7 @@ import { natures } from '@/lib/territory/validation';
 
 export const natureLabels: Record<string, string> = {
   platform: 'Plateforme', territory: 'Territoire', jurisdiction: 'Juridiction',
-  institution: 'Établissement', centre: 'Centre',
+  institution: 'Établissement', centre: 'Centre', academic_unit: 'Unité académique',
 };
 export const kindLabels: Record<string, string> = {
   implantation: 'Implantation territoriale', regulatory: 'Cadre réglementaire',

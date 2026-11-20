@@ -1,6 +1,6 @@
 import { boundedText, requireConfig, utcTime, type Input } from '@/lib/config/validation';
 
-export const natures = ['platform', 'territory', 'jurisdiction', 'institution', 'centre'] as const;
+export const natures = ['platform', 'territory', 'jurisdiction', 'institution', 'centre', 'academic_unit'] as const;
 export type Nature = typeof natures[number];
 export const attachmentKinds = ['implantation', 'regulatory'] as const;
 export type AttachmentKind = typeof attachmentKinds[number];

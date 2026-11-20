@@ -25,3 +25,11 @@
   et `production`. Production vierge. La connexion du rôle et le fournisseur
   d’identité sont à activer avant la validation applicative sur Neon.
   [Contrôles et limites de la recette](LOT_006.md).
+
+- Lot 007. Structures académiques et catalogue : composantes proposées puis
+  validées par une autre personne, postes et nominations datés, capacités,
+  fermeture, fusion et transfert avec filiation ; taxonomie libre, programmes,
+  versions, périodes, UE, cours mutualisés, options, prérequis sans cycle,
+  compétences, stages et mémoires, revue, publication immuable, équivalences,
+  simulation et contrôle réglementaire avant candidatures. Catalogue public et
+  organigramme public. [Fiche](LOT_007.md), [ADR-0005](ADR/0005-structures-et-catalogue.md).

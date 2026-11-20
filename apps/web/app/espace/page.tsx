@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { readableScopes } from '@/lib/config/store';
 import { readableTerritories } from '@/lib/territory/store';
+import { orgContexts } from '@/lib/org/store';
+import { catalogContexts } from '@/lib/catalog/store';
 import { sessionAccount } from '@/lib/iam/sessions';
 
 export const metadata: Metadata = { title: 'Mon espace · UNOA' };
@@ -22,9 +24,11 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
   if (!account) redirect('/connexion');
 
   const { statut } = await searchParams;
-  const [configuration, territories] = await Promise.all([
+  const [configuration, territories, structures, catalogue] = await Promise.all([
     readableScopes(settings, account).catch(() => []),
     readableTerritories(settings, account).catch(() => []),
+    orgContexts(settings, account).catch(() => []),
+    catalogContexts(settings, account).catch(() => []),
   ]);
   return (
     <main id="contenu">
@@ -35,6 +39,8 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
           : <p>Votre session institutionnelle est active.</p>}
         {configuration.length > 0 && <p><a href="/administration/parametres">Paramètres et versions</a></p>}
         {territories.length > 0 && <p><a href="/administration/territoires">Territoires et implantations</a></p>}
+        {structures.length > 0 && <p><a href="/administration/structures">Structures académiques</a></p>}
+        {catalogue.length > 0 && <p><a href="/administration/catalogue">Catalogue des formations</a></p>}
         <form action="/api/v1/auth/logout" method="post">
           <button className="action" type="submit">Se déconnecter</button>
         </form>

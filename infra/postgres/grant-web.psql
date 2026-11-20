@@ -27,4 +27,46 @@ GRANT SELECT, INSERT ON unoa.scope_label TO :"web_role";
 GRANT UPDATE (label, updated_at) ON unoa.scope_label TO :"web_role";
 GRANT SELECT, INSERT ON unoa.scope_attachment TO :"web_role";
 GRANT UPDATE (effective_until) ON unoa.scope_attachment TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.nearest_institution(uuid), unoa.academic_owner(uuid),
+      unoa.program_regulatory_status(uuid), unoa.program_admission_allowed(uuid),
+      unoa.public_org_units(), unoa.public_org_positions(),
+      unoa.public_programs(), unoa.public_program_sheet(uuid) TO :"web_role";
+GRANT SELECT ON unoa.org_unit, unoa.org_position, unoa.org_appointment, unoa.org_capacity,
+      unoa.org_change, unoa.org_succession TO :"web_role";
+GRANT INSERT (scope_id, code, mission, public, proposed_by, status, decided_by, decided_at),
+      UPDATE (status, public, mission, decided_by, decided_at, closed_at) ON unoa.org_unit TO :"web_role";
+GRANT INSERT (unit_id, title, is_head, seats, public, created_by) ON unoa.org_position TO :"web_role";
+GRANT INSERT (position_id, account_id, capacity, public_name, reason, effective_from, effective_until, appointed_by),
+      UPDATE (effective_until) ON unoa.org_appointment TO :"web_role";
+GRANT INSERT (unit_id, resource, quantity, measure, reason, effective_from, recorded_by) ON unoa.org_capacity TO :"web_role";
+GRANT INSERT (unit_id, kind, target_id, reason, effective_at, requested_by),
+      UPDATE (state, decided_by, decided_at, decision_note, successor_id) ON unoa.org_change TO :"web_role";
+GRANT INSERT ON unoa.org_succession TO :"web_role";
+GRANT SELECT ON unoa.field_type, unoa.field_type_parent, unoa.academic_field, unoa.program_kind,
+      unoa.program, unoa.program_label, unoa.program_version, unoa.program_authorization,
+      unoa.program_period, unoa.option_group, unoa.teaching_unit, unoa.unit_volume, unoa.course,
+      unoa.unit_course, unoa.unit_prerequisite, unoa.competency, unoa.version_competency,
+      unoa.unit_competency, unoa.version_requirement, unoa.version_territory, unoa.unit_equivalence TO :"web_role";
+GRANT INSERT (code, label, root_allowed) ON unoa.field_type TO :"web_role";
+GRANT INSERT ON unoa.field_type_parent TO :"web_role";
+GRANT INSERT (owner_scope_id, type_code, parent_id, code, label, description, created_by),
+      UPDATE (label, description, status) ON unoa.academic_field TO :"web_role";
+GRANT INSERT (code, label, degree_awarding, description) ON unoa.program_kind TO :"web_role";
+GRANT INSERT (owner_scope_id, field_id, kind_code, code, title, created_by), UPDATE (title) ON unoa.program TO :"web_role";
+GRANT INSERT, UPDATE (title, summary, updated_at) ON unoa.program_label TO :"web_role";
+GRANT INSERT (program_id, number, based_on, title, organisation, duration, delivery_mode, credit_unit,
+              expected_credits, languages, capacity, objectives, admission, author_id),
+      UPDATE (state, title, organisation, duration, delivery_mode, credit_unit, expected_credits, languages,
+              capacity, objectives, admission, submitted_at, reviewer_id, reviewed_at, review_note,
+              publisher_id, published_at, admission_open, admission_changed_by, admission_changed_at)
+ON unoa.program_version TO :"web_role";
+GRANT INSERT (program_id, territory_id, status, authority, evidence, valid_from, valid_until, recorded_by),
+      UPDATE (verified_by, verified_at) ON unoa.program_authorization TO :"web_role";
+GRANT INSERT (owner_scope_id, code, title, description, created_by), UPDATE (title, description) ON unoa.course TO :"web_role";
+GRANT INSERT (owner_scope_id, code, label, description, created_by) ON unoa.competency TO :"web_role";
+-- Draft curriculum content is edited, deleted and copied; triggers refuse any
+-- change once the version leaves the draft state.
+GRANT INSERT, UPDATE, DELETE ON unoa.program_period, unoa.option_group, unoa.teaching_unit, unoa.unit_volume,
+      unoa.unit_course, unoa.unit_prerequisite, unoa.version_competency, unoa.unit_competency,
+      unoa.version_requirement, unoa.version_territory, unoa.unit_equivalence TO :"web_role";
 COMMIT;

@@ -98,3 +98,23 @@ préparent un rôle de service sans accès de connexion au départ. Le fichier
 contrôle les droits accordés et interdits. En production, Vercel utilise
 uniquement le rôle de service dans `UNOA_IAM_DATABASE_URL`. La chaîne de
 connexion propriétaire reste réservée aux migrations.
+
+## Structures académiques et catalogue
+
+Après la migration 0007, relancer `grant-web.psql`. Déclarer d'abord, dans le
+studio des territoires, les types d'unités de nature « Unité académique »
+(faculté, école, département, laboratoire…) et leur imbrication. Aucune
+structure, aucune filière et aucun programme ne sont fournis par le logiciel.
+
+| Permission | Effet |
+|---|---|
+| `org.read` / `org.write` | Consulte / propose des composantes, postes, nominations, capacités et réorganisations |
+| `org.approve` | Valide une composante ou une réorganisation demandée par une autre personne |
+| `catalog.define` à la racine | Déclare les natures de programme et les types de taxonomie |
+| `catalog.read` / `catalog.write` | Consulte / rédige domaines, cours, compétences, programmes et brouillons de maquette |
+| `catalog.review` | Approuve ou renvoie une version soumise par une autre personne |
+| `catalog.publish` | Publie une version approuvée et ouvre ou ferme les candidatures |
+| `catalog.authorize` | Enregistre ou vérifie (second compte) une pièce réglementaire |
+
+Le catalogue public `/formations` et l'organigramme `/structures` n'affichent que
+les versions publiées et les unités actives déclarées publiques.
