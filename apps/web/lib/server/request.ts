@@ -37,6 +37,7 @@ export function storageError(error: unknown, label: string, unavailable: string)
   if (error instanceof Problem) return error;
   const code = typeof error === 'object' && error && 'code' in error ? error.code : undefined;
   if (code === 'U0403') return new Problem(403, 'Action non autorisée');
+  if (code === 'U0409') return new Problem(409, 'Déjà effectué');
   if (code === '23514' || code === '23503' || code === 'P0002') {
     return new Problem(422, 'Valeur ou transition incompatible avec la règle en vigueur');
   }

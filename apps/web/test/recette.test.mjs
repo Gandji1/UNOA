@@ -18,6 +18,7 @@ import { exerciseAdmissions } from './fixtures/admissions.fixture.mjs';
 import { exerciseAdministration } from './fixtures/administration.fixture.mjs';
 import { exerciseNotifications, startRelay } from './fixtures/notifications.fixture.mjs';
 import { exerciseBrowser } from './fixtures/browser.fixture.mjs';
+import { exerciseLocal } from './fixtures/local.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -99,6 +100,7 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
   const relay = await startRelay();
   context.after(() => relay.close());
   const jobsToken = randomBytes(32).toString('base64url');
+  const setupToken = randomBytes(32).toString('base64url');
   const live = { domain: 'visio.recette.invalid', appId: 'unoa-recette', secret: randomBytes(32).toString('hex') };
   dataUrl.username = role;
   dataUrl.password = password;
@@ -123,6 +125,7 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
       UNOA_SMS_HTTP_URL: relay.url,
       UNOA_SMS_HTTP_TOKEN: relay.token,
       UNOA_JOBS_TOKEN: jobsToken,
+      UNOA_SETUP_TOKEN_SHA256: createHash('sha256').update(setupToken).digest('hex'),
       UNOA_JOBS_DRAIN_AFTER_WRITE: 'off',
       UNOA_LIVE_JITSI_DOMAIN: live.domain,
       UNOA_LIVE_JITSI_APP_ID: live.appId,
@@ -219,6 +222,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Administration des accès : amorçage, rôles, invitations, délégations, comptes et audit', () =>
       exerciseAdministration({ database, issuer, call, login, origin, root, alpha }),
+    );
+    await context.test('Connexion locale : mot de passe, code, verrouillage, changement et installation', () =>
+      exerciseLocal({ database, call, origin, setupToken }),
     );
     await context.test('Navigateur : accessibilité WCAG 2.2 AA, clavier, mobile, zoom et réseau dégradé', () =>
       exerciseBrowser({ issuer, login, origin, evidence: process.env.UNOA_TEST_EVIDENCE ?? fileURLToPath(new URL('../../../docs/preuves/lot013', import.meta.url)) }),

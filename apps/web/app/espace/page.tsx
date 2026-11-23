@@ -12,13 +12,14 @@ import { lmsContexts } from '@/lib/lms/studio';
 import { sessionAccount } from '@/lib/iam/sessions';
 import { accountDetails } from '@/lib/iam/admin';
 import { contactSettings } from '@/lib/notifications/admin';
+import { credentialState } from '@/lib/iam/local';
 import { navigation } from '@/lib/iam/navigation';
 import { ActionForm, Badge, formatTime, Notice } from '../administration/forms';
 
 export const metadata: Metadata = { title: 'Mon espace' };
 export const dynamic = 'force-dynamic';
 
-export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string; error?: string; message?: string }> }) {
+export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string; error?: string; message?: string; changer?: string }> }) {
   const settings = iamSettings();
   if (!settings) redirect('/connexion');
   const token = (await cookies()).get(cookieName(settings, 'session'))?.value;
@@ -30,8 +31,9 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
   }
   if (!account) redirect('/connexion');
 
-  const { statut, error, message } = await searchParams;
+  const { statut, error, message, changer } = await searchParams;
   const [me, menu, contact] = await Promise.all([accountDetails(settings, account, account), navigation(), contactSettings(settings, account)]);
+  const credential = await credentialState(settings, account);
   const administration = menu.groups.some(group => group.label === 'Administration');
   const own = me.grants.filter(item => !item.revoked_at && !item.delegated_from && (!item.effective_until || new Date(item.effective_until) > new Date()));
   const [configuration, territories, structures, catalogue] = await Promise.all([
@@ -109,6 +111,18 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
         )}
         <p><a href="/api/v1/notifications/contact/export">Exporter mes consentements et préférences (JSON)</a></p>
       </section>
+      {credential && (
+        <section className="account-panel" aria-labelledby="mot-de-passe-titre" id="mot-de-passe">
+          <h2 id="mot-de-passe-titre">Identifiant et mot de passe</h2>
+          {(credential.must_change || changer) && <p className="studio-notice" role="alert">Choisissez un mot de passe personnel : celui qui vous a été remis est provisoire.</p>}
+          <p>Identifiant : <code>{credential.login}</code>{credential.totp ? ' · code de vérification exigé à chaque connexion' : ''}</p>
+          <ActionForm action="/api/v1/auth/password" back="/espace" submit="Changer le mot de passe">
+            <label>Mot de passe actuel<input name="current" type="password" required autoComplete="current-password" /></label>
+            <label>Nouveau mot de passe (12 caractères au moins, majuscules, minuscules et chiffres)
+              <input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
+          </ActionForm>
+        </section>
+      )}
       <section className="account-panel" aria-labelledby="sessions">
         <h2 id="sessions">Sessions</h2>
         <p>Identifiant de compte : <code>{account}</code></p>

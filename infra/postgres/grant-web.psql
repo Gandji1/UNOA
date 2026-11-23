@@ -148,4 +148,8 @@ GRANT INSERT (kind, payload, scope_id, idempotency_key, correlation_id),
       UPDATE (state, attempts, run_after, locked_until, last_error, finished_at, replayed_by, replayed_at) ON unoa.job TO :"web_role";
 GRANT INSERT (job_id, notification_id, channel, adapter, recipient_masked, status, provider_ref, error) ON unoa.delivery_attempt TO :"web_role";
 GRANT INSERT (job_id, channel, recipient, subject, body) ON unoa.sandbox_message TO :"web_role";
+-- 0013: local sign-in and one-time installation.
+GRANT SELECT ON unoa.local_credential, unoa.installation TO :"web_role";
+GRANT UPDATE (password_hash, totp_secret, failed_attempts, locked_until, must_change, changed_at) ON unoa.local_credential TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.install_platform(text, text, text, text, text, text) TO :"web_role";
 COMMIT;
