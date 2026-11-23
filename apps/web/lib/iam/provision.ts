@@ -8,7 +8,7 @@ import { provisionDatabase } from '@unoa/db/provision';
 // current schema and rights (advisory lock, idempotent). Until it succeeds no
 // connection is handed out; a failure is retried after one minute.
 
-export interface ProvisionState { status: 'pending' | 'ok' | 'failed'; at: string; applied?: number; checks?: number; code?: string }
+export interface ProvisionState { status: 'pending' | 'ok' | 'failed'; at: string; applied?: number; checks?: number; code?: string; failedChecks?: string[] }
 
 let running: Promise<void> | null = null;
 let failedAt = 0;
@@ -29,7 +29,9 @@ export function ensureProvisioned(connectionString: string, role: string) {
     }, error => {
       failedAt = Date.now();
       const code = typeof error?.code === 'string' && /^[A-Z0-9_]{3,20}$/.test(error.code) ? error.code : 'unknown';
-      provisionState = { status: 'failed', at: new Date().toISOString(), code };
+      const message = String(error?.message ?? '');
+      const failedChecks = message.startsWith('Contrôles de droits en échec : ') ? message.slice(31).split(', ').filter(name => /^[a-z_]+$/.test(name)) : undefined;
+      provisionState = { status: 'failed', at: new Date().toISOString(), code, failedChecks };
       console.error('unoa-provision', code, String(error?.message ?? '').replace(/postgres(ql)?:\/\/\S+/g, '[adresse]').slice(0, 200));
     }).finally(() => { running = null; });
   }
