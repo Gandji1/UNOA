@@ -60,7 +60,7 @@ function usePreference(name: 'dark' | 'eco') {
   return [on, setOn] as const;
 }
 
-export function Shell({ groups, brand, title, children }: { groups: NavGroup[]; brand: string | null; title: string; children: ReactNode }) {
+export function Shell({ groups, brand, title, children, signedIn = false }: { groups: NavGroup[]; brand: string | null; title: string; children: ReactNode; signedIn?: boolean }) {
   const path = usePathname() ?? '/';
   const [open, setOpen] = useState(false);
   const [dark, setDark] = usePreference('dark');
@@ -105,6 +105,9 @@ export function Shell({ groups, brand, title, children }: { groups: NavGroup[]; 
             <div className="head-tools">
               <button type="button" className={'tool' + (eco ? ' on' : '')} onClick={() => setEco(!eco)} aria-pressed={eco}
                 title="Mode faible débit : sans illustrations ni animations"><Icon name="wifi" /><span>{eco ? 'Éco' : 'Débit normal'}</span></button>
+              {signedIn
+                ? <form action="/api/v1/auth/logout" method="post"><button type="submit" className="tool account-button"><Icon name="user" /><span>Se déconnecter</span></button></form>
+                : <a href="/connexion" className="tool account-button"><Icon name="user" /><span>Se connecter</span></a>}
               <button type="button" className={'tool' + (dark ? ' on' : '')} onClick={() => setDark(!dark)} aria-pressed={dark} title="Mode sombre"><Icon name="moon" /><span className="sr">Mode sombre</span></button>
             </div>
           </div>

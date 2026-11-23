@@ -273,3 +273,6 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
 .sidebar-group[open] > summary::after { transform: rotate(90deg); }
 .handoff { border-left: 4px solid var(--orange, #f97316); }
 .handoff li { margin: .35rem 0; }
+.account-button { text-decoration: none; font-weight: 600; }
+.head-tools form { display: inline-flex; margin: 0; }
+@media (max-width: 40rem) { .tool.account-button span { display: inline; } }
