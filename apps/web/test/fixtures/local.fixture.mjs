@@ -66,7 +66,7 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.match(where(await accept({ login: 'admin.alpha2', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' })), /erreur=410$/, 'invitation à usage unique');
   const alphaCookie = session(await signIn('admin.alpha', 'Alpha-Secret-2026'));
   const alphaConsole = await (await call('/administration', { headers: { Cookie: alphaCookie } })).text();
-  assert.match(alphaConsole, /Administrateur d’établissement \(Université Alpha\)/);
+  assert.match(alphaConsole, /Administrateur d’établissement \(campus\) \(Université Alpha\)/);
   assert.match(alphaConsole, /href="\/administration\/structures"/);
   assert.doesNotMatch(alphaConsole, /Mise en route de la plateforme/, 'réservé à la plateforme');
   assert.match(await (await call('/administration/guide', { headers: { Cookie: alphaCookie } })).text(), /Qui crée quoi/);
@@ -75,6 +75,13 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
     'rôle de plateforme hors racine');
   assert.equal((await iam('grants', { accountId: alphaAdmin.account_id, scopeId: root.id, role: 'auditor', reason: 'Contrôle', includeDescendants: true })).status, 200);
   assert.match(await (await call('/administration', { headers: { Cookie: cookie } })).text(), /Mise en route de la plateforme/);
+  // Hierarchy: a country administrator on a territory, never on an establishment.
+  const { rows: [country] } = await database.query("SELECT id FROM unoa.scope WHERE label = 'Alpha' AND parent_id IS NOT NULL");
+  const countryInvite = data => iam('invitations', { displayName: 'Admin pays', role: 'country_admin', reason: 'Nomination', validDays: 7, includeDescendants: true, ...data });
+  assert.equal((await countryInvite({ scopeId: alpha.id })).status, 422, 'administrateur pays sur un établissement refusé');
+  assert.equal((await countryInvite({ scopeId: country.id })).status, 200);
+  assert.equal((await iam('invitations', { scopeId: country.id, displayName: 'Doyen', role: 'dean', reason: 'x', validDays: 7 })).status, 422,
+    'doyen sur un pays refusé');
 
   // Installation: secret token, then refused once an administrator exists.
   const install = (token, body) => call('/api/v1/installation', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { 'X-Setup-Token': token } : {}) }, body: JSON.stringify(body) });

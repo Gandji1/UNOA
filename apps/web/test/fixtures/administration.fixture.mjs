@@ -44,10 +44,10 @@ export async function exerciseAdministration({ database, issuer, login, call, or
   // 2. Roles are composed without code; the bootstrap role stays intact.
   await status(await post(iam + 'roles', 'iam-admin', { code: 'iam_x', label: 'X', permissions: ['inconnue.read'] }), 422, 'permission inconnue');
   await status(await post(iam + 'roles', 'iam-admin', { code: 'platform_admin', label: 'X', permissions: ['org.read'] }), 409, 'rôle réservé');
-  await okay(await post(iam + 'roles', 'iam-admin', { code: 'iam_scolarite', label: 'Scolarité', permissions: ['org.read', 'catalog.read'] }));
-  await okay(await post(iam + 'roles', 'iam-admin', { code: 'iam_lecteur', label: 'Lecteur des structures', permissions: ['org.read'] }));
+  await okay(await post(iam + 'roles', 'iam-admin', { code: 'iam_scolarite', label: 'Scolarité', level: 'territory', permissions: ['org.read', 'catalog.read'] }));
+  await okay(await post(iam + 'roles', 'iam-admin', { code: 'iam_lecteur', label: 'Lecteur des structures', level: 'territory', permissions: ['org.read'] }));
   await okay(await post(iam + 'roles', 'iam-admin', {
-    code: 'iam_local', label: 'Administrateur local', description: 'Gère les accès de son établissement.',
+    code: 'iam_local', label: 'Administrateur local', level: 'territory', description: 'Gère les accès de son établissement.',
     permissions: ['iam.read', 'iam.assign', 'iam.manage', 'iam.delegate', 'org.read'],
   }));
   await assert.rejects(database.query("DELETE FROM unoa.role_permission WHERE role_code = 'platform_admin'"), /keeps every permission/);

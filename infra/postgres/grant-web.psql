@@ -167,4 +167,6 @@ GRANT INSERT (student_id, kind, detail, actor_id) ON unoa.student_event TO :"web
 GRANT EXECUTE ON FUNCTION unoa.next_matricule(uuid) TO :"web_role";
 -- 0015: invitation accepted with a local identifier.
 GRANT EXECUTE ON FUNCTION unoa.accept_invitation_local(bytea, text, text) TO :"web_role";
+-- 0016: role levels.
+GRANT EXECUTE ON FUNCTION unoa.set_role_level(uuid, text, text, uuid) TO :"web_role";
 COMMIT;

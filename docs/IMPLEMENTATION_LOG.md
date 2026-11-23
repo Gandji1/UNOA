@@ -171,3 +171,9 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 
 - Rôles types par niveau, console structurée, mise en route, guide, invitation par identifiant local.
 - Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
+
+## 23 novembre 2026 — Lot 016 (hiérarchie d'administration)
+
+- Migration 0016 : niveaux pays et composante, administrateur pays, doyen, chef de département, règle de niveau
+  à l'attribution et à l'invitation ; console, mise en route et guide alignés (ADR-0011).
+- Vérifications : PostgreSQL 7, HTTP 11, build : PASS.

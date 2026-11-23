@@ -14,6 +14,7 @@ type Search = Record<string, string | string[] | undefined>;
 const field = (value: Search[string]) => typeof value === 'string' ? value : '';
 const path = '/administration/acces';
 const api = '/api/v1/iam/';
+const levelLabels: Record<string, string> = { platform: 'Plateforme', territory: 'Pays', institution: 'Établissement', unit: 'Faculté / département' };
 const origins: Record<string, string> = { bootstrap: 'Amorçage', invitation: 'Invitation', registration: 'Inscription libre', provisioned: 'Provisionné' };
 const invitationState = (item: { accepted_at: Date | null; revoked_at: Date | null; expires_at: Date }) =>
   item.accepted_at ? <Badge tone="ok">Acceptée</Badge> : item.revoked_at ? <Badge tone="muted">Retirée</Badge>
@@ -64,7 +65,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
             {data.roles.map(item => (
               <tr key={item.code}><td>{item.label ?? item.code}{item.description && <p className="muted">{item.description}</p>}</td><td><code>{item.code}</code></td>
                 <td>{item.system ? 'Toutes' : item.permissions.join(', ')}</td>
-                <td>{item.level === 'platform' ? <Badge tone="info">Plateforme</Badge> : <Badge tone="muted">Établissement</Badge>}{' '}
+                <td><Badge tone="info">{levelLabels[item.level] ?? item.level}</Badge>{' '}
                   {item.system ? <Badge tone="info">Amorçage</Badge> : item.archived_at ? <Badge tone="muted">Archivé</Badge> : <Badge tone="ok">Actif</Badge>}</td>
                 <td>{data.manage && !item.system && !item.archived_at && <>
                   <a href={`${path}?vue=roles&role=${item.code}#composer`}>Modifier</a>{' '}
@@ -79,6 +80,9 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
             <ActionForm action={api + 'roles'} back={`${path}?vue=roles`} submit={editing ? 'Enregistrer' : 'Créer le rôle'}>
               <label>Code technique<input name="code" required pattern="[a-z][a-z0-9_]{0,62}" defaultValue={editing?.code} readOnly={!!editing} /></label>
               <label>Libellé<input name="label" required maxLength={120} defaultValue={editing?.label ?? ''} /></label>
+              <label>Niveau<select name="level" defaultValue={editing?.level ?? 'institution'}>
+                <option value="platform">Plateforme</option><option value="territory">Pays ou territoire</option>
+                <option value="institution">Établissement ou campus</option><option value="unit">Faculté ou département</option></select></label>
               <label className="studio-wide">Description<textarea name="description" maxLength={1000} defaultValue={editing?.description ?? ''} /></label>
               {permissionsPicker(editing?.permissions ?? [])}
             </ActionForm>

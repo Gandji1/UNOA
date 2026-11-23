@@ -2,7 +2,7 @@ import 'server-only';
 import { createHash, randomBytes } from 'node:crypto';
 import type { IamSettings } from './settings';
 import { database } from './sessions';
-import { boundedText, ensure, flag, optional, Problem, text, technicalCode, utcTime, uuid, type Input } from '@/lib/shared/validation';
+import { boundedText, choice, ensure, flag, optional, Problem, text, technicalCode, utcTime, uuid, type Input } from '@/lib/shared/validation';
 
 // Administration of accounts and access (IAM). Every write goes through a
 // database function that checks the actor's rights again (no self-grant,
@@ -52,7 +52,9 @@ export async function accessOverview(settings: IamSettings, actor: string, scope
     `, [scopeId]) : { rows: [] },
     store.query<{ code: string; label: string | null; system: boolean; assignable: boolean; level: string; description: string | null }>(`
       SELECT code, label, system, level, description,
-        unoa.can_grant($1, code, $2) AND (level <> 'platform' OR $2 = (SELECT id FROM unoa.scope WHERE parent_id IS NULL)) AS assignable
+        unoa.can_grant($1, code, $2) AND coalesce((SELECT CASE level WHEN 'platform' THEN $2 = (SELECT id FROM unoa.scope WHERE parent_id IS NULL)
+          WHEN 'territory' THEN kind.nature IN ('territory', 'jurisdiction') WHEN 'institution' THEN kind.nature IN ('institution', 'centre', 'academic_unit')
+          ELSE kind.nature = 'academic_unit' END FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE scope.id = $2), false) AS assignable
       FROM unoa.access_role WHERE archived_at IS NULL ORDER BY ordinal, coalesce(label, code)
     `, [actor, scopeId]),
     store.query<{ id: string }>('SELECT id FROM unoa.scope WHERE parent_id IS NULL'),
@@ -138,6 +140,8 @@ export async function accessAction(settings: IamSettings, actor: string, action:
       ensure(code !== 'platform_admin', 409, 'Rôle réservé');
       await call('SELECT unoa.compose_role($1, $2, $3, $4, $5, $6)', [actor, code, boundedText(input.label, 120, 'Libellé'),
         optional(input.description, text(1000, 'Description')), permissionList(input.permissions), correlation]);
+      await call('SELECT unoa.set_role_level($1, $2, $3, $4)', [actor, code,
+        choice(input.level ?? 'institution', ['platform', 'territory', 'institution', 'unit'] as const, 'Niveau'), correlation]);
       return { role: code };
     }
     case 'archive-role':

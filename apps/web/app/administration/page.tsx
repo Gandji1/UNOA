@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { navigation, studioDescriptions } from '@/lib/iam/navigation';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { database, sessionAccount } from '@/lib/iam/sessions';
-import { roleGuide, setupProgress, setupSteps } from '@/lib/iam/guide';
+import { levelLabels, roleGuide, setupProgress, setupSteps } from '@/lib/iam/guide';
 import { Badge } from './forms';
 
 export const metadata: Metadata = { title: 'Administration' };
@@ -13,10 +13,11 @@ export const dynamic = 'force-dynamic';
 // Studios grouped by level: what the platform configures, what each
 // institution configures, and teaching. Each studio checks its own rights.
 const levels: [string, string, string[]][] = [
-  ['Plateforme', 'Super-administrateur et gestionnaires de la plateforme', ['/administration/acces', '/administration/territoires', '/administration/parametres']],
-  ['Établissement', 'Administrateur d’établissement et responsables nommés par lui', ['/administration/site', '/administration/structures', '/administration/catalogue',
-    '/administration/admissions', '/administration/scolarite', '/administration/notifications']],
-  ['Pédagogie', 'Enseignants, responsables de formation et validateurs', ['/administration/cours']],
+  ['Plateforme et pays', 'Super-administrateur (pays) et administrateurs pays (établissements et campus)', ['/administration/acces', '/administration/territoires', '/administration/parametres']],
+  ['Établissement', 'Administrateur d’établissement (campus) : site, facultés et départements, admissions, scolarité, messages',
+    ['/administration/site', '/administration/structures', '/administration/admissions', '/administration/scolarite', '/administration/notifications']],
+  ['Faculté, département et pédagogie', 'Doyens, chefs de département, responsables de formation et enseignants : filières, formations, matières, cours et séances en direct',
+    ['/administration/catalogue', '/administration/cours']],
 ];
 
 export default async function Administration() {
@@ -26,9 +27,10 @@ export default async function Administration() {
   if (!actor) redirect('/connexion');
   const { groups } = await navigation();
   const studios = new Map((groups.find(group => group.label === 'Administration')?.items ?? []).map(item => [item.href, item]));
-  const { rows: [root] } = await database(settings).query<{ platform: boolean }>(
-    `SELECT unoa.has_scope_permission($1, 'iam.read', id) AS platform FROM unoa.scope WHERE parent_id IS NULL`, [actor]);
-  const [progress, roles] = await Promise.all([root?.platform ? setupProgress(settings) : Promise.resolve(null), roleGuide(settings)]);
+  const { rows: [root] } = await database(settings).query<{ platform: boolean; country: boolean }>(
+    `SELECT unoa.has_scope_permission($1, 'iam.read', id) AS platform, 'territory.write' = ANY(unoa.account_permissions($1)) AS country
+     FROM unoa.scope WHERE parent_id IS NULL`, [actor]);
+  const [progress, roles] = await Promise.all([root?.platform || root?.country ? setupProgress(settings) : Promise.resolve(null), roleGuide(settings)]);
   const roleLabel = new Map(roles.map(role => [role.code, role.label ?? role.code]));
   const { rows: mine } = await database(settings).query<{ role_label: string | null; role_code: string; scope_label: string }>(
     'SELECT role_label, role_code, scope_label FROM unoa.iam_account($1, $1) WHERE revoked_at IS NULL AND (effective_until IS NULL OR effective_until > now())', [actor]);
@@ -43,6 +45,7 @@ export default async function Administration() {
       {progress && (
         <section className="studio-panel" aria-labelledby="mise-en-route">
           <h2 id="mise-en-route">Mise en route de la plateforme</h2>
+          <p><strong>Hiérarchie :</strong> Super-administrateur → Administrateur pays → Administrateur d’établissement (campus) → Doyen → Chef de département → Enseignants.</p>
           <p className="studio-help">Ordre conseillé : chaque étape s’appuie sur la précédente. Les étapes « Établissement » sont réalisées par les personnes nommées pour chaque établissement.</p>
           <ol className="setup-steps">
             {setupSteps.map(step => {
@@ -50,7 +53,7 @@ export default async function Administration() {
               return (
                 <li key={step.key}>
                   <div>
-                    <strong><a href={step.href}>{step.title}</a></strong> {step.level === 'platform' ? <Badge tone="info">Plateforme</Badge> : <Badge tone="muted">Établissement</Badge>}
+                    <strong><a href={step.href}>{step.title}</a></strong> <Badge tone={step.level === 'platform' ? 'info' : 'muted'}>{levelLabels[step.level]}</Badge>
                     {count !== undefined && (count > 0 ? <Badge tone="ok">{count} réalisé(s)</Badge> : <Badge tone="warn">À faire</Badge>)}
                     <p className="muted">{step.detail}</p>
                     <p className="muted">Par : {step.roles.map(code => roleLabel.get(code) ?? code).join(', ')}</p>
