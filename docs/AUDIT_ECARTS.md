@@ -49,6 +49,7 @@ plus tard » : un élément non livré reste explicitement `EN_COURS` ou `BLOQUE
   « Base Neon » (exécution 44743359866, 20 novembre 13:20 UTC) a appliqué les migrations 0001 à 0012 sur
   la base `unoa`, créé le rôle `unoa_web` (sans connexion tant que son mot de passe n'est pas fixé) et
   validé tous les contrôles de droits.
-- Reste pour mettre le site en service : mot de passe du rôle web et `UNOA_IAM_DATABASE_URL` dans Vercel,
-  fournisseur OIDC (EXT-001), amorçage du premier administrateur.
+- Vercel ↔ Neon : connecté en production depuis le 23 novembre (base `neondb` liée par l'intégration,
+  schéma et droits appliqués au premier accès, session en rôle restreint).
+- Reste pour l'ouverture aux utilisateurs : fournisseur OIDC (EXT-001), amorçage du premier administrateur.
 - OIDC de production : non fourni (EXT-001).

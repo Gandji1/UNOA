@@ -135,3 +135,13 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Intégration GitHub de Neon activée par le propriétaire ; workflow `.github/workflows/neon.yml`.
 - Exécution 44743359866 : migrations 0001–0012 appliquées sur `unoa`, rôle `unoa_web` créé, droits
   appliqués, `verify-web.psql` sans aucun contrôle en échec. SSL `verify-full`.
+
+## 23 novembre 2026 — Liaison Vercel ↔ Neon en production
+
+- Intégration Neon ↔ Vercel activée par le propriétaire ; elle lie la base `neondb` et n'expose son adresse
+  qu'à l'exécution. Le site applique migrations, rôle `unoa_web`, droits et 40 contrôles au premier accès
+  (ADR-0009, `packages/db/src/provision.mjs`), puis ouvre chaque session en `SET ROLE unoa_web` vérifié.
+- Preuve : `https://unoa-web.vercel.app/api/v1/health/database` →
+  `{"database":"connected","restricted":true,"schema":true,"provision":{"status":"ok","checks":40}}`.
+- Non-régression : unitaires 23, PostgreSQL 7, HTTP 8, build : PASS.
+- Reste : fournisseur OIDC (EXT-001) puis amorçage du premier administrateur ; contenu créé par l'administration.
