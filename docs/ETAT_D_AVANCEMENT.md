@@ -61,3 +61,7 @@
 
 - Lot 013. Recette navigateur et accessibilité : tous les écrans, trois formats, WCAG 2.2 AA sans violation,
   clavier, mobile, zoom 200 %, réseau dégradé. [Fiche](lots/LOT_013.md), [preuves](preuves/lot013/).
+
+- Lot 014. Scolarité : matricule configurable, cohortes et groupes, inscription depuis l'admission acceptée,
+  validation par un tiers, inscription pédagogique, statuts, historique, tableau de bord étudiant, export.
+  [Fiche](lots/LOT_014.md).

@@ -19,6 +19,7 @@ import { exerciseAdministration } from './fixtures/administration.fixture.mjs';
 import { exerciseNotifications, startRelay } from './fixtures/notifications.fixture.mjs';
 import { exerciseBrowser } from './fixtures/browser.fixture.mjs';
 import { exerciseLocal } from './fixtures/local.fixture.mjs';
+import { exerciseStudents } from './fixtures/students.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -216,6 +217,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Admissions : campagnes, dossiers, instruction, décisions et recours', () =>
       exerciseAdmissions({ database, issuer, call, login, origin }),
+    );
+    await context.test('Scolarité : matricule, cohortes, inscriptions, statuts et dossier', () =>
+      exerciseStudents({ database, issuer, call, login, origin }),
     );
     await context.test('Notifications : modèles, consentements, file durable, relais, rejeu et confidentialité', () =>
       exerciseNotifications({ database, issuer, call, login, origin, relay, jobsToken }),

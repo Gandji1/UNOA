@@ -61,6 +61,7 @@ prototype/                    Maquette visuelle de référence (non exécutée)
 | NOT | `notifications/` (store, admin) ; `packages/jobs` ; `apps/worker` | 0008, 0012 | `/lms/notifications`, `/notifications/*`, `/jobs/run` | `/administration/notifications`, `/apprendre`, `/espace` |
 | CMS | `site/` | 0009 | `/site/*` | `/administration/site`, `/`, `/mentions-legales`, `/confidentialite`, `/a-propos` |
 | IAM | `iam/` (settings, oidc, sessions, navigation, admin) | 0002, 0003, 0011 | `/auth/*`, `/me`, `/iam/*` | `/administration`, `/administration/acces`, `/invitation/{jeton}`, `/espace` |
+| SIS | `students/` | 0014 | `/sis/*` | `/administration/scolarite`, `/etudiant` |
 | ADM | `admissions/` | 0010 | `/admissions/*`, `/admissions-documents/{id}` | `/administration/admissions`, `/candidature`, `/formations/{id}` |
 
 ## 4. Couches et dépendances

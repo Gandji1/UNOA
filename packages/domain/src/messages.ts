@@ -31,6 +31,12 @@ export const events: EventDefinition[] = [
     en: { subject: 'Recording announced: {{title}}', body: 'Please record your consent before the session.' } } },
   { code: 'live.replay', module: 'LIVE', variables: ['title'], sensitive: false, defaults: {
     fr: { subject: 'Replay disponible : {{title}}', body: '' }, en: { subject: 'Replay available: {{title}}', body: '' } } },
+  { code: 'sis.registration_validated', module: 'SIS', variables: ['program', 'matricule', 'year'], sensitive: false, defaults: {
+    fr: { subject: 'Inscription validée · {{year}}', body: '{{program}} — matricule {{matricule}}.' },
+    en: { subject: 'Registration confirmed · {{year}}', body: '{{program}} — student number {{matricule}}.' } } },
+  { code: 'sis.status_changed', module: 'SIS', variables: ['status', 'reason'], sensitive: true, defaults: {
+    fr: { subject: 'Changement de votre situation', body: '{{status}} — {{reason}}' },
+    en: { subject: 'Change to your student status', body: '{{status}} — {{reason}}' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

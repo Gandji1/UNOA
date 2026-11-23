@@ -152,4 +152,17 @@ GRANT INSERT (job_id, channel, recipient, subject, body) ON unoa.sandbox_message
 GRANT SELECT ON unoa.local_credential, unoa.installation TO :"web_role";
 GRANT UPDATE (password_hash, totp_secret, failed_attempts, locked_until, must_change, changed_at) ON unoa.local_credential TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.install_platform(text, text, text, text, text, text) TO :"web_role";
+-- 0014: student records.
+GRANT SELECT ON unoa.matricule_rule, unoa.cohort, unoa.cohort_group, unoa.student, unoa.registration,
+      unoa.course_registration, unoa.student_event TO :"web_role";
+GRANT INSERT (institution_id, pattern, changed_by), UPDATE (pattern, changed_by, changed_at) ON unoa.matricule_rule TO :"web_role";
+GRANT INSERT (version_id, institution_id, owner_scope_id, code, label, academic_year, starts_on, ends_on, capacity, created_by),
+      UPDATE (state, capacity) ON unoa.cohort TO :"web_role";
+GRANT INSERT (cohort_id, label) ON unoa.cohort_group TO :"web_role";
+GRANT INSERT (account_id, institution_id, matricule, application_id, created_by), UPDATE (status) ON unoa.student TO :"web_role";
+GRANT INSERT (student_id, cohort_id, group_id, academic_year, kind, conditions, created_by),
+      UPDATE (state, group_id, conditions, decided_by, decided_at) ON unoa.registration TO :"web_role";
+GRANT INSERT (registration_id, unit_id, state), UPDATE (state, changed_at) ON unoa.course_registration TO :"web_role";
+GRANT INSERT (student_id, kind, detail, actor_id) ON unoa.student_event TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.next_matricule(uuid) TO :"web_role";
 COMMIT;

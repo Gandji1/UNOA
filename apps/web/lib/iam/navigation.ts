@@ -16,6 +16,7 @@ const administration: [string, NavItem][] = [
   ['lms.read', { href: '/administration/cours', label: 'Studio des cours', icon: 'studio' }],
   ['adm.read', { href: '/administration/admissions', label: 'Admissions', icon: 'inbox' }],
   ['not.read', { href: '/administration/notifications', label: 'Notifications', icon: 'bell' }],
+  ['sis.read', { href: '/administration/scolarite', label: 'Scolarité', icon: 'cap' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Territoires', icon: 'map' }],
   ['config.read', { href: '/administration/parametres', label: 'Paramètres', icon: 'sliders' }],
@@ -29,6 +30,7 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/cours': 'Contenus pédagogiques versionnés, offres de cours, promotions et classes virtuelles.',
   '/administration/admissions': 'Campagnes, formulaires et grilles, instruction des dossiers, décisions et recours.',
   '/administration/notifications': 'Modèles de messages par événement, canal et langue ; journal des envois, files et rejeu.',
+  '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/site': 'Site public de l’établissement : noms d’hôte, textes, mise en ligne, création de compte.',
   '/administration/territoires': 'Territoires, juridictions, établissements, centres et rattachements.',
   '/administration/parametres': 'Paramètres typés, héritage par portée, versions et dates d’effet.',
@@ -56,6 +58,7 @@ export const navigation = cache(async () => {
       groups.push({ label: 'Apprentissage', items: [
         { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
+        { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
       ] });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
       if (admin.length) groups.push({ label: 'Administration', items: [{ href: '/administration', label: 'Vue d’ensemble', icon: 'grid' }, ...admin] });

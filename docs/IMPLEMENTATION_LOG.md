@@ -161,3 +161,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   « Université Numérique Ouest-Africaine (UNOA) ») ; connexion mot de passe + code vérifiée sur
   https://unoa-web.vercel.app (redirection vers le changement du mot de passe provisoire). Les secrets ont
   été remis au propriétaire hors dépôt ; le jeton d'installation est désormais sans effet.
+
+## 23 novembre 2026 — Lot 014 (scolarité)
+
+- Migration 0014, module `lib/students`, API `/api/v1/sis`, écrans `/administration/scolarite` et `/etudiant`.
+- Vérifications : unitaires 25, PostgreSQL 7, HTTP 11, build : PASS.

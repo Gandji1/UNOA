@@ -23,6 +23,7 @@ const admissions = '0010_admissions.sql';
 const administration = '0011_administration.sql';
 const notifications = '0012_notifications.sql';
 const local = '0013_local_credentials.sql';
+const students = '0014_students.sql';
 
 test('Socle PostgreSQL UNOA', async context => {
   const name = 'unoa_test_' + randomUUID().replaceAll('-', '');
@@ -77,7 +78,7 @@ test('Socle PostgreSQL UNOA', async context => {
       [campus, alpha],
     );
     const results = await Promise.all([migrate(database), migrate(database)]);
-    assert.deepEqual(results.flat(), [next, sessions, config, territories, organisation, catalogue, learning, sites, admissions, administration, notifications, local]);
+    assert.deepEqual(results.flat(), [next, sessions, config, territories, organisation, catalogue, learning, sites, admissions, administration, notifications, local, students]);
     assert.deepEqual(await migrate(database), []);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.scope')).total, 4);
     assert.equal((await one('SELECT count(*)::int AS total FROM unoa.account')).total, 0);
@@ -152,11 +153,12 @@ test('Socle PostgreSQL UNOA', async context => {
     await copyMigration(administration);
     await copyMigration(notifications);
     await copyMigration(local);
+    await copyMigration(students);
     const broken = join(directory, '0099_atomic.sql');
     await writeFile(broken, 'CREATE TABLE unoa.atomic_test (id int); SELECT 1 / 0;');
     await assert.rejects(migrate(database, directory), { code: '22012' });
     assert.equal((await one("SELECT to_regclass('unoa.atomic_test') AS relation")).relation, null);
-    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 13);
+    assert.equal((await one('SELECT count(*)::int AS total FROM unoa_meta.migration')).total, 14);
     await writeFile(join(directory, initial), 'SELECT 1');
     await assert.rejects(migrate(database, directory), /Historique incohérent/);
 
