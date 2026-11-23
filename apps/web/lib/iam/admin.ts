@@ -50,9 +50,10 @@ export async function accessOverview(settings: IamSettings, actor: string, scope
       FROM unoa.invitation JOIN unoa.scope ON scope.id = invitation.scope_id
       WHERE unoa.scope_within(invitation.scope_id, $1) ORDER BY invitation.created_at DESC LIMIT 100
     `, [scopeId]) : { rows: [] },
-    store.query<{ code: string; label: string | null; system: boolean; assignable: boolean }>(`
-      SELECT code, label, system, unoa.can_grant($1, code, $2) AS assignable FROM unoa.access_role
-      WHERE archived_at IS NULL ORDER BY system DESC, coalesce(label, code)
+    store.query<{ code: string; label: string | null; system: boolean; assignable: boolean; level: string; description: string | null }>(`
+      SELECT code, label, system, level, description,
+        unoa.can_grant($1, code, $2) AND (level <> 'platform' OR $2 = (SELECT id FROM unoa.scope WHERE parent_id IS NULL)) AS assignable
+      FROM unoa.access_role WHERE archived_at IS NULL ORDER BY ordinal, coalesce(label, code)
     `, [actor, scopeId]),
     store.query<{ id: string }>('SELECT id FROM unoa.scope WHERE parent_id IS NULL'),
   ]);
@@ -67,11 +68,11 @@ export async function roleCatalogue(settings: IamSettings, actor: string) {
   const [permissions, roles, root] = await Promise.all([
     store.query<{ code: string; module: string | null; label: string | null; sensitive: boolean }>(
       'SELECT code, module, label, sensitive FROM unoa.permission ORDER BY module NULLS LAST, code'),
-    store.query<{ code: string; label: string | null; description: string | null; system: boolean; archived_at: Date | null; permissions: string[] }>(`
-      SELECT role.code, role.label, role.description, role.system, role.archived_at,
+    store.query<{ code: string; label: string | null; description: string | null; system: boolean; archived_at: Date | null; permissions: string[]; level: string }>(`
+      SELECT role.code, role.label, role.description, role.system, role.archived_at, role.level,
              coalesce(array_agg(item.permission_code ORDER BY item.permission_code) FILTER (WHERE item.permission_code IS NOT NULL), '{}') AS permissions
       FROM unoa.access_role AS role LEFT JOIN unoa.role_permission AS item ON item.role_code = role.code
-      GROUP BY role.code ORDER BY role.system DESC, role.archived_at NULLS FIRST, coalesce(role.label, role.code)
+      GROUP BY role.code ORDER BY role.archived_at NULLS FIRST, role.ordinal, coalesce(role.label, role.code)
     `),
     store.query<{ manage: boolean; id: string }>(`SELECT id, unoa.has_scope_permission($1, 'iam.manage', id) AS manage FROM unoa.scope WHERE parent_id IS NULL`, [actor]),
   ]);

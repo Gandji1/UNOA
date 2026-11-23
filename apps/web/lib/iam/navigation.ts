@@ -61,7 +61,7 @@ export const navigation = cache(async () => {
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
       ] });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
-      if (admin.length) groups.push({ label: 'Administration', items: [{ href: '/administration', label: 'Vue d’ensemble', icon: 'grid' }, ...admin] });
+      if (admin.length) groups.push({ label: 'Administration', items: [{ href: '/administration', label: 'Vue d’ensemble', icon: 'grid' }, ...admin, { href: '/administration/guide', label: 'Qui fait quoi', icon: 'book' }] });
     }
   }
   groups.push({ label: 'Compte', items: [signedIn

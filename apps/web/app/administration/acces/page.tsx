@@ -64,7 +64,8 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
             {data.roles.map(item => (
               <tr key={item.code}><td>{item.label ?? item.code}{item.description && <p className="muted">{item.description}</p>}</td><td><code>{item.code}</code></td>
                 <td>{item.system ? 'Toutes' : item.permissions.join(', ')}</td>
-                <td>{item.system ? <Badge tone="info">Amorçage</Badge> : item.archived_at ? <Badge tone="muted">Archivé</Badge> : <Badge tone="ok">Actif</Badge>}</td>
+                <td>{item.level === 'platform' ? <Badge tone="info">Plateforme</Badge> : <Badge tone="muted">Établissement</Badge>}{' '}
+                  {item.system ? <Badge tone="info">Amorçage</Badge> : item.archived_at ? <Badge tone="muted">Archivé</Badge> : <Badge tone="ok">Actif</Badge>}</td>
                 <td>{data.manage && !item.system && !item.archived_at && <>
                   <a href={`${path}?vue=roles&role=${item.code}#composer`}>Modifier</a>{' '}
                   <ActionForm inline action={api + 'archive-role'} back={`${path}?vue=roles`} hidden={{ code: item.code }} submit="Archiver" />
@@ -131,7 +132,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
               <button className="secondary" type="submit">Choisir la portée</button></form>
             <ActionForm action={api + 'grants'} back={back} hidden={{ accountId: account.id, scopeId: target }} submit="Attribuer"
               confirm="Seuls les rôles dont vous détenez toutes les permissions dans cette portée sont proposés.">
-              <label>Rôle<select name="role" required>{roles.filter(item => item.assignable).map(item => <option key={item.code} value={item.code}>{item.label ?? item.code}</option>)}</select></label>
+              <label className="studio-wide">Rôle<select name="role" required>{roles.filter(item => item.assignable).map(item => <option key={item.code} value={item.code}>{item.label ?? item.code}{item.description ? ' — ' + item.description : ''}</option>)}</select></label>
               <label className="check"><input type="checkbox" name="includeDescendants" defaultChecked /> Inclure les sous-structures</label>
               <label>Fin (UTC, facultative)<input type="datetime-local" name="effectiveUntil" /></label>
               <label className="studio-wide">Justification<input name="reason" required maxLength={500} /></label>
@@ -195,7 +196,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
       <main id="contenu" className="studio">
         {crumbs([data.scope.label])}
         <section className="studio-heading"><p className="eyebrow">Accès et rôles</p><h1>{data.scope.label}</h1>
-          <p className="studio-actions"><a href={`${path}?vue=roles`}>Rôles et permissions</a>
+          <p className="studio-actions"><a href={`${path}?vue=roles`}>Rôles et permissions</a> <a href="/administration/guide">Qui fait quoi</a>
             {data.rights.audit && <a href={`${path}?vue=journal&scope=${scopeId}`}>Journal d’audit</a>}</p></section>
         {notice}
         {link.startsWith(settings.origin.origin + '/invitation/') && (
@@ -224,12 +225,12 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
               <Hidden values={{ scopeId }} />
               <label>Nom complet<input name="displayName" required maxLength={200} /></label>
               <label>Courriel (facultatif)<input name="email" type="email" maxLength={254} /></label>
-              <label>Rôle<select name="role" required>{data.roles.filter(item => item.assignable).map(item => <option key={item.code} value={item.code}>{item.label ?? item.code}</option>)}</select></label>
+              <label className="studio-wide">Rôle<select name="role" required>{data.roles.filter(item => item.assignable).map(item => <option key={item.code} value={item.code}>{item.label ?? item.code}{item.description ? ' — ' + item.description : ''}</option>)}</select></label>
               <label>Validité (jours)<input name="validDays" type="number" min={1} max={30} defaultValue={7} required /></label>
               <label>Fin du rôle (UTC, facultative)<input type="datetime-local" name="effectiveUntil" /></label>
               <label className="check"><input type="checkbox" name="includeDescendants" value="true" defaultChecked /> Inclure les sous-structures</label>
               <label className="studio-wide">Justification<input name="reason" required maxLength={500} /></label>
-              <p className="studio-wide studio-help">La personne se connecte avec son compte institutionnel depuis le lien ; le rôle lui est alors attribué. Sans service de courriel configuré, le lien est à transmettre par vos soins.</p>
+              <p className="studio-wide studio-help">La personne ouvre le lien, choisit son identifiant et son mot de passe ; le rôle lui est alors attribué sur cette portée. Sans service de courriel configuré, le lien est à transmettre par vos soins.</p>
               <div className="studio-wide"><button className="action" type="submit">Créer l’invitation</button></div>
             </form>
           </Editor>

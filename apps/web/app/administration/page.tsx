@@ -1,25 +1,80 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { navigation, studioDescriptions } from '@/lib/iam/navigation';
+import { cookieName, iamSettings } from '@/lib/iam/settings';
+import { database, sessionAccount } from '@/lib/iam/sessions';
+import { roleGuide, setupProgress, setupSteps } from '@/lib/iam/guide';
+import { Badge } from './forms';
 
 export const metadata: Metadata = { title: 'Administration' };
 export const dynamic = 'force-dynamic';
 
-// Overview of the studios the session may open; each studio checks its own rights.
+// Studios grouped by level: what the platform configures, what each
+// institution configures, and teaching. Each studio checks its own rights.
+const levels: [string, string, string[]][] = [
+  ['Plateforme', 'Super-administrateur et gestionnaires de la plateforme', ['/administration/acces', '/administration/territoires', '/administration/parametres']],
+  ['Établissement', 'Administrateur d’établissement et responsables nommés par lui', ['/administration/site', '/administration/structures', '/administration/catalogue',
+    '/administration/admissions', '/administration/scolarite', '/administration/notifications']],
+  ['Pédagogie', 'Enseignants, responsables de formation et validateurs', ['/administration/cours']],
+];
+
 export default async function Administration() {
-  const { groups, signedIn } = await navigation();
-  if (!signedIn) redirect('/connexion');
-  const studios = groups.find(group => group.label === 'Administration')?.items.filter(item => item.href !== '/administration') ?? [];
+  const settings = iamSettings();
+  if (!settings) redirect('/connexion');
+  const actor = await sessionAccount(settings, (await cookies()).get(cookieName(settings, 'session'))?.value).catch(() => null);
+  if (!actor) redirect('/connexion');
+  const { groups } = await navigation();
+  const studios = new Map((groups.find(group => group.label === 'Administration')?.items ?? []).map(item => [item.href, item]));
+  const { rows: [root] } = await database(settings).query<{ platform: boolean }>(
+    `SELECT unoa.has_scope_permission($1, 'iam.read', id) AS platform FROM unoa.scope WHERE parent_id IS NULL`, [actor]);
+  const [progress, roles] = await Promise.all([root?.platform ? setupProgress(settings) : Promise.resolve(null), roleGuide(settings)]);
+  const roleLabel = new Map(roles.map(role => [role.code, role.label ?? role.code]));
+  const { rows: mine } = await database(settings).query<{ role_label: string | null; role_code: string; scope_label: string }>(
+    'SELECT role_label, role_code, scope_label FROM unoa.iam_account($1, $1) WHERE revoked_at IS NULL AND (effective_until IS NULL OR effective_until > now())', [actor]);
   return (
     <main id="contenu" className="studio">
       <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <span aria-current="page">Administration</span></nav>
       <section className="studio-heading"><p className="eyebrow">Console d’administration</p><h1>Administration</h1>
-        <p>Toute la configuration de l’établissement se fait ici, sans contenu prédéfini : structures, formations, cours, admissions, site, territoires, paramètres et accès.</p></section>
-      {studios.length === 0 ? <p className="card-note">Aucun rôle d’administration ne vous est attribué. Demandez une invitation à un administrateur.</p> : (
-        <ul className="admin-grid">
-          {studios.map(item => <li key={item.href}><a href={item.href}><strong>{item.label}</strong><span className="muted">{studioDescriptions[item.href]}</span></a></li>)}
-        </ul>
+        <p>Vos rôles : {mine.length ? mine.map(item => `${item.role_label ?? item.role_code} (${item.scope_label})`).join(' · ') : 'aucun'}.
+          {' '}<a href="/administration/guide">Qui fait quoi ?</a></p></section>
+      {studios.size === 0 && <p className="card-note">Aucun rôle d’administration ne vous est attribué. Demandez une invitation à un administrateur.</p>}
+
+      {progress && (
+        <section className="studio-panel" aria-labelledby="mise-en-route">
+          <h2 id="mise-en-route">Mise en route de la plateforme</h2>
+          <p className="studio-help">Ordre conseillé : chaque étape s’appuie sur la précédente. Les étapes « Établissement » sont réalisées par les personnes nommées pour chaque établissement.</p>
+          <ol className="setup-steps">
+            {setupSteps.map(step => {
+              const count = progress[step.key];
+              return (
+                <li key={step.key}>
+                  <div>
+                    <strong><a href={step.href}>{step.title}</a></strong> {step.level === 'platform' ? <Badge tone="info">Plateforme</Badge> : <Badge tone="muted">Établissement</Badge>}
+                    {count !== undefined && (count > 0 ? <Badge tone="ok">{count} réalisé(s)</Badge> : <Badge tone="warn">À faire</Badge>)}
+                    <p className="muted">{step.detail}</p>
+                    <p className="muted">Par : {step.roles.map(code => roleLabel.get(code) ?? code).join(', ')}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
       )}
+
+      {levels.map(([level, who, hrefs]) => {
+        const available = hrefs.map(href => studios.get(href)).filter(Boolean);
+        if (!available.length) return null;
+        return (
+          <section key={level} aria-labelledby={'niveau-' + level}>
+            <h2 id={'niveau-' + level}>{level}</h2>
+            <p className="muted">{who}</p>
+            <ul className="admin-grid">
+              {available.map(item => <li key={item!.href}><a href={item!.href}><strong>{item!.label}</strong><span className="muted">{studioDescriptions[item!.href]}</span></a></li>)}
+            </ul>
+          </section>
+        );
+      })}
     </main>
   );
 }

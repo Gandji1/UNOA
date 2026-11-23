@@ -165,4 +165,6 @@ GRANT INSERT (student_id, cohort_id, group_id, academic_year, kind, conditions, 
 GRANT INSERT (registration_id, unit_id, state), UPDATE (state, changed_at) ON unoa.course_registration TO :"web_role";
 GRANT INSERT (student_id, kind, detail, actor_id) ON unoa.student_event TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.next_matricule(uuid) TO :"web_role";
+-- 0015: invitation accepted with a local identifier.
+GRANT EXECUTE ON FUNCTION unoa.accept_invitation_local(bytea, text, text) TO :"web_role";
 COMMIT;

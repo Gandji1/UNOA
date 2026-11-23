@@ -115,6 +115,27 @@ export async function disableCode(settings: IamSettings, actor: string, current:
   return { accountId: actor };
 }
 
+// Invitation accepted by choosing a local identifier and password (ADR-0010).
+export async function acceptInvitationLocally(settings: IamSettings, token: unknown, loginInput: unknown, password: unknown) {
+  const hash = typeof token === 'string' && /^[\w-]{43}$/.test(token) ? createHash('sha256').update(token).digest() : null;
+  ensure(hash, 400, 'Lien d’invitation invalide');
+  const login = typeof loginInput === 'string' ? loginInput.trim().toLowerCase() : '';
+  ensure(/^[a-z0-9][a-z0-9._@-]{2,119}$/.test(login), 400, 'Identifiant : 3 à 120 caractères (lettres minuscules, chiffres, . _ @ -)');
+  const secret = checkNewPassword(password);
+  try {
+    const { rows } = await database(settings).query<{ account: string | null }>('SELECT unoa.accept_invitation_local($1, $2, $3) AS account',
+      [hash, login, await hashPassword(secret)]);
+    ensure(rows[0]?.account, 410, 'Invitation expirée, retirée ou déjà utilisée');
+  } catch (error) {
+    if ((error as { code?: string }).code === 'U0409') throw new Problem(409, 'Cet identifiant est déjà pris');
+    throw error;
+  }
+  const session = await openSession(settings, { issuer: localIssuer, subject: login });
+  ensure(session, 403, 'Compte indisponible');
+  await audit(settings, null, 'iam.invitation_local', 'allowed');
+  return session;
+}
+
 export async function credentialState(settings: IamSettings, actor: string) {
   const { rows } = await database(settings).query<{ login: string; must_change: boolean; totp: boolean }>(
     'SELECT login, must_change, totp_secret IS NOT NULL AS totp FROM unoa.local_credential WHERE account_id = $1', [actor]);

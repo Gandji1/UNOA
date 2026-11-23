@@ -49,6 +49,33 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.match(where(await signIn('candidat.local', 'Candidat-Secret-9')), /statut=verrouille$/);
   await assert.rejects(database.query("INSERT INTO unoa.local_credential(account_id, login, password_hash) VALUES ($1, 'xyz', 'clair')", [plain.account_id]), /check|duplicate/i);
 
+  // Invitation accepted with a local identifier; role levels respected.
+  const iam = (action, data) => call('/api/v1/iam/' + action, { method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  const { rows: [alpha] } = await database.query("SELECT id FROM unoa.scope WHERE label = 'Université Alpha'");
+  const { rows: [root] } = await database.query('SELECT id FROM unoa.scope WHERE parent_id IS NULL');
+  const invited = await (await iam('invitations', { scopeId: alpha.id, displayName: 'Admin Alpha', role: 'institution_admin', reason: 'Nomination', validDays: 7, includeDescendants: true })).json();
+  assert.ok(invited.link, JSON.stringify(invited));
+  const token = invited.link.split('/invitation/')[1];
+  const accept = data => call('/api/v1/auth/invitation', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ invitation: token, ...data }).toString() });
+  assert.match(where(await accept({ login: 'admin.alpha', password: 'Alpha-Secret-2026', confirm: 'autre' })), /erreur=422$/);
+  assert.match(where(await accept({ login: 'admin.alpha', password: 'faible', confirm: 'faible' })), /erreur=400$/);
+  assert.match(where(await accept({ login: 'admin.local', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' })), /erreur=409$/, 'identifiant pris');
+  const welcomed = await accept({ login: 'admin.alpha', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' });
+  assert.match(where(welcomed), /\/espace\?bienvenue=1$/);
+  assert.match(where(await accept({ login: 'admin.alpha2', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' })), /erreur=410$/, 'invitation à usage unique');
+  const alphaCookie = session(await signIn('admin.alpha', 'Alpha-Secret-2026'));
+  const alphaConsole = await (await call('/administration', { headers: { Cookie: alphaCookie } })).text();
+  assert.match(alphaConsole, /Administrateur d’établissement \(Université Alpha\)/);
+  assert.match(alphaConsole, /href="\/administration\/structures"/);
+  assert.doesNotMatch(alphaConsole, /Mise en route de la plateforme/, 'réservé à la plateforme');
+  assert.match(await (await call('/administration/guide', { headers: { Cookie: alphaCookie } })).text(), /Qui crée quoi/);
+  const { rows: [alphaAdmin] } = await database.query("SELECT account_id FROM unoa.local_credential WHERE login = 'admin.alpha'");
+  assert.equal((await iam('grants', { accountId: alphaAdmin.account_id, scopeId: alpha.id, role: 'territory_manager', reason: 'x', includeDescendants: true })).status, 422,
+    'rôle de plateforme hors racine');
+  assert.equal((await iam('grants', { accountId: alphaAdmin.account_id, scopeId: root.id, role: 'auditor', reason: 'Contrôle', includeDescendants: true })).status, 200);
+  assert.match(await (await call('/administration', { headers: { Cookie: cookie } })).text(), /Mise en route de la plateforme/);
+
   // Installation: secret token, then refused once an administrator exists.
   const install = (token, body) => call('/api/v1/installation', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { 'X-Setup-Token': token } : {}) }, body: JSON.stringify(body) });
   const body = { login: 'premier.admin', displayName: 'Premier administrateur', platformLabel: 'UNOA' };

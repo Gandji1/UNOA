@@ -166,3 +166,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 
 - Migration 0014, module `lib/students`, API `/api/v1/sis`, écrans `/administration/scolarite` et `/etudiant`.
 - Vérifications : unitaires 25, PostgreSQL 7, HTTP 11, build : PASS.
+
+## 23 novembre 2026 — Lot 015 (qui fait quoi)
+
+- Rôles types par niveau, console structurée, mise en route, guide, invitation par identifiant local.
+- Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
