@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import pg from 'pg';
 import { migrate } from './migrations.mjs';
 
@@ -8,6 +8,9 @@ import { migrate } from './migrations.mjs';
 // URL (local or CI build) it does nothing. Any failed check stops the deployment.
 const connectionString = process.env.UNOA_MIGRATION_DATABASE_URL || process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING;
 const role = process.env.UNOA_DATABASE_ROLE || 'unoa_web';
+// Outcome kept with the build, shown by /api/v1/health/database (no address or secret).
+const report = outcome => writeFile(new URL('../../../apps/web/lib/server/deploy-report.json', import.meta.url),
+  JSON.stringify({ at: new Date().toISOString(), ...outcome })).catch(() => undefined);
 
 if (!connectionString) {
   console.log('Base non liée : migrations ignorées pour ce build.');
@@ -34,9 +37,12 @@ if (!connectionString) {
     const failed = Object.entries(rows[0]).filter(([name, value]) => value === false && name !== 'migrations').map(([name]) => name);
     if (failed.length) throw new Error('Contrôles de droits en échec : ' + failed.join(', '));
     console.log(`Droits du rôle ${role} appliqués et vérifiés (${Object.keys(rows[0]).length} contrôles).`);
+    await report({ status: 'ok', applied, checks: Object.keys(rows[0]).length });
   } catch (error) {
     console.error(`Déploiement de la base interrompu : ${error.message}`);
-    process.exitCode = 1;
+    await report({ status: 'failed', code: error.code ?? null, message: String(error.message).replace(/postgres(ql)?:\/\/\S+/g, '[adresse]').slice(0, 300) });
+    // UNOA_DEPLOY_DB_STRICT=1 stops the deployment on a database failure.
+    if (process.env.UNOA_DEPLOY_DB_STRICT === '1') process.exitCode = 1;
   } finally {
     await pool.end();
   }

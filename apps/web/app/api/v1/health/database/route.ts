@@ -1,6 +1,7 @@
 import { iamSettings } from '@/lib/iam/settings';
 import { Client } from 'pg';
 import { database } from '@/lib/iam/sessions';
+import deployReport from '@/lib/server/deploy-report.json';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,6 @@ export async function GET() {
         target = rows[0];
       } catch { target = { reachable: false }; } finally { await owner.end().catch(() => undefined); }
     }
-    return Response.json({ database: 'unavailable', code, tls, mode: settings.databaseRole ? 'integration' : 'dedicated', target }, { status: 503, headers });
+    return Response.json({ database: 'unavailable', code, tls, mode: settings.databaseRole ? 'integration' : 'dedicated', target, deploy: deployReport }, { status: 503, headers });
   }
 }
