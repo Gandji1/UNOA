@@ -177,3 +177,9 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0016 : niveaux pays et composante, administrateur pays, doyen, chef de département, règle de niveau
   à l'attribution et à l'invitation ; console, mise en route et guide alignés (ADR-0011).
 - Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
+
+## 23 novembre 2026 — Comptes de test par niveau (production)
+
+- À la demande du propriétaire, créés par les API réelles (audités) : « Pays de test » → « Université de test »
+  → « Faculté des sciences et techniques (test) » → « Département d’informatique (test) » ; comptes admin.pays.test,
+  admin.univ.test, doyen.test, chef.dept.test, enseignant.test. Données marquées « test », à clore avant ouverture.
