@@ -22,3 +22,10 @@ pouvoir se connecter dès maintenant pour configurer la plateforme et recetter l
 
 Le jour où un fournisseur OIDC est configuré, il s'ajoute sans retirer la connexion locale ; la
 récupération de compte locale (IAM-004) reste à livrer avec l'envoi de courriels (EXT-004).
+
+## Décision du propriétaire (23 novembre 2026)
+
+Le propriétaire demande la connexion par identifiant et mot de passe seuls pour son compte. Le titulaire
+d'un compte peut désactiver son code depuis « Mon espace » (mot de passe actuel exigé, action
+`iam.mfa_disabled` journalisée). Écart assumé à la règle « MFA pour rôles sensibles » : risque consigné
+dans le registre des décisions ; à rétablir avec le fournisseur OIDC (EXT-001).

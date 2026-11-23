@@ -101,6 +101,20 @@ export async function changePassword(settings: IamSettings, actor: string, curre
   return { accountId: actor };
 }
 
+// The account holder removes their one-time code (owner decision of 23 November
+// 2026, recorded in ADR-0010): current password required, audited, reversible.
+export async function disableCode(settings: IamSettings, actor: string, current: unknown) {
+  const store = database(settings);
+  const { rows } = await store.query<{ password_hash: string; totp_secret: string | null }>(
+    'SELECT password_hash, totp_secret FROM unoa.local_credential WHERE account_id = $1', [actor]);
+  ensure(rows[0], 404, 'Ce compte se connecte par le fournisseur institutionnel');
+  ensure(typeof current === 'string' && await passwordMatches(current, rows[0].password_hash), 403, 'Mot de passe actuel incorrect');
+  ensure(rows[0].totp_secret, 409, 'Aucun code de vérification actif');
+  await store.query('UPDATE unoa.local_credential SET totp_secret = NULL WHERE account_id = $1', [actor]);
+  await audit(settings, actor, 'iam.mfa_disabled', 'allowed');
+  return { accountId: actor };
+}
+
 export async function credentialState(settings: IamSettings, actor: string) {
   const { rows } = await database(settings).query<{ login: string; must_change: boolean; totp: boolean }>(
     'SELECT login, must_change, totp_secret IS NOT NULL AS totp FROM unoa.local_credential WHERE account_id = $1', [actor]);

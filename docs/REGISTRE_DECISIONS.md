@@ -20,3 +20,5 @@
 | DEC-013 | 2026-11-20 · Nomination par identifiant de compte en attendant l'annuaire IAM | Pas de profil personne encore | RÉVERSIBLE | ORG | LOT_007 | Remplacer par sélection dans l'annuaire |
 | DEC-014 | 2026-11-20 · Site public = donnée par portée, résolu par l'hôte ; textes versionnés publiés par un tiers | §1.3, multi-établissement | OBLIGATOIRE | CMS | ADR-0006 | — |
 | DEC-015 | 2026-11-20 · Libellés d'interface en français dans le code jusqu'au module I18N | Distinction interface / contenu | RÉVERSIBLE | I18N | ADR-0006 | Externaliser les libellés |
+
+| 2026-11-23 | Désactivation du code TOTP du compte administrateur à la demande du propriétaire | Écart temporaire à la MFA des rôles sensibles, journalisé (ADR-0010) | À rétablir avec OIDC |

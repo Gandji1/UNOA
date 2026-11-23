@@ -116,6 +116,14 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
           <h2 id="mot-de-passe-titre">Identifiant et mot de passe</h2>
           {(credential.must_change || changer) && <p className="studio-notice" role="alert">Choisissez un mot de passe personnel : celui qui vous a été remis est provisoire.</p>}
           <p>Identifiant : <code>{credential.login}</code>{credential.totp ? ' · code de vérification exigé à chaque connexion' : ''}</p>
+          {credential.totp && (
+            <details><summary>Désactiver le code de vérification</summary>
+              <ActionForm action="/api/v1/auth/code" back="/espace" submit="Désactiver le code"
+                confirm="Sans code, seul le mot de passe protège ce compte d’administration. L’action est journalisée.">
+                <label>Mot de passe actuel<input name="current" type="password" required autoComplete="current-password" /></label>
+              </ActionForm>
+            </details>
+          )}
           <ActionForm action="/api/v1/auth/password" back="/espace" submit="Changer le mot de passe">
             <label>Mot de passe actuel<input name="current" type="password" required autoComplete="current-password" /></label>
             <label>Nouveau mot de passe (12 caractères au moins, majuscules, minuscules et chiffres)
