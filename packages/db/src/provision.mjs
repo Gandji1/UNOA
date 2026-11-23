@@ -17,12 +17,15 @@ export async function provisionDatabase({ connectionString, role = 'unoa_web', r
   const pool = new pg.Pool({ connectionString: url.href, connectionTimeoutMillis: 15_000, max: 1 });
   try {
     const applied = await migrate(pool, join(root, 'packages/db/migrations'));
+    // One instance at a time applies the rights (the pool holds a single connection).
+    await pool.query('SELECT pg_advisory_lock($1)', [7843392887071802n]);
     await pool.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${role}') THEN CREATE ROLE "${role}" NOLOGIN; END IF; END $$`);
     await pool.query(await script('grant-web.psql'));
     await pool.query(`GRANT "${role}" TO CURRENT_USER WITH INHERIT FALSE, SET TRUE`);
     const { rows } = await pool.query(await script('verify-web.psql'));
     const failed = Object.entries(rows[0]).filter(([, value]) => value === false).map(([name]) => name);
     if (failed.length) throw new Error('Contrôles de droits en échec : ' + failed.join(', '));
+    await pool.query('SELECT pg_advisory_unlock($1)', [7843392887071802n]);
     return { applied, checks: Object.keys(rows[0]).length };
   } finally {
     await pool.end();
