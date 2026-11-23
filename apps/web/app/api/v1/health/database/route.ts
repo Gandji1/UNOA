@@ -1,7 +1,7 @@
 import { iamSettings } from '@/lib/iam/settings';
 import { Client } from 'pg';
 import { database } from '@/lib/iam/sessions';
-import deployReport from '@/lib/server/deploy-report.json';
+import { provisionState } from '@/lib/iam/provision';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +23,7 @@ export async function GET() {
              has_schema_privilege('unoa', 'USAGE') AS schema
     `);
     return Response.json({ database: 'connected', restricted: rows[0].restricted, schema: rows[0].schema,
-      signIn: settings.oidc ? 'configured' : 'not_configured' }, { headers });
+      signIn: settings.oidc ? 'configured' : 'not_configured', provision: settings.databaseRole ? provisionState : undefined }, { headers });
   } catch (error) {
     // SQLSTATE or network error class only (e.g. 28P01, 42704, ECONNREFUSED): no address or credential.
     const code = typeof error === 'object' && error && 'code' in error && /^[A-Z0-9_]{3,20}$/.test(String(error.code)) ? String(error.code) : 'unknown';
@@ -40,6 +40,6 @@ export async function GET() {
         target = rows[0];
       } catch { target = { reachable: false }; } finally { await owner.end().catch(() => undefined); }
     }
-    return Response.json({ database: 'unavailable', code, tls, mode: settings.databaseRole ? 'integration' : 'dedicated', target, deploy: deployReport }, { status: 503, headers });
+    return Response.json({ database: 'unavailable', code, tls, mode: settings.databaseRole ? 'integration' : 'dedicated', target, provision: provisionState }, { status: 503, headers });
   }
 }

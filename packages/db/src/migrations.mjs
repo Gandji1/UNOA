@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const directory = fileURLToPath(new URL('../migrations/', import.meta.url));
+// Default folder next to this module (callers bundling it pass their own folder).
+const directory = join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 export const migrationLock = 7843392887071801n;
 
 export async function loadMigrations(migrationDirectory = directory) {

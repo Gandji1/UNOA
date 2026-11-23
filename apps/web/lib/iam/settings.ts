@@ -60,7 +60,7 @@ function databaseSettings() {
     return { databaseUrl: value, databaseRole: null };
   }
   url.searchParams.delete('channel_binding');
-  url.searchParams.set('sslmode', 'verify-full');
+  if (!['127.0.0.1', 'localhost'].includes(url.hostname)) url.searchParams.set('sslmode', 'verify-full');
   return { databaseUrl: url.href, databaseRole: process.env.UNOA_DATABASE_ROLE || 'unoa_web' };
 }
 

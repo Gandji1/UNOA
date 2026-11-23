@@ -1,51 +1,19 @@
-import { readFile, writeFile } from 'node:fs/promises';
-import pg from 'pg';
-import { migrate } from './migrations.mjs';
+import { fileURLToPath } from 'node:url';
+import { provisionDatabase } from './provision.mjs';
 
-// Run by the Vercel build before "next build": brings the database linked by
-// the Neon ↔ Vercel integration to the current schema, creates the restricted
-// role, applies its rights and verifies them (ADR-0009). Without a database
-// URL (local or CI build) it does nothing. Any failed check stops the deployment.
+// Command line: provisions the database of UNOA_MIGRATION_DATABASE_URL (or the
+// URL injected by the Neon ↔ Vercel integration) — migrations, web role, rights, checks.
 const connectionString = process.env.UNOA_MIGRATION_DATABASE_URL || process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING;
-const role = process.env.UNOA_DATABASE_ROLE || 'unoa_web';
-// Outcome kept with the build, shown by /api/v1/health/database (no address or secret).
-const report = outcome => writeFile(new URL('../../../apps/web/lib/server/deploy-report.json', import.meta.url),
-  JSON.stringify({ at: new Date().toISOString(), ...outcome })).catch(() => undefined);
-
 if (!connectionString) {
-  console.log('Base non liée : migrations ignorées pour ce build.');
-  await report({ status: 'skipped', vercel: process.env.VERCEL_ENV ?? null, inputs: ['DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'POSTGRES_URL_NON_POOLING', 'PGHOST']
-    .filter(name => process.env[name]) });
-} else if (!/^[a-z_][a-z0-9_]{0,62}$/.test(role)) {
-  console.error('UNOA_DATABASE_ROLE invalide');
-  process.exitCode = 1;
+  console.log('Base non liée : rien à déployer.');
 } else {
-  const url = new URL(connectionString);
-  url.searchParams.delete('channel_binding');
-  if (!['127.0.0.1', 'localhost'].includes(url.hostname)) url.searchParams.set('sslmode', 'verify-full');
-  const pool = new pg.Pool({ connectionString: url.href, connectionTimeoutMillis: 15_000, max: 1 });
-  // psql scripts of infra/postgres, executed through the driver: \set lines removed,
-  // the role variable substituted (validated identifier above).
-  const script = async name => (await readFile(new URL(`../../../infra/postgres/${name}`, import.meta.url), 'utf8'))
-    .split('\n').filter(line => !line.startsWith('\\')).join('\n')
-    .replaceAll(':"web_role"', `"${role}"`).replaceAll(":'web_role'", `'${role}'`);
   try {
-    const applied = await migrate(pool);
-    console.log(applied.length ? `Migrations appliquées : ${applied.join(', ')}` : 'Base à jour.');
-    await pool.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${role}') THEN CREATE ROLE "${role}" NOLOGIN; END IF; END $$`);
-    await pool.query(await script('grant-web.psql'));
-    await pool.query(`GRANT "${role}" TO CURRENT_USER WITH INHERIT FALSE, SET TRUE`);
-    const { rows } = await pool.query(await script('verify-web.psql'));
-    const failed = Object.entries(rows[0]).filter(([name, value]) => value === false && name !== 'migrations').map(([name]) => name);
-    if (failed.length) throw new Error('Contrôles de droits en échec : ' + failed.join(', '));
-    console.log(`Droits du rôle ${role} appliqués et vérifiés (${Object.keys(rows[0]).length} contrôles).`);
-    await report({ status: 'ok', applied, checks: Object.keys(rows[0]).length });
+    const { applied, checks } = await provisionDatabase({
+      connectionString, role: process.env.UNOA_DATABASE_ROLE || 'unoa_web', root: fileURLToPath(new URL('../../../', import.meta.url)),
+    });
+    console.log(`${applied.length ? 'Migrations appliquées : ' + applied.join(', ') : 'Base à jour'} ; ${checks} contrôles de droits vérifiés.`);
   } catch (error) {
     console.error(`Déploiement de la base interrompu : ${error.message}`);
-    await report({ status: 'failed', code: error.code ?? null, message: String(error.message).replace(/postgres(ql)?:\/\/\S+/g, '[adresse]').slice(0, 300) });
-    // UNOA_DEPLOY_DB_STRICT=1 stops the deployment on a database failure.
-    if (process.env.UNOA_DEPLOY_DB_STRICT === '1') process.exitCode = 1;
-  } finally {
-    await pool.end();
+    process.exitCode = 1;
   }
 }

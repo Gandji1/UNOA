@@ -2,18 +2,20 @@ import 'server-only';
 import { createHash, randomBytes } from 'node:crypto';
 import { Client, Pool } from 'pg';
 import { sessionDurationSeconds, type IamSettings } from './settings';
+import { ensureProvisioned } from './provision';
 
 let pool: Pool | undefined;
 
 // Owner URL from the hosting integration (ADR-0009): the pool hands out a
 // connection only after it switched to the restricted role and checked it;
 // any failure closes the connection (fail closed).
-function restrictedClient(role: string) {
+function restrictedClient(role: string, connectionString: string) {
   if (!/^[a-z_][a-z0-9_]{0,62}$/.test(role)) throw new Error('Invalid database role');
   return class RestrictedClient extends Client {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async connect(callback?: (error: Error | undefined) => void): Promise<any> {
       try {
+        await ensureProvisioned(connectionString, role);
         await super.connect();
         await this.query(`SET ROLE ${role}`);
         const { rows } = await this.query<{ current_user: string }>('SELECT current_user');
@@ -38,7 +40,7 @@ export function database(settings: IamSettings) {
       statement_timeout: 5000,
       idleTimeoutMillis: 5000,
       allowExitOnIdle: true,
-      ...(settings.databaseRole ? { Client: restrictedClient(settings.databaseRole) } : {}),
+      ...(settings.databaseRole ? { Client: restrictedClient(settings.databaseRole, settings.databaseUrl) } : {}),
     });
     pool.on('error', () => console.error('unoa-iam-database-idle-error'));
 

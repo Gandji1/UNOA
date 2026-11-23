@@ -27,7 +27,10 @@ dédié reste possible en renseignant `UNOA_IAM_DATABASE_URL`.
 
 ## Complément (23 novembre 2026)
 
-L'intégration a relié Vercel à la base `neondb` d'une autre branche que celle migrée par GitHub. Le build
-Vercel exécute donc `packages/db/src/deploy.mjs` avant `next build` : migrations, rôle `unoa_web`, droits et
-40 contrôles sur la base effectivement liée ; un contrôle en échec arrête le déploiement. Le workflow GitHub
-reste disponible pour la base `unoa`.
+L'intégration a relié Vercel à la base `neondb` d'une autre branche que celle migrée par GitHub, et ses
+variables ne sont exposées qu'à l'exécution. La première connexion de chaque instance exécute donc
+`provisionDatabase` (`packages/db/src/provision.mjs`) : migrations sous verrou consultatif, rôle `unoa_web`,
+droits et 40 contrôles ; tant que ce n'est pas réussi, aucune connexion n'est servie (nouvel essai après
+une minute). Les scripts SQL sont embarqués dans les fonctions (`outputFileTracingIncludes`). La même
+fonction sert en ligne de commande (`pnpm --filter @unoa/db deploy`). Le workflow GitHub reste
+disponible pour la base `unoa`.

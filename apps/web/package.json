@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node ../../packages/db/src/deploy.mjs && next build --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "test:http": "node --test test/recette.test.mjs"
   },
