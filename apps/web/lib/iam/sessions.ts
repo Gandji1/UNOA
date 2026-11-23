@@ -36,7 +36,8 @@ export function database(settings: IamSettings) {
     pool = new Pool({
       connectionString: settings.databaseUrl,
       max: 2,
-      connectionTimeoutMillis: 5000,
+      // The first connection of an instance may provision the schema (ADR-0009).
+      connectionTimeoutMillis: settings.databaseRole ? 30_000 : 5000,
       statement_timeout: 5000,
       idleTimeoutMillis: 5000,
       allowExitOnIdle: true,
