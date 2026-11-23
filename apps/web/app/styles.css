@@ -266,3 +266,10 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
 .setup-steps li { background: var(--surface); border: 1px solid var(--line); border-radius: .7rem; padding: .7rem .9rem; }
 .setup-steps .badge { margin-left: .35rem; }
 .setup-steps p { margin: .25rem 0 0; }
+.sidebar-group { margin-bottom: .35rem; }
+.sidebar-group > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+.sidebar-group > summary::-webkit-details-marker { display: none; }
+.sidebar-group > summary::after { content: '▸'; font-size: .8rem; transition: transform .15s; }
+.sidebar-group[open] > summary::after { transform: rotate(90deg); }
+.handoff { border-left: 4px solid var(--orange, #f97316); }
+.handoff li { margin: .35rem 0; }

@@ -52,7 +52,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
         <section className="account-panel">
           <h1>Pays et établissements</h1>
           <p>{scopeAfter ? 'Aucun autre périmètre à afficher.' : 'Aucun périmètre territoriale ne vous est attribuée.'}</p>
-          {scopeAfter && <p><a href={path}>Revenir aux premières périmètres</a></p>}
+          {scopeAfter && <p><a href={path}>Revenir aux premiers périmètres</a></p>}
         </section>
       </main>
     );
@@ -205,7 +205,8 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
 
       {scope.write && <ChildEditor scope={scope} types={types} />}
       {scope.write && <TerritoryEditor scope={scope} />}
-      {scope.root && scope.define && <TypeEditor scope={scope} types={types} />}
+      {scope.root && scope.define && (stringField(search.avance) === '1' ? <TypeEditor scope={scope} types={types} />
+        : <p className="muted"><a href={`${path}?scope=${scope.id}&avance=1`}>Types de niveaux (réglage avancé)</a></p>)}
     </main>
   );
 }

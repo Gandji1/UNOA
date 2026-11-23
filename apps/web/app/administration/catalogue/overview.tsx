@@ -9,7 +9,7 @@ type Contexts = Awaited<ReturnType<typeof catalogContexts>>;
 const path = '/administration/catalogue';
 const api = '/api/v1/catalog/';
 
-export function Overview({ data, contexts, notice }: { data: Data; contexts: Contexts; notice: ReactNode }) {
+export function Overview({ data, contexts, notice, advanced = false }: { data: Data; contexts: Contexts; notice: ReactNode; advanced?: boolean }) {
   const { scope, fieldTypes, kinds, fields, programs, courses, competencies } = data;
   const back = `${path}?scope=${scope.id}`;
   const activeFields = fields.filter(item => item.status === 'active');
@@ -144,7 +144,8 @@ export function Overview({ data, contexts, notice }: { data: Data; contexts: Con
         )}
       </Panel>
 
-      <Panel title="Référentiels de la plateforme" id="referentiels">
+      {!advanced && scope.define && <p className="muted"><a href={`?scope=${scope.id}&avance=1`}>Types de filières et natures de formation (réglage avancé)</a></p>}
+      {advanced && <Panel title="Référentiels de la plateforme" id="referentiels">
         <div className="two-columns">
           <div><h3>Natures de programme</h3>
             {kinds.length === 0 ? <p>Aucune nature déclarée.</p> : <ul>{kinds.map(kind => (
@@ -179,7 +180,7 @@ export function Overview({ data, contexts, notice }: { data: Data; contexts: Con
             </Editor>
           </>
         )}
-      </Panel>
+      </Panel>}
     </main>
   );
 }

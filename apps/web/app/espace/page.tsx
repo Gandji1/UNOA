@@ -34,7 +34,7 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
   const { statut, error, message, changer } = await searchParams;
   const [me, menu, contact] = await Promise.all([accountDetails(settings, account, account), navigation(), contactSettings(settings, account)]);
   const credential = await credentialState(settings, account);
-  const administration = menu.groups.some(group => group.label === 'Administration');
+  const administration = menu.groups.some(group => group.items.some(item => item.href.startsWith('/administration')));
   const own = me.grants.filter(item => !item.revoked_at && !item.delegated_from && (!item.effective_until || new Date(item.effective_until) > new Date()));
   const [configuration, territories, structures, catalogue] = await Promise.all([
     readableScopes(settings, account).catch(() => []),

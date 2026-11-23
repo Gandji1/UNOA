@@ -65,5 +65,5 @@ export default async function Catalogue({ searchParams }: { searchParams: Promis
     );
   }
   const data = await catalogOverview(settings, actor, selected).catch(refused);
-  return data ? <Overview data={data} contexts={contexts} notice={notice} /> : inaccessible;
+  return data ? <Overview data={data} contexts={contexts} notice={notice} advanced={field(search.avance) === '1'} /> : inaccessible;
 }

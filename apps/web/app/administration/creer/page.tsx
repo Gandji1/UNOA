@@ -6,6 +6,9 @@ import { cookieName, iamSettings } from '@/lib/iam/settings';
 import { database, sessionAccount } from '@/lib/iam/sessions';
 import { wizardData, wizardKinds, type WizardKind } from '@/lib/iam/wizard';
 import { ActionForm, Hidden, Notice } from '../forms';
+import { handoffs } from '@/lib/iam/handoff';
+import { allowedCreations } from '@/lib/iam/navigation';
+import { HandoffPanel } from '../handoff';
 
 export const metadata: Metadata = { title: 'Créer' };
 export const dynamic = 'force-dynamic';
@@ -27,6 +30,19 @@ function ParentPicker({ kind, items, chosen, label }: { kind: string; items: { i
   );
 }
 
+// What logically follows each creation in the hierarchy.
+const nextSteps: Record<string, [string, string][]> = {
+  pays: [['Nommer l’administrateur de ce pays', '?quoi=responsable'], ['Créer un autre pays', '?quoi=pays']],
+  etablissement: [['Nommer l’administrateur de cet établissement', '?quoi=responsable'], ['Créer un campus', '?quoi=campus']],
+  campus: [['Nommer un responsable', '?quoi=responsable']],
+  faculte: [['Créer un département dans cette faculté', '?quoi=departement'], ['Nommer le doyen', '?quoi=responsable']],
+  departement: [['Nommer le chef de département', '?quoi=responsable'], ['Créer une filière', '?quoi=filiere']],
+  filiere: [['Créer une formation', '?quoi=formation'], ['Créer une spécialité', '?quoi=filiere']],
+  formation: [['Créer les matières', '?quoi=matiere'], ['Compléter la maquette (semestres, UE, crédits)', '/administration/catalogue']],
+  matiere: [['Rédiger le cours en ligne', '/administration/cours'], ['Nommer un enseignant', '?quoi=responsable']],
+  responsable: [],
+};
+
 export default async function Creer({ searchParams }: { searchParams: Promise<Search> }) {
   const settings = iamSettings();
   if (!settings) redirect('/connexion');
@@ -40,6 +56,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
     "SELECT id, unoa.has_scope_permission($1, 'territory.define', id) AND unoa.has_scope_permission($1, 'catalog.define', id) AS define FROM unoa.scope WHERE parent_id IS NULL", [actor]);
 
   if (!kind) {
+    const allowed = new Set((await allowedCreations(actor)).map(item => item.kind));
     return (
       <main id="contenu" className="studio">
         <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/administration">Administration</a> › <span aria-current="page">Créer</span></nav>
@@ -55,7 +72,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
           </section>
         )}
         <ul className="admin-grid">
-          {wizardKinds.map(item => <li key={item.kind}><a href={`${path}?quoi=${item.kind}`}><strong>{item.title}</strong>
+          {wizardKinds.filter(item => allowed.has(item.kind)).map(item => <li key={item.kind}><a href={`${path}?quoi=${item.kind}`}><strong>{item.title}</strong>
             <span className="muted">{item.help}</span><span className="muted"> · {item.who}</span></a></li>)}
         </ul>
       </main>
@@ -154,6 +171,11 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
       <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/administration">Administration</a> › <a href={path}>Créer</a> › <span aria-current="page">{meta.title}</span></nav>
       <section className="studio-heading"><p className="eyebrow">Assistant · {meta.who}</p><h1>{meta.title}</h1><p>{meta.help}</p></section>
       {notice}
+      {field(search.message) === 'saved' && nextSteps[kind].length > 0 && (
+        <section className="studio-panel" aria-labelledby="suite"><h2 id="suite">C’est fait. Étape suivante</h2>
+          <p className="studio-actions">{nextSteps[kind].map(([label, href]) => <a key={label} className="action" href={href.startsWith('?') ? path + href : href}>{label}</a>)}</p></section>
+      )}
+      {field(search.message) === 'saved' && <HandoffPanel items={(await handoffs(settings, actor)).slice(0, 3)} tasks={[]} />}
       {body}
       <p><a href={path}>← Autres créations</a></p>
     </main>

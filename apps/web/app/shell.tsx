@@ -45,7 +45,7 @@ function Mark() {
   );
 }
 
-const isActive = (path: string, href: string) => href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+const isActive = (path: string, href: string) => href.includes('?') ? false : href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
 
 // Reader preferences stay on this device only.
 function usePreference(name: 'dark' | 'eco') {
@@ -79,15 +79,18 @@ export function Shell({ groups, brand, title, children }: { groups: NavGroup[]; 
           <button type="button" className="icon-button only-mobile" onClick={() => setOpen(false)} aria-label="Fermer le menu"><Icon name="close" /></button>
         </div>
         <nav className="sidebar-nav" aria-label="Navigation principale">
-          {groups.map((group, index) => (
-            <div key={group.label}>
-              <p className="sidebar-caption">{index + 1}. {group.label}</p>
-              {group.items.map(item => (
-                <a key={item.href} href={item.href} className={isActive(path, item.href) && item === current ? 'nav-item active' : 'nav-item'}
-                  aria-current={item === current ? 'page' : undefined}><Icon name={item.icon} />{item.label}</a>
-              ))}
-            </div>
-          ))}
+          {groups.map(group => {
+            const here = group.items.includes(current!) || (path === '/administration/creer' && group.label === 'Créer');
+            return (
+              <details key={group.label} className="sidebar-group" open={here || groups.length <= 3 || undefined}>
+                <summary className="sidebar-caption">{group.label}</summary>
+                {group.items.map(item => (
+                  <a key={item.href} href={item.href} className={item === current ? 'nav-item active' : 'nav-item'}
+                    aria-current={item === current ? 'page' : undefined}><Icon name={item.icon} />{item.label}</a>
+                ))}
+              </details>
+            );
+          })}
         </nav>
       </aside>
       <div className="overlay only-mobile" onClick={() => setOpen(false)} aria-hidden="true" />
@@ -106,7 +109,7 @@ export function Shell({ groups, brand, title, children }: { groups: NavGroup[]; 
             </div>
           </div>
           <nav className="role-strip" aria-label="Accès rapides">
-            {all.map(item => (
+            {(groups.find(group => current && group.items.includes(current))?.items ?? groups[0]?.items ?? []).map(item => (
               <a key={item.href} href={item.href} className={item === current ? 'pill active' : 'pill'}><Icon name={item.icon} />{item.label}</a>
             ))}
           </nav>

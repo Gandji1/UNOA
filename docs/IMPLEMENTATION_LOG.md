@@ -200,3 +200,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0018 : mode développement (mot de passe libre, sans blocage, affiché à la connexion, journalisé)
   décidé par le propriétaire jusqu'à la fin du développement ; réinitialisation de mot de passe par un administrateur.
 - Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
+
+## 23 novembre 2026 — Menus pliables, actions par profil, relais hiérarchique
+
+- Barre latérale en rubriques pliables (Site public, Mon espace, Tableau de bord, Créer, Organisation, Formations et cours,
+  Étudiants, Utilisateurs, Réglages) ; rubrique « Créer » limitée à ce que le profil peut créer.
+- Tableau de bord : boutons « Ce que vous pouvez créer », « Prochaines étapes » (tâches du profil, personnes invitées
+  à qui demander de se connecter et pour quoi) ; étape suivante après chaque création.
+- Définitions de types déplacées en réglage avancé. Vérifications : HTTP 11, build : PASS.

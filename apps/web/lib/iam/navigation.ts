@@ -36,9 +36,40 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/parametres': 'Règles et réglages par pays ou établissement, avec versions et dates d’effet.',
 };
 
+// Creation shortcuts by level (owner's hierarchy): shown only where the
+// person may create the object (same rule as the creation assistants).
+const creations: { kind: string; label: string; check: string }[] = [
+  { kind: 'pays', label: 'Un pays', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature IN ('platform', 'territory')" },
+  { kind: 'etablissement', label: 'Un établissement', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature IN ('territory', 'jurisdiction')" },
+  { kind: 'campus', label: 'Un campus', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature = 'institution'" },
+  { kind: 'faculte', label: 'Une faculté', check: "unoa.has_scope_permission($1, 'org.write', scope.id) AND kind.nature = 'institution'" },
+  { kind: 'departement', label: 'Un département', check: "unoa.has_scope_permission($1, 'org.write', scope.id) AND kind.nature = 'academic_unit'" },
+  { kind: 'filiere', label: 'Une filière', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
+  { kind: 'formation', label: 'Une formation', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
+  { kind: 'matiere', label: 'Une matière', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
+  { kind: 'responsable', label: 'Nommer un responsable', check: "unoa.has_scope_permission($1, 'iam.manage', scope.id)" },
+];
+
+export async function allowedCreations(actor: string) {
+  const settings = iamSettings();
+  if (!settings) return [];
+  const { rows } = await database(settings).query<Record<string, boolean>>(`SELECT ${creations.map(item =>
+    `EXISTS (SELECT 1 FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE ${item.check}) AS "${item.kind}"`).join(', ')}`, [actor]);
+  return creations.filter(item => rows[0]?.[item.kind]);
+}
+
+// Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
+const sections: { label: string; icon: string; hrefs: string[] }[] = [
+  { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/site'] },
+  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours'] },
+  { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite'] },
+  { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
+  { label: 'Réglages', icon: 'sliders', hrefs: ['/administration/notifications', '/administration/parametres'] },
+];
+
 export const navigation = cache(async () => {
   const groups: NavGroup[] = [{
-    label: 'Portail public',
+    label: 'Site public',
     items: [
       { href: '/', label: 'Accueil', icon: 'home' },
       { href: '/formations', label: 'Formations', icon: 'cap' },
@@ -55,17 +86,26 @@ export const navigation = cache(async () => {
         'SELECT unoa.account_permissions($1) AS permissions', [actor],
       ).catch(() => ({ rows: [{ permissions: [] as string[] }] }));
       const held = new Set(rows[0]?.permissions ?? []);
-      groups.push({ label: 'Apprentissage', items: [
+      groups.push({ label: 'Mon espace', items: [
+        { href: '/espace', label: 'Mon espace', icon: 'user' },
         { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
       ] });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
-      if (admin.length) groups.push({ label: 'Administration', items: [{ href: '/administration', label: 'Vue d’ensemble', icon: 'grid' }, { href: '/administration/creer', label: 'Créer (assistants)', icon: 'studio' }, ...admin, { href: '/administration/guide', label: 'Qui fait quoi', icon: 'book' }] });
+      if (admin.length) {
+        groups.push({ label: 'Tableau de bord', items: [
+          { href: '/administration', label: 'Vue d’ensemble', icon: 'grid' }, { href: '/administration/guide', label: 'Qui fait quoi', icon: 'book' }] });
+        const create = await allowedCreations(actor).catch(() => []);
+        if (create.length) groups.push({ label: 'Créer', items: create.map(item => ({ href: '/administration/creer?quoi=' + item.kind, label: item.label, icon: 'studio' })) });
+        for (const section of sections) {
+          const items = section.hrefs.map(href => admin.find(item => item.href === href)).filter((item): item is NavItem => !!item);
+          if (items.length) groups.push({ label: section.label, items });
+        }
+      }
     }
   }
-  groups.push({ label: 'Compte', items: [signedIn
-    ? { href: '/espace', label: 'Mon espace', icon: 'user' }
-    : { href: '/connexion', label: 'Connexion', icon: 'user' }] });
+  if (!signedIn) groups.push({ label: 'Compte', items: [
+    { href: '/connexion', label: 'Connexion', icon: 'user' }, { href: '/inscription', label: 'Créer un compte', icon: 'file' }] });
   return { groups, signedIn };
 });

@@ -7,6 +7,9 @@ import { database, sessionAccount } from '@/lib/iam/sessions';
 import { levelLabels, roleGuide, setupProgress, setupSteps } from '@/lib/iam/guide';
 import { ActionForm, Badge } from './forms';
 import { developmentMode } from '@/lib/iam/local';
+import { handoffs, myTasks } from '@/lib/iam/handoff';
+import { allowedCreations } from '@/lib/iam/navigation';
+import { HandoffPanel } from './handoff';
 
 export const metadata: Metadata = { title: 'Administration' };
 export const dynamic = 'force-dynamic';
@@ -27,11 +30,12 @@ export default async function Administration() {
   const actor = await sessionAccount(settings, (await cookies()).get(cookieName(settings, 'session'))?.value).catch(() => null);
   if (!actor) redirect('/connexion');
   const { groups } = await navigation();
-  const studios = new Map((groups.find(group => group.label === 'Administration')?.items ?? []).map(item => [item.href, item]));
+  const studios = new Map(groups.flatMap(group => group.items).filter(item => item.href.startsWith('/administration/') && !item.href.includes('?')).map(item => [item.href, item]));
   const { rows: [root] } = await database(settings).query<{ platform: boolean; country: boolean }>(
     `SELECT unoa.has_scope_permission($1, 'iam.read', id) AS platform, 'territory.write' = ANY(unoa.account_permissions($1)) AS country
      FROM unoa.scope WHERE parent_id IS NULL`, [actor]);
   const development = await developmentMode(settings).catch(() => false);
+  const [relay, tasks, creations] = await Promise.all([handoffs(settings, actor), myTasks(settings, actor), allowedCreations(actor)]);
   const [progress, roles] = await Promise.all([root?.platform || root?.country ? setupProgress(settings) : Promise.resolve(null), roleGuide(settings)]);
   const roleLabel = new Map(roles.map(role => [role.code, role.label ?? role.code]));
   const { rows: mine } = await database(settings).query<{ role_label: string | null; role_code: string; scope_label: string }>(
@@ -42,11 +46,12 @@ export default async function Administration() {
       <section className="studio-heading"><p className="eyebrow">Console d’administration</p><h1>Administration</h1>
         <p>Vos rôles : {mine.length ? mine.map(item => `${item.role_label ?? item.role_code} (${item.scope_label})`).join(' · ') : 'aucun'}.
           {' '}<a href="/administration/guide">Qui fait quoi ?</a></p></section>
-      {studios.size > 0 && (
+      <HandoffPanel items={relay} tasks={tasks} />
+      {creations.length > 0 && (
         <section className="studio-panel" aria-labelledby="creer">
-          <h2 id="creer">Créer en quelques clics</h2>
-          <p>Pays, établissement, campus, faculté, département, filière, formation, matière, responsable : un assistant par élément, dans l’ordre.</p>
-          <p><a className="action" href="/administration/creer">Ouvrir les assistants de création</a></p>
+          <h2 id="creer">Ce que vous pouvez créer</h2>
+          <p className="studio-actions">{creations.map(item => <a key={item.kind} className="action" href={'/administration/creer?quoi=' + item.kind}>
+            {item.kind === 'responsable' ? item.label : 'Créer ' + item.label.toLowerCase()}</a>)}</p>
         </section>
       )}
       {root?.platform && (
