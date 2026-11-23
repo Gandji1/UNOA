@@ -10,16 +10,16 @@ export interface NavGroup { label: string; items: NavItem[] }
 // Menus follow the permissions held by the session; a hidden route stays
 // protected on the server (TDR §18).
 const administration: [string, NavItem][] = [
-  ['iam.read', { href: '/administration/acces', label: 'Accès et rôles', icon: 'key' }],
-  ['org.read', { href: '/administration/structures', label: 'Structures académiques', icon: 'landmark' }],
-  ['catalog.read', { href: '/administration/catalogue', label: 'Catalogue des formations', icon: 'book' }],
-  ['lms.read', { href: '/administration/cours', label: 'Studio des cours', icon: 'studio' }],
+  ['iam.read', { href: '/administration/acces', label: 'Utilisateurs et rôles', icon: 'key' }],
+  ['org.read', { href: '/administration/structures', label: 'Facultés et départements', icon: 'landmark' }],
+  ['catalog.read', { href: '/administration/catalogue', label: 'Filières et formations', icon: 'book' }],
+  ['lms.read', { href: '/administration/cours', label: 'Cours en ligne', icon: 'studio' }],
   ['adm.read', { href: '/administration/admissions', label: 'Admissions', icon: 'inbox' }],
   ['not.read', { href: '/administration/notifications', label: 'Notifications', icon: 'bell' }],
   ['sis.read', { href: '/administration/scolarite', label: 'Scolarité', icon: 'cap' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
-  ['territory.read', { href: '/administration/territoires', label: 'Territoires', icon: 'map' }],
-  ['config.read', { href: '/administration/parametres', label: 'Paramètres', icon: 'sliders' }],
+  ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
+  ['config.read', { href: '/administration/parametres', label: 'Réglages', icon: 'sliders' }],
 ];
 
 // Short description of each studio, shown on the administration overview.
@@ -32,8 +32,8 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/notifications': 'Modèles de messages par événement, canal et langue ; journal des envois, files et rejeu.',
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/site': 'Site public de l’établissement : noms d’hôte, textes, mise en ligne, création de compte.',
-  '/administration/territoires': 'Territoires, juridictions, établissements, centres et rattachements.',
-  '/administration/parametres': 'Paramètres typés, héritage par portée, versions et dates d’effet.',
+  '/administration/territoires': 'Pays, régions, établissements universitaires et campus.',
+  '/administration/parametres': 'Règles et réglages par pays ou établissement, avec versions et dates d’effet.',
 };
 
 export const navigation = cache(async () => {

@@ -13,7 +13,7 @@ import { Overview } from './overview';
 import { ProgramView } from './program';
 import { VersionView } from './version';
 
-export const metadata: Metadata = { title: 'Catalogue des formations' };
+export const metadata: Metadata = { title: 'Filières et formations' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -36,7 +36,7 @@ export default async function Catalogue({ searchParams }: { searchParams: Promis
   const notice = <Notice error={field(search.error)} message={field(search.message)} />;
   const inaccessible = (
     <main id="contenu" className="studio">
-      <section className="studio-panel"><h1>Catalogue des formations</h1>{notice}
+      <section className="studio-panel"><h1>Filières et formations</h1>{notice}
         <p>Cet élément est inaccessible avec vos habilitations.</p>
         <p><a href="/administration/catalogue">Revenir au catalogue</a></p></section>
     </main>
@@ -59,7 +59,7 @@ export default async function Catalogue({ searchParams }: { searchParams: Promis
     return (
       <main id="contenu" className="studio">
         <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › Catalogue</nav>
-        <section className="studio-heading"><h1>Catalogue des formations</h1>
+        <section className="studio-heading"><h1>Filières et formations</h1>
           <p>Aucun établissement ni aucune composante active ne vous est attribué pour le catalogue.</p></section>
       </main>
     );

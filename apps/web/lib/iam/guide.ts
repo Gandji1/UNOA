@@ -12,7 +12,7 @@ export interface SetupStep { key: string; title: string; detail: string; href: s
 // Owner's hierarchy: super-administrator → country administrator →
 // institution (campus) administrator → dean / head of department → teachers.
 export const setupSteps: SetupStep[] = [
-  { key: 'countries', title: '1. Pays (territoires)', href: '/administration/territoires', level: 'platform',
+  { key: 'countries', title: '1. Pays', href: '/administration/territoires', level: 'platform',
     detail: 'Le super-administrateur déclare les types (pays, région, établissement, campus, faculté, département…) puis crée les pays.',
     roles: ['platform_admin', 'territory_manager'] },
   { key: 'country_admins', title: '2. Administrateurs pays', href: '/administration/acces', level: 'platform',

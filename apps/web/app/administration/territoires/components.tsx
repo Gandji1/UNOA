@@ -43,7 +43,7 @@ function AttributeFields({ scope, defaults }: { scope: TerritoryScope; defaults?
 export function TerritoryEditor({ scope }: { scope: TerritoryScope }) {
   return (
     <details className="studio-panel">
-      <summary>Modifier cette portée</summary>
+      <summary>Modifier ce périmètre</summary>
       <form method="post" action={`/api/v1/territories/scopes/${scope.id}/update`} className="studio-form">
         <input type="hidden" name="scopeId" value={scope.id} />
         <AttributeFields scope={scope} defaults={scope} />
@@ -59,14 +59,14 @@ export function ChildEditor({ scope, types }: { scope: TerritoryScope; types: Sc
   if (allowed.length === 0) {
     return (
       <section className="studio-panel">
-        <h2>Créer une portée fille</h2>
+        <h2>Créer une sous-périmètre</h2>
         <p>Aucun type n’est déclaré sous « {scope.type_label} ». Déclarez d’abord la hiérarchie à la racine.</p>
       </section>
     );
   }
   return (
     <details className="studio-panel">
-      <summary>Créer une portée fille</summary>
+      <summary>Créer une sous-périmètre</summary>
       <form method="post" action="/api/v1/territories/scopes" className="studio-form">
         <input type="hidden" name="scopeId" value={scope.id} />
         <input type="hidden" name="parentId" value={scope.id} />
@@ -77,8 +77,8 @@ export function ChildEditor({ scope, types }: { scope: TerritoryScope; types: Sc
         </select></label>
         <label>Début de présence (UTC)<input type="datetime-local" name="presentFrom" required /></label>
         <AttributeFields scope={scope} />
-        <p className="studio-wide">La présence doit rester comprise dans celle de la portée mère.</p>
-        <div className="studio-wide"><button className="action" type="submit">Créer la portée</button></div>
+        <p className="studio-wide">La présence doit rester comprise dans celle du périmètre mère.</p>
+        <div className="studio-wide"><button className="action" type="submit">Créer le périmètre</button></div>
       </form>
     </details>
   );
@@ -107,7 +107,7 @@ export function AttachmentEditor({ scope, targets }: { scope: TerritoryScope; ta
         <label>Nature du rattachement<select name="kind" required>
           {Object.entries(kindLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select></label>
-        <label>Portée visée<select name="territoryId" required>
+        <label>Périmètre visée<select name="territoryId" required>
           {targets.map(target => (
             <option key={target.id} value={target.id}>{target.label} · {natureLabels[target.nature]}</option>
           ))}
@@ -134,7 +134,7 @@ export function AttachmentClosure({ scope, attachment }: { scope: TerritoryScope
 export function TypeEditor({ scope, types }: { scope: TerritoryScope; types: ScopeTypeRow[] }) {
   return (
     <details className="studio-panel">
-      <summary>Déclarer un type de portée et sa hiérarchie</summary>
+      <summary>Déclarer un type de périmètre et sa hiérarchie</summary>
       <form method="post" action="/api/v1/territories/types" className="studio-form">
         <input type="hidden" name="scopeId" value={scope.id} />
         <label>Code<input name="code" required maxLength={63} pattern="[a-z][a-z0-9_]*" placeholder="region" /></label>

@@ -55,7 +55,7 @@ export async function exerciseConfiguration({ database, issuer, login, call, ori
   await okay(await write('definitions', reviewCookie, definition));
   const catalogue = await okay(await read(api + 'definitions?scopeId=' + alpha, alphaCookie));
   assert.deepEqual(catalogue.definitions.map(item => item.key), [key]);
-  assert.match(await (await read('/administration', alphaCookie)).text(), /<a href="\/administration\/parametres"><strong>Paramètres/);
+  assert.match(await (await read('/administration', alphaCookie)).text(), /<a href="\/administration\/parametres"><strong>Réglages/);
 
   const at = new Date(Date.now() + 3_600_000).toISOString().slice(0, 16);
   const draft = { scopeId: alpha, key, value: 18, reason: 'Ajustement Alpha', effectiveFrom: at };

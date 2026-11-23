@@ -10,17 +10,17 @@ import {
   kindLabels, LabelEditor, natureLabels, TerritoryEditor, TypeEditor,
 } from './components';
 
-export const metadata: Metadata = { title: 'Territoires et implantations' };
+export const metadata: Metadata = { title: 'Pays et établissements' };
 export const dynamic = 'force-dynamic';
 
 const path = '/administration/territoires';
 const formErrors: Record<string, string> = {
   '400': 'Vérifiez les champs saisis : fuseau IANA, monnaie, langue et format régional.',
   '403': 'Cette action dépasse vos habilitations.',
-  '404': 'La portée demandée est introuvable.',
+  '404': 'Le périmètre demandé est introuvable.',
   '409': 'Cet enregistrement existe déjà ou a changé depuis son affichage.',
   '413': 'La demande dépasse la taille autorisée.',
-  '422': 'La hiérarchie, la période de présence ou la nature de la portée refuse cette valeur.',
+  '422': 'La hiérarchie, la période de présence ou la nature du périmètre refuse cette valeur.',
   '503': 'Le registre territorial est temporairement indisponible.',
 };
 
@@ -50,9 +50,9 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
       <main id="contenu">
         <a href="/espace">Mon espace</a>
         <section className="account-panel">
-          <h1>Territoires et implantations</h1>
-          <p>{scopeAfter ? 'Aucune autre portée à afficher.' : 'Aucune portée territoriale ne vous est attribuée.'}</p>
-          {scopeAfter && <p><a href={path}>Revenir aux premières portées</a></p>}
+          <h1>Pays et établissements</h1>
+          <p>{scopeAfter ? 'Aucun autre périmètre à afficher.' : 'Aucun périmètre territoriale ne vous est attribuée.'}</p>
+          {scopeAfter && <p><a href={path}>Revenir aux premières périmètres</a></p>}
         </section>
       </main>
     );
@@ -67,9 +67,9 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
     return (
       <main id="contenu">
         <section className="account-panel">
-          <h1>Territoires et implantations</h1>
-          <p>Cette portée est inaccessible.</p>
-          <p><a href={path}>Choisir une portée autorisée</a></p>
+          <h1>Pays et établissements</h1>
+          <p>Ce périmètre est inaccessible.</p>
+          <p><a href={path}>Choisir un périmètre autorisé</a></p>
         </section>
       </main>
     );
@@ -85,23 +85,23 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
     <main id="contenu" className="studio">
       <a href="/espace">Mon espace</a>
       <section className="studio-heading">
-        <h1>Territoires et implantations</h1>
+        <h1>Pays et établissements</h1>
         <p>Déclarez les types, la hiérarchie, les règles régionales et les rattachements des établissements.</p>
       </section>
 
       {message && <p className="studio-notice" role="alert">{message}</p>}
       {!message && search.message === 'saved' && <p className="studio-notice" role="status">Modification enregistrée.</p>}
 
-      <section className="studio-panel" aria-label="Choix de la portée">
+      <section className="studio-panel" aria-label="Choix du périmètre">
         <form method="get" className="studio-form studio-filters">
-          <label>Portée<select name="scope" defaultValue={scope.id}>
+          <label>Périmètre<select name="scope" defaultValue={scope.id}>
             {choices.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
           </select></label>
           <button type="submit" className="action">Consulter</button>
         </form>
         <div className="studio-links">
-          {scopes.length > 50 && <a href={studioUrl({ scopeAfter: options[49].id })}>Portées suivantes</a>}
-          {scopeAfter && <a href={path}>Premières portées</a>}
+          {scopes.length > 50 && <a href={studioUrl({ scopeAfter: options[49].id })}>Périmètres suivantes</a>}
+          {scopeAfter && <a href={path}>Premières périmètres</a>}
         </div>
       </section>
 
@@ -110,7 +110,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
         <dl className="studio-resolution">
           <div><dt>Type</dt><dd>{scope.type_label}</dd></div>
           <div><dt>Nature</dt><dd>{natureLabels[scope.nature]}</dd></div>
-          <div><dt>Portée mère</dt><dd>{scope.parent_label ?? 'Racine de la plateforme'}</dd></div>
+          <div><dt>Périmètre mère</dt><dd>{scope.parent_label ?? 'Racine de la plateforme'}</dd></div>
           <div><dt>Fuseau</dt><dd>{scope.time_zone ?? 'Non renseigné'}</dd></div>
           <div><dt>Monnaie</dt><dd>{scope.currency ?? 'Non renseignée'}</dd></div>
           <div><dt>Format régional</dt><dd>{scope.locale ?? 'Non renseigné'}</dd></div>
@@ -142,11 +142,11 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
       </section>
 
       <section className="studio-panel" aria-labelledby="sous-portees-title">
-        <h2 id="sous-portees-title">Portées filles</h2>
-        {children.length === 0 ? <p>Aucune portée fille visible.</p> : (
-          <div className="studio-table" role="region" aria-label="Portées filles" tabIndex={0}>
+        <h2 id="sous-portees-title">Sous-périmètres</h2>
+        {children.length === 0 ? <p>Aucune sous-périmètre visible.</p> : (
+          <div className="studio-table" role="region" aria-label="Sous-périmètres" tabIndex={0}>
             <table>
-              <thead><tr><th>Portée</th><th>Nature</th><th>Fuseau</th><th>Monnaie</th><th>Présence</th></tr></thead>
+              <thead><tr><th>Périmètre</th><th>Nature</th><th>Fuseau</th><th>Monnaie</th><th>Présence</th></tr></thead>
               <tbody>{children.map(child => (
                 <tr key={child.id}>
                   <td><a href={studioUrl({ scope: child.id })}>{child.label}</a></td>
@@ -160,8 +160,8 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
           </div>
         )}
         <div className="studio-links">
-          {data.nextChild && <a href={studioUrl({ scope: scope.id, childAfter: data.nextChild })}>Portées filles suivantes</a>}
-          {childAfter && <a href={studioUrl({ scope: scope.id })}>Premières portées filles</a>}
+          {data.nextChild && <a href={studioUrl({ scope: scope.id, childAfter: data.nextChild })}>Sous-périmètres suivantes</a>}
+          {childAfter && <a href={studioUrl({ scope: scope.id })}>Premières sous-périmètres</a>}
         </div>
       </section>
 
@@ -171,7 +171,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
           attachments.length === 0 ? <p>Cet établissement n’est rattaché à aucun territoire ni cadre réglementaire.</p> : (
             <div className="studio-table" role="region" aria-label="Rattachements de l’établissement" tabIndex={0}>
               <table>
-                <thead><tr><th>Portée visée</th><th>Nature</th><th>Période</th><th>Justification</th><th>Action</th></tr></thead>
+                <thead><tr><th>Périmètre visée</th><th>Nature</th><th>Période</th><th>Justification</th><th>Action</th></tr></thead>
                 <tbody>{attachments.map(item => (
                   <tr key={item.id}>
                     <td>{item.territory_label}</td><td>{kindLabels[item.kind]}</td>
@@ -185,7 +185,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
             </div>
           )
         ) : (
-          hosted.length === 0 ? <p>Aucun établissement rattaché à cette portée.</p> : (
+          hosted.length === 0 ? <p>Aucun établissement rattaché à ce périmètre.</p> : (
             <div className="studio-table" role="region" aria-label="Établissements rattachés" tabIndex={0}>
               <table>
                 <thead><tr><th>Établissement</th><th>Nature</th><th>Période</th><th>Justification</th></tr></thead>

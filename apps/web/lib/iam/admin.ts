@@ -38,7 +38,7 @@ async function rights(settings: IamSettings, actor: string, scopeId: string) {
 export async function accessOverview(settings: IamSettings, actor: string, scope: string, search?: string) {
   const scopeId = uuid(scope);
   const granted = await rights(settings, actor, scopeId);
-  ensure(granted?.read || granted?.audit, 403, 'Portée inaccessible');
+  ensure(granted?.read || granted?.audit, 403, 'Périmètre inaccessible');
   const store = database(settings);
   const [label, accounts, invitations, roles, root] = await Promise.all([
     store.query<{ label: string }>('SELECT label FROM unoa.scope WHERE id = $1', [scopeId]),

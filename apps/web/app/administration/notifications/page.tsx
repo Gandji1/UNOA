@@ -36,7 +36,7 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
 
   if (scopeIdFormat.test(scopeId)) {
     const data = await notificationOverview(settings, actor, scopeId).catch(refused);
-    if (!data) return <main id="contenu" className="studio"><section className="studio-panel"><h1>Notifications</h1>{notice}<p>Portée inaccessible.</p></section></main>;
+    if (!data) return <main id="contenu" className="studio"><section className="studio-panel"><h1>Notifications</h1>{notice}<p>Périmètre inaccessible.</p></section></main>;
     const back = `${path}?scope=${scopeId}`;
     return (
       <main id="contenu" className="studio">
@@ -47,7 +47,7 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
         {notice}
         <Panel title="Modèles" id="modeles">
           {data.templates.length === 0 ? <p>Aucun modèle : les textes par défaut s’appliquent.</p> : (
-            <Table label="Modèles" head={['Événement', 'Canal', 'Langue', 'Objet et texte', 'Portée', 'État', '']}>
+            <Table label="Modèles" head={['Événement', 'Canal', 'Langue', 'Objet et texte', 'Périmètre', 'État', '']}>
               {data.templates.map(item => (
                 <tr key={item.id}><td><code>{item.event_code}</code></td><td>{channelLabels[item.channel]}</td><td>{item.language}</td>
                   <td><strong>{item.subject}</strong><p className="muted">{item.body}</p></td><td>{item.scope_label}{!item.own && ' (héritée)'}</td>
@@ -109,9 +109,9 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
   return (
     <main id="contenu" className="studio">
       {crumbs()}
-      <section className="studio-heading"><p className="eyebrow">Administration</p><h1>Notifications</h1><p>Choisissez une portée.</p></section>
+      <section className="studio-heading"><p className="eyebrow">Administration</p><h1>Notifications</h1><p>Choisissez un périmètre.</p></section>
       {notice}
-      {scopes.length === 0 ? <p className="card-note">Aucune portée accessible.</p> : (
+      {scopes.length === 0 ? <p className="card-note">Aucun périmètre accessible.</p> : (
         <ul className="program-grid">{scopes.map(item => <li key={item.id} className="program-card"><h2><a href={`${path}?scope=${item.id}`}>{item.label}</a></h2></li>)}</ul>
       )}
     </main>

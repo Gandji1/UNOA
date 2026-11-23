@@ -8,17 +8,17 @@ export const metadata: Metadata = { title: 'Qui fait quoi' };
 export const dynamic = 'force-dynamic';
 
 const creations: [string, string, string][] = [
-  ['Types de portées (pays, région, établissement, campus, faculté, département…)', 'Territoires → types', 'Super-administrateur'],
-  ['Pays (territoires)', 'Territoires', 'Super-administrateur'],
-  ['Administrateur de chaque pays', 'Accès et rôles → inviter (rôle Administrateur pays, sur le pays)', 'Super-administrateur'],
-  ['Établissements universitaires et leurs campus', 'Territoires (dans le pays)', 'Administrateur pays'],
-  ['Administrateur de chaque établissement', 'Accès et rôles → inviter (sur l’établissement)', 'Administrateur pays'],
+  ['Types de périmètres (pays, région, établissement, campus, faculté, département…)', 'Pays et établissements → types', 'Super-administrateur'],
+  ['Pays', 'Pays et établissements', 'Super-administrateur'],
+  ['Administrateur de chaque pays', 'Utilisateurs et rôles → inviter (rôle Administrateur pays, sur le pays)', 'Super-administrateur'],
+  ['Établissements universitaires et leurs campus', 'Pays et établissements (dans le pays)', 'Administrateur pays'],
+  ['Administrateur de chaque établissement', 'Utilisateurs et rôles → inviter (sur l’établissement)', 'Administrateur pays'],
   ['Site public de l’établissement', 'Site public', 'Administrateur d’établissement'],
-  ['Facultés, puis départements au sein des facultés', 'Structures académiques', 'Administrateur d’établissement (départements : aussi le doyen)'],
-  ['Doyens, chefs de département, enseignants', 'Accès et rôles → inviter (sur la faculté ou le département)', 'Administrateur d’établissement, doyen, chef de département'],
+  ['Facultés, puis départements au sein des facultés', 'Facultés et départements', 'Administrateur d’établissement (départements : aussi le doyen)'],
+  ['Doyens, chefs de département, enseignants', 'Utilisateurs et rôles → inviter (sur la faculté ou le département)', 'Administrateur d’établissement, doyen, chef de département'],
   ['Filières et spécialités d’un département', 'Catalogue → référentiels (propriétaire : le département)', 'Chef de département, doyen'],
   ['Formations, maquettes (semestres, UE, crédits) et matières', 'Catalogue → programmes et cours', 'Chef de département, responsable de formation'],
-  ['Leçons, vidéos, exercices ; séances en direct avec les étudiants', 'Studio des cours → offre → séances', 'Enseignant (validation : chef de département ou validateur)'],
+  ['Leçons, vidéos, exercices ; séances en direct avec les étudiants', 'Cours en ligne → offre → séances', 'Enseignant (validation : chef de département ou validateur)'],
   ['Campagnes de candidature', 'Admissions', 'Gestionnaire des admissions (décision : jury ; recours : commission)'],
   ['Matricules, cohortes, inscriptions', 'Scolarité', 'Gestionnaire de scolarité (validation : validateur de scolarité)'],
 ];
@@ -49,7 +49,7 @@ export default async function Guide() {
       </section>
       <section className="studio-panel" aria-labelledby="roles">
         <h2 id="roles">Rôles disponibles</h2>
-        <p className="studio-help">Rôles types fournis avec la plateforme ; le super-administrateur peut les modifier ou en composer d’autres (Accès et rôles → Rôles et permissions).
+        <p className="studio-help">Rôles types fournis avec la plateforme ; le super-administrateur peut les modifier ou en composer d’autres (Utilisateurs et rôles → Rôles et permissions).
           Un rôle s’attribue au niveau indiqué : plateforme, pays, établissement (ou campus, faculté, département), faculté ou département.</p>
         <Table label="Rôles" head={['Rôle', 'Niveau', 'Mission', 'Permissions']}>
           {roles.map(role => (

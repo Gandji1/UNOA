@@ -338,10 +338,10 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   assert.match(localMenu, /href="\/administration\/catalogue"/);
   assert.doesNotMatch(await (await get('/')).text(), /href="\/administration\//);
   assert.equal((await get('/administration/site', B)).status, 200);
-  assert.match(await (await get('/administration/site', B)).text(), /Aucune portée ne vous est attribuée/);
+  assert.match(await (await get('/administration/site', B)).text(), /Aucun périmètre ne vous est attribué/);
   const espace = await (await get('/espace', A)).text();
-  assert.match(espace, /Structures académiques/);
-  assert.match(espace, /Catalogue des formations/);
+  assert.match(espace, /Facultés et départements/);
+  assert.match(espace, /Filières et formations/);
   const form = await call('/api/v1/catalog/program-versions/' + v2 + '/periods', {
     method: 'POST', headers: { Origin: origin, Cookie: A, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ return: 'https://evil.example/x', ordinal: '9', label: 'x' }),

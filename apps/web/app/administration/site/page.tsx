@@ -28,10 +28,10 @@ export default async function SiteStudio({ searchParams }: { searchParams: Promi
   const notice = <Notice error={field(search.error)} message={field(search.message)} />;
   if (!selected) {
     return <main id="contenu" className="studio"><section className="studio-heading"><h1>Site public</h1>
-      <p>Aucune portée ne vous est attribuée pour la gestion d’un site public.</p></section></main>;
+      <p>Aucun périmètre ne vous est attribué pour la gestion d’un site public.</p></section></main>;
   }
   const data = await siteDetails(settings, actor, selected).catch(error => { if (error instanceof Problem) return null; throw error; });
-  if (!data) return <main id="contenu" className="studio"><section className="studio-panel"><h1>Site public</h1>{notice}<p>Portée inaccessible.</p></section></main>;
+  if (!data) return <main id="contenu" className="studio"><section className="studio-panel"><h1>Site public</h1>{notice}<p>Périmètre inaccessible.</p></section></main>;
   const { scope, rights, site, hosts, texts } = data;
   const back = `${path}?scope=${scope.id}`;
   const latest = texts.find(item => item.language === site?.default_language);
@@ -40,11 +40,11 @@ export default async function SiteStudio({ searchParams }: { searchParams: Promi
       <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <span aria-current="page">Site public</span></nav>
       <section className="studio-heading"><p className="eyebrow">Site public · {scope.label}</p><h1>{latest?.name ?? 'Site public'}</h1>
         <p>Nom, accroche, textes d’accueil, présentation, contacts, mentions légales et confidentialité sont publiés ici, par langue.
-          Le site n’affiche que les formations et les structures de sa portée.</p></section>
+          Le site n’affiche que les formations et les structures de sa périmètre.</p></section>
       {notice}
-      <section className="studio-panel" aria-label="Choix de la portée">
+      <section className="studio-panel" aria-label="Choix du périmètre">
         <form method="get" className="studio-form studio-filters">
-          <label>Portée<select name="scope" defaultValue={scope.id}>
+          <label>Périmètre<select name="scope" defaultValue={scope.id}>
             {contexts.map(item => <option key={item.id} value={item.id}>{item.label}{item.site_id ? ' · site' : ''}</option>)}
           </select></label>
           <button className="action" type="submit">Consulter</button>
@@ -52,7 +52,7 @@ export default async function SiteStudio({ searchParams }: { searchParams: Promi
       </section>
       {!site ? (
         <Panel title="Créer le site" id="creer">
-          <p>Aucun site n’est encore déclaré pour cette portée.</p>
+          <p>Aucun site n’est encore déclaré pour ce périmètre.</p>
           {rights.write && (
             <ActionForm action={`${api}sites`} back={back} hidden={{ scopeId: scope.id }} submit="Créer le site">
               <label>Langue par défaut<input name="defaultLanguage" required maxLength={6} defaultValue="fr" /></label>

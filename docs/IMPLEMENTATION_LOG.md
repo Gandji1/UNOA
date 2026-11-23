@@ -183,3 +183,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - À la demande du propriétaire, créés par les API réelles (audités) : « Pays de test » → « Université de test »
   → « Faculté des sciences et techniques (test) » → « Département d’informatique (test) » ; comptes admin.pays.test,
   admin.univ.test, doyen.test, chef.dept.test, enseignant.test. Données marquées « test », à clore avant ouverture.
+
+## 23 novembre 2026 — Vocabulaire simplifié et compte candidat
+
+- Interface : Pays et établissements, Facultés et départements, Filières et formations, Cours en ligne,
+  Utilisateurs et rôles, Réglages ; « périmètre » au lieu de « portée ».
+- Migration 0017 : création de compte candidat par identifiant et mot de passe (`/inscription`) sur un site
+  qui l'autorise. Vérifications : PostgreSQL 7, HTTP 11, build : PASS.

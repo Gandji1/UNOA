@@ -99,7 +99,7 @@ export async function scopeTypeCatalogue(settings: IamSettings) {
 export async function territoryDetails(settings: IamSettings, actor: string, scopeId: string, after?: string) {
   const store = database(settings);
   const scope = await getTerritory(store, actor, scopeId);
-  ensure(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Périmètre inaccessible');
   const [children, labels, attachments, hosted] = await Promise.all([
     store.query<TerritoryScope>(`
       SELECT ${scopeFields}
@@ -169,7 +169,7 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
   const presentFrom = utcTime(input.presentFrom);
   return transaction(settings, 'unoa.territory.' + parentId, async store => {
     const parent = await getTerritory(store, actor, parentId);
-    ensure(parent?.write, 403, 'Création de portée non autorisée');
+    ensure(parent?.write, 403, 'Création de périmètre non autorisée');
     // Academic units are proposed and approved through the organisation studio.
     const nature = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
     ensure(nature.rows[0]?.nature !== 'academic_unit', 422, 'Une unité académique se crée dans le studio des structures');

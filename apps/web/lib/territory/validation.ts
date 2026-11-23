@@ -18,7 +18,7 @@ export function typeCode(input: unknown) {
 }
 
 export function nature(input: unknown) {
-  ensure(natures.includes(input as Nature), 400, 'Nature de portée invalide');
+  ensure(natures.includes(input as Nature), 400, 'Nature de périmètre invalide');
   return input as Nature;
 }
 

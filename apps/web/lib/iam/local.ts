@@ -136,6 +136,29 @@ export async function acceptInvitationLocally(settings: IamSettings, token: unkn
   return session;
 }
 
+// Self-registration on a site with open account creation (candidates).
+export async function registerLocally(settings: IamSettings, siteId: string | null, input: Record<string, unknown>) {
+  ensure(siteId, 403, 'Création de compte fermée');
+  const login = typeof input.login === 'string' ? input.login.trim().toLowerCase() : '';
+  ensure(/^[a-z0-9][a-z0-9._@-]{2,119}$/.test(login), 400, 'Identifiant : 3 à 120 caractères (lettres minuscules, chiffres, . _ @ -)');
+  const name = boundedText(input.displayName, 200, 'Nom');
+  const email = typeof input.email === 'string' && input.email.trim() ? input.email.trim().toLowerCase() : null;
+  ensure(!email || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254), 400, 'Courriel invalide');
+  ensure(input.password === input.confirm, 422, 'Les mots de passe diffèrent');
+  const secret = checkNewPassword(input.password);
+  try {
+    await database(settings).query('SELECT unoa.register_local_account($1, $2, $3, $4, $5)', [siteId, login, await hashPassword(secret), name, email]);
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    if (code === 'U0409') throw new Problem(409, 'Cet identifiant est déjà pris');
+    if (code === 'U0403') throw new Problem(403, 'Création de compte fermée sur ce site');
+    throw error;
+  }
+  const session = await openSession(settings, { issuer: localIssuer, subject: login });
+  ensure(session, 403, 'Compte indisponible');
+  return session;
+}
+
 export async function credentialState(settings: IamSettings, actor: string) {
   const { rows } = await database(settings).query<{ login: string; must_change: boolean; totp: boolean }>(
     'SELECT login, must_change, totp_secret IS NOT NULL AS totp FROM unoa.local_credential WHERE account_id = $1', [actor]);

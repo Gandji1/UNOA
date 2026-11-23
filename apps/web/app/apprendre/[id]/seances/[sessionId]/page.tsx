@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string; sessionId: string }>; searchParams: Promise<{ error?: string; message?: string }> };
 const statusLabels: Record<string, string> = { present: 'Présent', absent: 'Absent', excused: 'Excusé' };
 const eventLabels: Record<string, string> = {
-  scheduled: 'Planifiée', rescheduled: 'Reportée', cancelled: 'Annulée', recording_announced: 'Enregistrement annoncé', replay_published: 'Replay publié',
+  scheduled: 'Planifiée', rescheduled: 'Repérimètre', cancelled: 'Annulée', recording_announced: 'Enregistrement annoncé', replay_published: 'Replay publié',
 };
 
 export default async function Roster({ params, searchParams }: Props) {

@@ -169,4 +169,6 @@ GRANT EXECUTE ON FUNCTION unoa.next_matricule(uuid) TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.accept_invitation_local(bytea, text, text) TO :"web_role";
 -- 0016: role levels.
 GRANT EXECUTE ON FUNCTION unoa.set_role_level(uuid, text, text, uuid) TO :"web_role";
+-- 0017: local self-registration.
+GRANT EXECUTE ON FUNCTION unoa.register_local_account(uuid, text, text, text, text) TO :"web_role";
 COMMIT;

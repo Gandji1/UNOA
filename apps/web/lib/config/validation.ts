@@ -34,9 +34,9 @@ export function definitionInput(input: Input, form: boolean) {
   ensure((kind === 'choice') === (options.length > 0), 400, 'Renseigner les choix uniquement pour le type Liste');
   const allowedTypes = typeof input.allowedTypes === 'string' ? [input.allowedTypes] : input.allowedTypes;
   ensure(Array.isArray(allowedTypes) && allowedTypes.length > 0 && allowedTypes.length <= 32 &&
-    new Set(allowedTypes).size === allowedTypes.length, 400, 'Types de portée requis');
+    new Set(allowedTypes).size === allowedTypes.length, 400, 'Types de périmètre requis');
   const types = allowedTypes.map(item => {
-    ensure(typeof item === 'string' && scopeType.test(item), 400, 'Type de portée invalide');
+    ensure(typeof item === 'string' && scopeType.test(item), 400, 'Type de périmètre invalide');
     return item;
   });
   const minimum = input.minimum == null || input.minimum === '' ? null : numeric(input.minimum);

@@ -7,7 +7,7 @@ import { Problem } from '@/lib/shared/validation';
 import { orgContexts, orgDetails } from '@/lib/org/store';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, shortId, Table } from '../forms';
 
-export const metadata: Metadata = { title: 'Structures académiques' };
+export const metadata: Metadata = { title: 'Facultés et départements' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -44,7 +44,7 @@ export default async function Structures({ searchParams }: { searchParams: Promi
     return (
       <main id="contenu" className="studio">
         <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › Structures</nav>
-        <section className="studio-heading"><h1>Structures académiques</h1>
+        <section className="studio-heading"><h1>Facultés et départements</h1>
           <p>Aucun établissement ni aucune composante ne vous est attribué.</p></section>
       </main>
     );
@@ -56,7 +56,7 @@ export default async function Structures({ searchParams }: { searchParams: Promi
   if (!data) {
     return (
       <main id="contenu" className="studio">
-        <section className="studio-panel"><h1>Structures académiques</h1>{notice}
+        <section className="studio-panel"><h1>Facultés et départements</h1>{notice}
           <p>Cette structure est inaccessible.</p><p><a href={path}>Choisir une structure autorisée</a></p></section>
       </main>
     );

@@ -8,7 +8,7 @@ import { configKey } from '@/lib/config/validation';
 import { Problem, utcTime } from '@/lib/shared/validation';
 import { DefinitionEditor, DraftEditor, formatTime, formatValue, kindLabels, stateLabels, VersionAction } from './components';
 
-export const metadata: Metadata = { title: 'Paramètres et versions' };
+export const metadata: Metadata = { title: 'Réglages' };
 export const dynamic = 'force-dynamic';
 
 const path = '/administration/parametres';
@@ -59,9 +59,9 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
       <main id="contenu">
         <a href="/espace">Mon espace</a>
         <section className="account-panel">
-          <h1>Paramètres et versions</h1>
-          <p>{scopeAfter ? 'Aucune autre portée à afficher.' : 'Aucune portée de configuration ne vous est attribuée.'}</p>
-          {scopeAfter && <p><a href={path}>Revenir aux premières portées</a></p>}
+          <h1>Réglages</h1>
+          <p>{scopeAfter ? 'Aucun autre périmètre à afficher.' : 'Aucun périmètre de configuration ne vous est attribuée.'}</p>
+          {scopeAfter && <p><a href={path}>Revenir aux premières périmètres</a></p>}
         </section>
       </main>
     );
@@ -77,9 +77,9 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
     return (
       <main id="contenu">
         <section className="account-panel">
-          <h1>Paramètres et versions</h1>
-          <p>Cette portée est inaccessible.</p>
-          <p><a href={path}>Choisir une portée autorisée</a></p>
+          <h1>Réglages</h1>
+          <p>Ce périmètre est inaccessible.</p>
+          <p><a href={path}>Choisir un périmètre autorisé</a></p>
         </section>
       </main>
     );
@@ -111,8 +111,8 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
     <main id="contenu" className="studio">
       <a href="/espace">Mon espace</a>
       <section className="studio-heading">
-        <h1>Paramètres et versions</h1>
-        <p>Consultez la valeur applicable et sa provenance par portée.</p>
+        <h1>Réglages</h1>
+        <p>Consultez la valeur applicable et sa provenance par périmètre.</p>
       </section>
 
       {message && <p className="studio-notice" role="alert">{message}</p>}
@@ -122,7 +122,7 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
         <form method="get" className="studio-form studio-filters">
           <input type="hidden" name="scopeAfter" value={scopeAfter} />
           <input type="hidden" name="keyAfter" value={keyAfter} />
-          <label>Portée<select name="scope" defaultValue={scope.id}>
+          <label>Périmètre<select name="scope" defaultValue={scope.id}>
             {scopeChoices.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
           </select></label>
           <label>Date et heure (UTC)<input name="at" type="datetime-local" defaultValue={at.slice(0, 16)} required /></label>
@@ -133,8 +133,8 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
           <button type="submit" className="action">Consulter</button>
         </form>
         <div className="studio-links">
-          {scopes.length > 50 && <a href={studioUrl({ at, scopeAfter: scopeOptions[49].id })}>Portées suivantes</a>}
-          {scopeAfter && <a href={studioUrl({ at })}>Premières portées</a>}
+          {scopes.length > 50 && <a href={studioUrl({ at, scopeAfter: scopeOptions[49].id })}>Périmètres suivantes</a>}
+          {scopeAfter && <a href={studioUrl({ at })}>Premières périmètres</a>}
           {definitions.length > 24 && <a href={studioUrl({ ...queryFields, keyAfter: items[23].key })}>Paramètres suivants</a>}
           {keyAfter && <a href={studioUrl({ ...queryFields, keyAfter: '' })}>Premiers paramètres</a>}
         </div>
@@ -183,7 +183,7 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
 
           {mayDraft && <DraftEditor def={data.definition} scopeId={scope.id} />}
           <section className="studio-panel" aria-labelledby="versions-title">
-            <h2 id="versions-title">Versions de cette portée</h2>
+            <h2 id="versions-title">Versions de ce périmètre</h2>
             {data.versions.length === 0 ? <p>Aucune version locale.</p> : (
               <div className="studio-table" role="region" aria-label="Historique des versions" tabIndex={0}>
                 <table>
@@ -211,7 +211,7 @@ export default async function Configuration({ searchParams }: { searchParams: Pr
           </section>
         </>
       ) : (
-        <section className="studio-panel"><h2>Catalogue</h2><p>Aucune définition disponible pour cette portée.</p></section>
+        <section className="studio-panel"><h2>Catalogue</h2><p>Aucune définition disponible pour ce périmètre.</p></section>
       )}
       {scope.root && scope.define && <DefinitionEditor scopeId={scope.id} types={await scopeTypes(settings)} />}
     </main>

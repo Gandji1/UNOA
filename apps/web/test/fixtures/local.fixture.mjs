@@ -41,7 +41,7 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.equal((await change({ current: 'Provisoire-2026-A', password: 'court' })).status, 400);
   assert.equal((await change({ current: 'Provisoire-2026-A', password: 'Nouveau-Secret-2026' })).status, 200);
   assert.match(where(await signIn('admin.local', 'Nouveau-Secret-2026', code(secret))), /\/espace$/);
-  assert.match(await (await call('/administration', { headers: { Cookie: cookie } })).text(), /Accès et rôles/);
+  assert.match(await (await call('/administration', { headers: { Cookie: cookie } })).text(), /Utilisateurs et rôles/);
 
   // Account without code: password only. Lockout after five failures, even with the right password.
   assert.match(where(await signIn('candidat.local', 'Candidat-Secret-9')), /\/espace$/);
@@ -82,6 +82,22 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.equal((await countryInvite({ scopeId: country.id })).status, 200);
   assert.equal((await iam('invitations', { scopeId: country.id, displayName: 'Doyen', role: 'dean', reason: 'x', validDays: 7 })).status, 422,
     'doyen sur un pays refusé');
+
+  // Candidate self-registration: only on a site that opened account creation.
+  const register = data => call('/api/v1/auth/register', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ displayName: 'Candidate locale', login: 'candidate.web', password: 'Candidate-2026-OK', confirm: 'Candidate-2026-OK', ...data }).toString() });
+  assert.match(where(await register({})), /erreur=403$/, 'création fermée');
+  const { rows: [site] } = await database.query('SELECT site_id FROM unoa.site_host WHERE host = $1', [new URL(origin).host]);
+  assert.equal((await call(`/api/v1/site/sites/${site.site_id}/registration`, { method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ open: true }) })).status, 200);
+  assert.match(where(await register({ confirm: 'autre' })), /erreur=422$/);
+  assert.match(where(await register({ password: 'faible', confirm: 'faible' })), /erreur=400$/);
+  const registered = await register({});
+  assert.match(where(registered), /\/espace\?bienvenue=1$/);
+  assert.ok(session(registered));
+  assert.match(where(await register({})), /erreur=409$/, 'identifiant pris');
+  const { rows: [candidate] } = await database.query("SELECT account.origin, (SELECT count(*)::int FROM unoa.role_grant WHERE account_id = account.id) AS grants FROM unoa.local_credential JOIN unoa.account ON account.id = local_credential.account_id WHERE login = 'candidate.web'");
+  assert.deepEqual(candidate, { origin: 'registration', grants: 0 });
+  assert.match(where(await signIn('candidate.web', 'Candidate-2026-OK')), /\/espace$/);
 
   // Installation: secret token, then refused once an administrator exists.
   const install = (token, body) => call('/api/v1/installation', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { 'X-Setup-Token': token } : {}) }, body: JSON.stringify(body) });

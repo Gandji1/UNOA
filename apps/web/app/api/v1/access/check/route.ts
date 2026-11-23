@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const scopeId = searchParams.get('scopeId') || '';
   const permission = searchParams.get('permission') || '';
   if (!scopeIdFormat.test(scopeId) || !permissionFormat.test(permission)) {
-    return problem(400, 'Portée ou permission invalide', path);
+    return problem(400, 'Périmètre ou permission invalide', path);
   }
 
   const correlationId = randomUUID();

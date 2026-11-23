@@ -29,7 +29,7 @@ export function DefinitionEditor({ scopeId, types }: { scopeId: string; types: {
         <label>Défaut facultatif<input name="defaultValue" maxLength={1000} aria-describedby="default-format" /></label>
         <p id="default-format" className="studio-wide">Pour Oui / Non, saisir true ou false.</p>
         <fieldset className="studio-wide">
-          <legend>Types de portées autorisés</legend>
+          <legend>Types de périmètres autorisés</legend>
           {types.map(type => (
             <label className="studio-checkbox" key={type.code}>
               <input type="checkbox" name="allowedTypes" value={type.code} />{type.label}

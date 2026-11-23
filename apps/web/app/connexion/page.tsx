@@ -33,6 +33,7 @@ export default async function Connexion({ searchParams }: { searchParams: Promis
               <p id="code-aide" className="studio-wide studio-help">Code à 6 chiffres de votre application d’authentification ; laisser vide si votre compte n’en a pas.</p>
               <div className="studio-wide"><button className="action" type="submit">Se connecter</button></div>
             </form>
+            <p>Pas encore de compte ? <a href="/inscription">Créer un compte candidat</a></p>
             {settings.oidc && (
               <form action="/api/v1/auth/login" method="post">
                 <button className="secondary" type="submit">Se connecter avec son compte institutionnel</button>

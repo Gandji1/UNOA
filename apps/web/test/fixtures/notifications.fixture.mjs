@@ -183,7 +183,7 @@ export async function exerciseNotifications({ database, issuer, login, call, ori
   assert.match(screen, /Journal des envois/);
   assert.match(screen, /\+229\*\*\*\*12/);
   assert.doesNotMatch(screen, /\+22990000012/, 'destinataire masqué dans le journal');
-  assert.match(await (await get(`/administration/notifications?scope=${univ.id}`, 'candidate')).text(), /Portée inaccessible/);
+  assert.match(await (await get(`/administration/notifications?scope=${univ.id}`, 'candidate')).text(), /Périmètre inaccessible/);
   await status(await get(`${api}scopes?scopeId=${univ.id}`, 'candidate'), 403);
   assert.match(await (await get('/espace', 'candidate')).text(), /Retirer mon consentement/);
   assert.match(await (await get('/', 'publisher')).text(), /href="\/administration\/notifications"/);

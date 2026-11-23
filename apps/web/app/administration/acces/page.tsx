@@ -7,7 +7,7 @@ import { Problem } from '@/lib/shared/validation';
 import { accessOverview, accountDetails, adminContexts, auditTrail, roleCatalogue } from '@/lib/iam/admin';
 import { ActionForm, Badge, Editor, formatTime, Hidden, Notice, Panel, Table } from '../forms';
 
-export const metadata: Metadata = { title: 'Accès et rôles' };
+export const metadata: Metadata = { title: 'Utilisateurs et rôles' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -32,10 +32,10 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
   if (!actor) redirect('/connexion');
   const search = await searchParams;
   const notice = <Notice error={field(search.error)} message={field(search.message)} />;
-  const denied = <main id="contenu" className="studio"><section className="studio-panel"><h1>Accès et rôles</h1>{notice}
+  const denied = <main id="contenu" className="studio"><section className="studio-panel"><h1>Utilisateurs et rôles</h1>{notice}
     <p>Élément inaccessible avec vos habilitations.</p><p><a href={path}>Revenir</a></p></section></main>;
   const crumbs = (...parts: [string, string?][]) => (
-    <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/administration">Administration</a> › <a href={path}>Accès et rôles</a>
+    <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/administration">Administration</a> › <a href={path}>Utilisateurs et rôles</a>
       {parts.map(([label, href], index) => <span key={index}> › {href ? <a href={href}>{label}</a> : <span aria-current="page">{label}</span>}</span>)}</nav>
   );
   const contexts = await adminContexts(settings, actor);
@@ -111,7 +111,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
         {notice}
         <Panel title="Rôles attribués" id="attributions">
           {data.grants.length === 0 ? <p>Aucun rôle : le compte n’accède qu’à ses propres espaces.</p> : (
-            <Table label="Attributions" head={['Rôle', 'Portée', 'Période', 'Justification', 'État', '']}>
+            <Table label="Attributions" head={['Rôle', 'Périmètre', 'Période', 'Justification', 'État', '']}>
               {data.grants.map(item => (
                 <tr key={item.grant_id}>
                   <td>{item.role_label ?? item.role_code}{item.delegated_from && <Badge tone="info">délégation</Badge>}</td>
@@ -132,10 +132,10 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
         {!data.self && assignScopes.length > 0 && (
           <Editor summary="Attribuer un rôle">
             <form method="get" action={path} className="studio-inline"><input type="hidden" name="compte" value={account.id} />
-              <select name="portee" defaultValue={target} aria-label="Portée">{assignScopes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
-              <button className="secondary" type="submit">Choisir la portée</button></form>
+              <select name="portee" defaultValue={target} aria-label="Périmètre">{assignScopes.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
+              <button className="secondary" type="submit">Choisir le périmètre</button></form>
             <ActionForm action={api + 'grants'} back={back} hidden={{ accountId: account.id, scopeId: target }} submit="Attribuer"
-              confirm="Seuls les rôles dont vous détenez toutes les permissions dans cette portée sont proposés.">
+              confirm="Seuls les rôles dont vous détenez toutes les permissions dans ce périmètre sont proposés.">
               <label className="studio-wide">Rôle<select name="role" required>{roles.filter(item => item.assignable).map(item => <option key={item.code} value={item.code}>{item.label ?? item.code}{item.description ? ' — ' + item.description : ''}</option>)}</select></label>
               <label className="check"><input type="checkbox" name="includeDescendants" defaultChecked /> Inclure les sous-structures</label>
               <label>Fin (UTC, facultative)<input type="datetime-local" name="effectiveUntil" /></label>
@@ -173,11 +173,11 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
       <main id="contenu" className="studio">
         {crumbs(['Journal d’audit'])}
         <section className="studio-heading"><p className="eyebrow">Traçabilité</p><h1>Journal d’audit</h1>
-          <p>Actions autorisées et refusées dans la portée, horodatées, non modifiables.</p></section>
+          <p>Actions autorisées et refusées dans le périmètre, horodatées, non modifiables.</p></section>
         <form method="get" action={path} className="studio-inline"><Hidden values={{ vue: 'journal', scope: scopeId }} />
           <input name="prefixe" defaultValue={field(search.prefixe)} placeholder="Préfixe (ex. iam., adm.)" aria-label="Filtrer par action" pattern="[a-z][a-z0-9_.]{0,40}" />
           <button className="secondary" type="submit">Filtrer</button></form>
-        <Table label="Événements" head={['Date', 'Action', 'Résultat', 'Auteur', 'Portée', 'Corrélation']}>
+        <Table label="Événements" head={['Date', 'Action', 'Résultat', 'Auteur', 'Périmètre', 'Corrélation']}>
           {data.events.map(item => (
             <tr key={item.id}><td>{formatTime(item.occurred_at)}</td><td><code>{item.action}</code></td>
               <td>{item.outcome === 'allowed' ? <Badge tone="ok">autorisé</Badge> : <Badge tone="danger">{item.outcome === 'denied' ? 'refusé' : 'échec'}</Badge>}</td>
@@ -199,7 +199,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
     return (
       <main id="contenu" className="studio">
         {crumbs([data.scope.label])}
-        <section className="studio-heading"><p className="eyebrow">Accès et rôles</p><h1>{data.scope.label}</h1>
+        <section className="studio-heading"><p className="eyebrow">Utilisateurs et rôles</p><h1>{data.scope.label}</h1>
           <p className="studio-actions"><a href={`${path}?vue=roles`}>Rôles et permissions</a> <a href="/administration/guide">Qui fait quoi</a>
             {data.rights.audit && <a href={`${path}?vue=journal&scope=${scopeId}`}>Journal d’audit</a>}</p></section>
         {notice}
@@ -212,7 +212,7 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
             <form method="get" action={path} className="studio-inline"><input type="hidden" name="scope" value={scopeId} />
               <input name="q" defaultValue={field(search.q)} placeholder="Nom ou courriel" aria-label="Rechercher un compte" maxLength={100} />
               <button className="secondary" type="submit">Rechercher</button></form>}>
-            {data.accounts.length === 0 ? <p>Aucun compte rattaché à cette portée.</p> : (
+            {data.accounts.length === 0 ? <p>Aucun compte rattaché à ce périmètre.</p> : (
               <Table label="Comptes" head={['Nom', 'Courriel', 'Origine', 'Rôles', 'Sessions', 'État']}>
                 {data.accounts.map(item => (
                   <tr key={item.id}><td><a href={`${path}?compte=${item.id}`}>{item.display_name ?? 'Compte ' + item.id.slice(0, 8)}</a></td>
@@ -234,14 +234,14 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
               <label>Fin du rôle (UTC, facultative)<input type="datetime-local" name="effectiveUntil" /></label>
               <label className="check"><input type="checkbox" name="includeDescendants" value="true" defaultChecked /> Inclure les sous-structures</label>
               <label className="studio-wide">Justification<input name="reason" required maxLength={500} /></label>
-              <p className="studio-wide studio-help">La personne ouvre le lien, choisit son identifiant et son mot de passe ; le rôle lui est alors attribué sur cette portée. Sans service de courriel configuré, le lien est à transmettre par vos soins.</p>
+              <p className="studio-wide studio-help">La personne ouvre le lien, choisit son identifiant et son mot de passe ; le rôle lui est alors attribué sur ce périmètre. Sans service de courriel configuré, le lien est à transmettre par vos soins.</p>
               <div className="studio-wide"><button className="action" type="submit">Créer l’invitation</button></div>
             </form>
           </Editor>
         )}
         {data.invitations.length > 0 && (
           <Panel title="Invitations" id="invitations">
-            <Table label="Invitations" head={['Personne', 'Rôle', 'Portée', 'Expiration', 'État', '']}>
+            <Table label="Invitations" head={['Personne', 'Rôle', 'Périmètre', 'Expiration', 'État', '']}>
               {data.invitations.map(item => (
                 <tr key={item.id}><td>{item.display_name}{item.email && <p className="muted">{item.email}</p>}</td><td>{item.role_code}</td>
                   <td>{item.scope_label}</td><td>{formatTime(item.expires_at)}</td><td>{invitationState(item)}</td>
@@ -258,11 +258,11 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
   return (
     <main id="contenu" className="studio">
       {crumbs()}
-      <section className="studio-heading"><p className="eyebrow">Administration</p><h1>Accès et rôles</h1>
+      <section className="studio-heading"><p className="eyebrow">Administration</p><h1>Utilisateurs et rôles</h1>
         <p>Comptes, invitations, rôles composés, attributions justifiées, délégations, sessions et journal d’audit.</p>
         <p><a href={`${path}?vue=roles`}>Rôles et permissions</a></p></section>
       {notice}
-      {contexts.length === 0 ? <p className="card-note">Aucune portée administrable.</p> : (
+      {contexts.length === 0 ? <p className="card-note">Aucun périmètre administrable.</p> : (
         <ul className="program-grid">{contexts.map(item => <li key={item.id} className="program-card"><p className="eyebrow">{item.nature}</p>
           <h2><a href={`${path}?scope=${item.id}`}>{item.label}</a></h2></li>)}</ul>
       )}

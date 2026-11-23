@@ -209,7 +209,7 @@ export default async function Scolarite({ searchParams }: { searchParams: Promis
       {crumbs()}
       <section className="studio-heading"><p className="eyebrow">Administration</p><h1>Scolarité</h1><p>Choisissez un établissement.</p></section>
       {notice}
-      {institutions.length === 0 ? <p className="card-note">Aucun établissement accessible. Créez d’abord un établissement dans Territoires.</p> : (
+      {institutions.length === 0 ? <p className="card-note">Aucun établissement accessible. Créez d’abord un établissement dans Pays et établissements.</p> : (
         <ul className="program-grid">{institutions.map(item => <li key={item.id} className="program-card"><h2><a href={`${path}?etablissement=${item.id}`}>{item.label}</a></h2></li>)}</ul>
       )}
     </main>

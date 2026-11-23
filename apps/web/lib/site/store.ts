@@ -81,7 +81,7 @@ async function siteOf(store: Queryable, actor: string, siteId: string, right: Ri
 export async function siteDetails(settings: IamSettings, actor: string, scopeId: string) {
   const store = database(settings);
   const granted = await rights(store, actor, uuid(scopeId));
-  ensure(granted?.read, 403, 'Portée inaccessible');
+  ensure(granted?.read, 403, 'Périmètre inaccessible');
   const { rows: scope } = await store.query<{ label: string }>('SELECT label FROM unoa.scope WHERE id = $1', [scopeId]);
   const { rows: site } = await store.query<{ id: string; default_language: string; online: boolean; open_registration: boolean }>(
     'SELECT id, default_language, online, open_registration FROM unoa.site WHERE scope_id = $1', [scopeId],

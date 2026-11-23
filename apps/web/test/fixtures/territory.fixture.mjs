@@ -173,7 +173,7 @@ export async function exerciseTerritory({ database, issuer, login, call, origin,
   assert.match(rendered, /Cadre réglementaire/);
   const localView = await read(studio + '?scope=' + campus.scopeId, localCookie);
   assert.doesNotMatch(await localView.text(), /Campus Gamma de l’UNOA/);
-  assert.match(await (await read('/administration', stewardCookie)).text(), /<a href="\/administration\/territoires"><strong>Territoires/);
+  assert.match(await (await read('/administration', stewardCookie)).text(), /<a href="\/administration\/territoires"><strong>Pays et établissements/);
 
   const trail = await database.query(
     "SELECT action, count(*)::int AS total FROM unoa.audit_event WHERE action LIKE 'territory.%' GROUP BY action ORDER BY action",

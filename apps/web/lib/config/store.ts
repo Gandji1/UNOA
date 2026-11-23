@@ -85,7 +85,7 @@ export async function scopeTypes(settings: IamSettings) {
 export async function catalogue(settings: IamSettings, actor: string, scopeId: string, after?: string) {
   const store = database(settings);
   const scope = await getScope(store, actor, scopeId);
-  ensure(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Périmètre inaccessible');
   const { rows } = await store.query<Definition>(`
     SELECT key, label, description, kind, default_value, minimum, maximum,
            choices, allowed_types, inherits, allow_override
@@ -136,7 +136,7 @@ async function effective(store: Queryable, def: Definition, scopeId: string, at:
 export async function resolveConfiguration(settings: IamSettings, actor: string, scopeId: string, key: string, at: string) {
   const store = database(settings);
   const scope = await getScope(store, actor, scopeId);
-  ensure(scope, 403, 'Portée inaccessible');
+  ensure(scope, 403, 'Périmètre inaccessible');
   const def = await definition(store, key);
   ensure(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
   return { key, scopeId, at, ...(await effective(store, def, scopeId, at)) };
@@ -146,7 +146,7 @@ export async function configurationDetails(
   settings: IamSettings, actor: string, scope: Scope, key: string, at: string, previewId?: string, before?: number,
 ) {
   const store = database(settings);
-  ensure(await getScope(store, actor, scope.id), 403, 'Portée inaccessible');
+  ensure(await getScope(store, actor, scope.id), 403, 'Périmètre inaccessible');
   const def = await definition(store, key);
   ensure(def.inherits || def.allowed_types.includes(scope.type_code), 404, 'Paramètre introuvable');
   const result = await effective(store, def, scope.id, at);
@@ -181,7 +181,7 @@ export async function createDefinition(settings: IamSettings, actor: string, inp
     const { rows } = await store.query<{ count: number }>(
       'SELECT count(*)::int FROM unoa.scope_type WHERE code = ANY($1)', [item.types],
     );
-    ensure(rows[0].count === item.types.length, 400, 'Type de portée inconnu');
+    ensure(rows[0].count === item.types.length, 400, 'Type de périmètre inconnu');
     const result = await store.query(`
       INSERT INTO unoa.config_definition
         (key, label, description, kind, default_value, minimum, maximum, choices, allowed_types, inherits, allow_override, author_id)
@@ -205,7 +205,7 @@ export async function createValue(settings: IamSettings, actor: string, input: I
     const scope = await getScope(store, actor, scopeId);
     ensure(scope?.write, 403, 'Rédaction non autorisée');
     const def = await definition(store, key);
-    ensure(def.allowed_types.includes(scope.type_code) && (def.allow_override || scope.root), 422, 'Surcharge interdite pour cette portée');
+    ensure(def.allowed_types.includes(scope.type_code) && (def.allow_override || scope.root), 422, 'Surcharge interdite pour ce périmètre');
     const value = typedValue(def.kind, input.value, form);
     const json = JSON.stringify(value);
     const prior = await store.query<Version & { identical: boolean }>(`

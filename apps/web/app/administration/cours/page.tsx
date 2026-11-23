@@ -9,7 +9,7 @@ import { courseDetails, courseVersionDetails, lmsContexts, lmsOverview } from '@
 import { Markup } from '@/lib/lms/markup';
 import { ActionForm, Badge, Editor, formatTime, Notice, Panel, Table } from '../forms';
 
-export const metadata: Metadata = { title: 'Studio des cours' };
+export const metadata: Metadata = { title: 'Cours en ligne' };
 export const dynamic = 'force-dynamic';
 
 type Search = Record<string, string | string[] | undefined>;
@@ -36,7 +36,7 @@ export default async function Studio({ searchParams }: { searchParams: Promise<S
   if (!actor) redirect('/connexion');
   const search = await searchParams;
   const notice = <Notice error={field(search.error)} message={field(search.message)} />;
-  const denied = <main id="contenu" className="studio"><section className="studio-panel"><h1>Studio des cours</h1>{notice}
+  const denied = <main id="contenu" className="studio"><section className="studio-panel"><h1>Cours en ligne</h1>{notice}
     <p>Élément inaccessible avec vos habilitations.</p><p><a href={path}>Revenir au studio</a></p></section></main>;
 
   const versionId = field(search.version);
@@ -49,7 +49,7 @@ export default async function Studio({ searchParams }: { searchParams: Promise<S
     const action = (part: string) => `${api}course-versions/${version.id}/${part}`;
     return (
       <main id="contenu" className="studio">
-        <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <a href={path}>Studio des cours</a> ›{' '}
+        <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <a href={path}>Cours en ligne</a> ›{' '}
           <a href={`${path}?course=${course.id}`}>{course.code}</a> › <span aria-current="page">v{version.number} ({version.language})</span></nav>
         <section className="studio-heading">
           <p className="eyebrow">{course.code} · version {version.number} · {version.language}</p>
@@ -191,7 +191,7 @@ export default async function Studio({ searchParams }: { searchParams: Promise<S
     const back = `${path}?course=${course.id}`;
     return (
       <main id="contenu" className="studio">
-        <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <a href={`${path}?scope=${course.owner_scope_id}`}>Studio des cours</a> ›{' '}
+        <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <a href={`${path}?scope=${course.owner_scope_id}`}>Cours en ligne</a> ›{' '}
           <span aria-current="page">{course.code}</span></nav>
         <section className="studio-heading"><p className="eyebrow">{course.owner_label}</p><h1>{course.title}</h1>
           <p>Le cours du catalogue est distinct de ses versions pédagogiques et de ses offres par promotion.</p></section>
@@ -241,14 +241,14 @@ export default async function Studio({ searchParams }: { searchParams: Promise<S
   const requested = field(search.scope);
   const selected = scopeIdFormat.test(requested) ? requested : contexts[0]?.id;
   if (!selected) {
-    return <main id="contenu" className="studio"><section className="studio-heading"><h1>Studio des cours</h1>
+    return <main id="contenu" className="studio"><section className="studio-heading"><h1>Cours en ligne</h1>
       <p>Aucune structure ne vous est attribuée pour la conception de cours.</p></section></main>;
   }
   const data = await lmsOverview(settings, actor, selected).catch(refused);
   if (!data) return denied;
   return (
     <main id="contenu" className="studio">
-      <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <span aria-current="page">Studio des cours</span></nav>
+      <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/espace">Mon espace</a> › <span aria-current="page">Cours en ligne</span></nav>
       <section className="studio-heading"><p className="eyebrow">Studio pédagogique</p><h1>{data.scope.label}</h1>
         <p>Rédigez le syllabus, les modules, les leçons et les activités des cours du catalogue, faites-les valider puis offrez-les aux promotions.</p></section>
       {notice}
