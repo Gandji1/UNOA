@@ -1,4 +1,5 @@
 import { iamSettings } from '@/lib/iam/settings';
+import { Client } from 'pg';
 import { database } from '@/lib/iam/sessions';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,18 @@ export async function GET() {
     // SQLSTATE or network error class only (e.g. 28P01, 42704, ECONNREFUSED): no address or credential.
     const code = typeof error === 'object' && error && 'code' in error && /^[A-Z0-9_]{3,20}$/.test(String(error.code)) ? String(error.code) : 'unknown';
     const tls = error instanceof Error && /certificate|self.signed|SSL|TLS/i.test(error.message) ? 'tls' : undefined;
-    return Response.json({ database: 'unavailable', code, tls, role: settings.databaseRole ? 'startup' : 'dedicated' }, { status: 503, headers });
+    // Integrated owner URL: say which database it reaches and whether it is migrated.
+    let target: Record<string, unknown> | undefined;
+    if (settings.databaseRole) {
+      const owner = new Client({ connectionString: settings.databaseUrl, connectionTimeoutMillis: 5000 });
+      try {
+        await owner.connect();
+        const { rows } = await owner.query(`SELECT current_database() AS name,
+          EXISTS (SELECT 1 FROM pg_roles WHERE rolname = $1) AS role_exists,
+          to_regnamespace('unoa') IS NOT NULL AS schema_exists`, [settings.databaseRole]);
+        target = rows[0];
+      } catch { target = { reachable: false }; } finally { await owner.end().catch(() => undefined); }
+    }
+    return Response.json({ database: 'unavailable', code, tls, mode: settings.databaseRole ? 'integration' : 'dedicated', target }, { status: 503, headers });
   }
 }
