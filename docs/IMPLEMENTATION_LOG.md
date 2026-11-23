@@ -190,3 +190,4 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   Utilisateurs et rôles, Réglages ; « périmètre » au lieu de « portée ».
 - Migration 0017 : création de compte candidat par identifiant et mot de passe (`/inscription`) sur un site
   qui l'autorise. Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
+- Site public de « Université de test » relié à unoa-web.vercel.app (textes publiés par un tiers), création de compte ouverte ; compte etudiant.test créé par /inscription.
