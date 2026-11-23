@@ -14,6 +14,8 @@ const report = outcome => writeFile(new URL('../../../apps/web/lib/server/deploy
 
 if (!connectionString) {
   console.log('Base non liée : migrations ignorées pour ce build.');
+  await report({ status: 'skipped', vercel: process.env.VERCEL_ENV ?? null, inputs: ['DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'POSTGRES_URL_NON_POOLING', 'PGHOST']
+    .filter(name => process.env[name]) });
 } else if (!/^[a-z_][a-z0-9_]{0,62}$/.test(role)) {
   console.error('UNOA_DATABASE_ROLE invalide');
   process.exitCode = 1;
