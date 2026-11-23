@@ -7,7 +7,7 @@ import {
 } from '@/lib/org/store';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
-const options = { path: '/api/v1/org', studio: '/administration/structures', denial: 'org.access', label: 'org' };
+const options = { path: '/api/v1/org', studio: '/administration/structures', denial: 'org.access', label: 'org', returns: ['/administration/creer'] };
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const { operation } = await params;

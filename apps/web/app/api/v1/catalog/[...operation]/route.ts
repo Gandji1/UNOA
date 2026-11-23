@@ -8,7 +8,7 @@ import { archiveField, catalogOverview, createCompetency, createCourse, createFi
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 const options = {
-  path: '/api/v1/catalog', studio: '/administration/catalogue', denial: 'catalog.access', label: 'catalog',
+  path: '/api/v1/catalog', studio: '/administration/catalogue', denial: 'catalog.access', label: 'catalog', returns: ['/administration/creer'],
   repeated: ['parentTypes', 'languages', 'choices'],
 };
 const versionParts = ['update', 'periods', 'groups', 'units', 'volumes', 'courses', 'prerequisites',

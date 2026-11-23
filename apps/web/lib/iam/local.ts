@@ -29,7 +29,17 @@ async function passwordMatches(password: string, stored: string) {
   return wanted.length === hash.length && timingSafeEqual(wanted, hash);
 }
 
-export function checkNewPassword(password: unknown) {
+// Development mode (0018): set by the super-administrator, any length accepted, no lockout.
+export async function developmentMode(settings: IamSettings) {
+  const { rows } = await database(settings).query<{ development_mode: boolean }>('SELECT development_mode FROM unoa.installation');
+  return rows[0]?.development_mode === true;
+}
+
+export function checkNewPassword(password: unknown, relaxed = false) {
+  if (relaxed) {
+    ensure(typeof password === 'string' && password.length >= 1 && password.length <= 200, 400, 'Mot de passe requis');
+    return password;
+  }
   ensure(typeof password === 'string' && password.length >= 12 && password.length <= 200, 400, 'Mot de passe de 12 à 200 caractères');
   ensure(/[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password), 400, 'Mot de passe : minuscules, majuscules et chiffres requis');
   return password;
@@ -67,14 +77,15 @@ export async function localLogin(settings: IamSettings, loginInput: unknown, pas
     await audit(settings, null, 'iam.local_login', 'denied');
     return { refused: 'credentials' };
   }
-  if (credential.locked_until && credential.locked_until > new Date()) {
+  const relaxed = await developmentMode(settings);
+  if (!relaxed && credential.locked_until && credential.locked_until > new Date()) {
     await audit(settings, credential.account_id, 'iam.local_login_locked', 'denied');
     return { refused: 'locked' };
   }
   const passwordOk = await passwordMatches(password, credential.password_hash);
   const codeOk = !credential.totp_secret || (typeof otp === 'string' && verify(credential.totp_secret, otp.replace(/\s/g, '')));
   if (!passwordOk || !codeOk || credential.disabled_at) {
-    const locked = credential.failed_attempts + 1 >= maxAttempts;
+    const locked = !relaxed && credential.failed_attempts + 1 >= maxAttempts;
     await store.query(`UPDATE unoa.local_credential SET failed_attempts = CASE WHEN $2 THEN 0 ELSE failed_attempts + 1 END,
       locked_until = CASE WHEN $2 THEN now() + make_interval(mins => $3) ELSE locked_until END WHERE account_id = $1`,
       [credential.account_id, locked, lockMinutes]);
@@ -93,7 +104,7 @@ export async function changePassword(settings: IamSettings, actor: string, curre
   const { rows } = await store.query<{ password_hash: string }>('SELECT password_hash FROM unoa.local_credential WHERE account_id = $1', [actor]);
   ensure(rows[0], 404, 'Ce compte se connecte par le fournisseur institutionnel');
   ensure(typeof current === 'string' && await passwordMatches(current, rows[0].password_hash), 403, 'Mot de passe actuel incorrect');
-  const password = checkNewPassword(next);
+  const password = checkNewPassword(next, await developmentMode(settings));
   ensure(password !== current, 400, 'Choisir un mot de passe différent');
   await store.query('UPDATE unoa.local_credential SET password_hash = $2, must_change = false, changed_at = now() WHERE account_id = $1',
     [actor, await hashPassword(password)]);
@@ -121,7 +132,7 @@ export async function acceptInvitationLocally(settings: IamSettings, token: unkn
   ensure(hash, 400, 'Lien d’invitation invalide');
   const login = typeof loginInput === 'string' ? loginInput.trim().toLowerCase() : '';
   ensure(/^[a-z0-9][a-z0-9._@-]{2,119}$/.test(login), 400, 'Identifiant : 3 à 120 caractères (lettres minuscules, chiffres, . _ @ -)');
-  const secret = checkNewPassword(password);
+  const secret = checkNewPassword(password, await developmentMode(settings));
   try {
     const { rows } = await database(settings).query<{ account: string | null }>('SELECT unoa.accept_invitation_local($1, $2, $3) AS account',
       [hash, login, await hashPassword(secret)]);
@@ -145,7 +156,7 @@ export async function registerLocally(settings: IamSettings, siteId: string | nu
   const email = typeof input.email === 'string' && input.email.trim() ? input.email.trim().toLowerCase() : null;
   ensure(!email || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254), 400, 'Courriel invalide');
   ensure(input.password === input.confirm, 422, 'Les mots de passe diffèrent');
-  const secret = checkNewPassword(input.password);
+  const secret = checkNewPassword(input.password, await developmentMode(settings));
   try {
     await database(settings).query('SELECT unoa.register_local_account($1, $2, $3, $4, $5)', [siteId, login, await hashPassword(secret), name, email]);
   } catch (error) {
@@ -157,6 +168,29 @@ export async function registerLocally(settings: IamSettings, siteId: string | nu
   const session = await openSession(settings, { issuer: localIssuer, subject: login });
   ensure(session, 403, 'Compte indisponible');
   return session;
+}
+
+export async function resetPassword(settings: IamSettings, actor: string, target: string, password: unknown, correlation: string) {
+  const relaxed = await developmentMode(settings);
+  const secret = checkNewPassword(password, relaxed);
+  try {
+    await database(settings).query('SELECT unoa.reset_local_password($1, $2, $3, $4, $5)', [actor, target, await hashPassword(secret), !relaxed, correlation]);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'U0403') throw new Problem(403, 'Réinitialisation non autorisée');
+    if ((error as { code?: string }).code === 'P0002') throw new Problem(404, 'Ce compte n’a pas d’identifiant local');
+    throw error;
+  }
+  return { accountId: target };
+}
+
+export async function setDevelopmentMode(settings: IamSettings, actor: string, enabled: boolean, correlation: string) {
+  try {
+    await database(settings).query('SELECT unoa.set_development_mode($1, $2, $3)', [actor, enabled, correlation]);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'U0403') throw new Problem(403, 'Réservé au super-administrateur');
+    throw error;
+  }
+  return {};
 }
 
 export async function credentialState(settings: IamSettings, actor: string) {

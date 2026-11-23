@@ -99,6 +99,27 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.deepEqual(candidate, { origin: 'registration', grants: 0 });
   assert.match(where(await signIn('candidate.web', 'Candidate-2026-OK')), /\/espace$/);
 
+  // Creation assistants, usual types in one click, development mode and password reset.
+  const asAdmin = (path, data) => call(path, { method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  assert.match(await (await call('/administration/creer', { headers: { Cookie: cookie } })).text(), /Créer les types usuels manquants/);
+  const created = await (await asAdmin('/api/v1/setup/standard-types', {})).json();
+  assert.ok(Array.isArray(created.created), JSON.stringify(created));
+  assert.equal((await (await asAdmin('/api/v1/setup/standard-types', {})).json()).created.length, 0, 'idempotent');
+  assert.equal((await call('/api/v1/setup/standard-types', { method: 'POST', headers: { Origin: origin, Cookie: alphaCookie, 'Content-Type': 'application/json' }, body: '{}' })).status, 403);
+  const facultyPage = await (await call(`/administration/creer?quoi=faculte&dans=${alpha.id}`, { headers: { Cookie: alphaCookie } })).text();
+  assert.match(facultyPage, /Créer une faculté/);
+  assert.match(await (await call('/administration/creer?quoi=pays', { headers: { Cookie: alphaCookie } })).text(), /Aucun emplacement/, 'pas de pays pour un administrateur d’établissement');
+  assert.match(await (await call(`/administration/creer?quoi=responsable&dans=${alpha.id}`, { headers: { Cookie: alphaCookie } })).text(), /Créer l’invitation/);
+  assert.equal((await asAdmin('/api/v1/iam/reset-password', { accountId: alphaAdmin.account_id, password: '1' })).status, 400, 'mot de passe faible hors mode développement');
+  assert.equal((await call('/api/v1/iam/development-mode', { method: 'POST', headers: { Origin: origin, Cookie: alphaCookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: true }) })).status, 403);
+  assert.equal((await asAdmin('/api/v1/iam/development-mode', { enabled: true })).status, 200);
+  assert.match(await (await call('/connexion')).text(), /Mode développement/);
+  assert.equal((await asAdmin('/api/v1/iam/reset-password', { accountId: alphaAdmin.account_id, password: '1' })).status, 200);
+  for (let attempt = 0; attempt < 6; attempt++) await signIn('admin.alpha', 'faux');
+  assert.match(where(await signIn('admin.alpha', '1')), /\/espace$/, 'aucun blocage en mode développement');
+  assert.equal((await asAdmin('/api/v1/iam/development-mode', { enabled: false })).status, 200);
+  assert.doesNotMatch(await (await call('/connexion')).text(), /Mode développement/);
+
   // Installation: secret token, then refused once an administrator exists.
   const install = (token, body) => call('/api/v1/installation', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { 'X-Setup-Token': token } : {}) }, body: JSON.stringify(body) });
   const body = { login: 'premier.admin', displayName: 'Premier administrateur', platformLabel: 'UNOA' };

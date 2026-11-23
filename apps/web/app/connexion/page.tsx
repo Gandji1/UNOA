@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { iamSettings } from '@/lib/iam/settings';
+import { developmentMode } from '@/lib/iam/local';
 
 export const metadata: Metadata = { title: 'Connexion' };
 export const dynamic = 'force-dynamic';
@@ -17,10 +18,12 @@ export default async function Connexion({ searchParams }: { searchParams: Promis
   const { statut } = await searchParams;
   const settings = iamSettings();
   const message = typeof statut === 'string' ? messages[statut] : undefined;
+  const development = settings ? await developmentMode(settings).catch(() => false) : false;
   return (
     <main id="contenu" className="page">
       <section className="account-panel">
         <h1>Connexion</h1>
+        {development && <p className="studio-notice" role="note">Mode développement : sécurité allégée (mot de passe libre, pas de blocage). À désactiver avant l’ouverture.</p>}
         {message && <p role={statut === 'deconnecte' ? 'status' : 'alert'} className="studio-notice">{message}</p>}
         {!settings ? <p>L’accès aux comptes sera ouvert après la mise en service de la base.</p> : (
           <>

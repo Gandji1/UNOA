@@ -8,7 +8,7 @@ import {
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
 const options: StudioOptions = {
-  path: '/api/v1/territories', studio: '/administration/territoires', denial: 'territory.access', label: 'territory',
+  path: '/api/v1/territories', studio: '/administration/territoires', denial: 'territory.access', label: 'territory', returns: ['/administration/creer'],
   repeated: ['parentTypes'],
 };
 

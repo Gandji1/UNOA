@@ -5,9 +5,9 @@ import { studioGet, studioPost } from '@/lib/server/route';
 import { accessAction, accessOverview, accountDetails, adminContexts, auditTrail, roleCatalogue } from '@/lib/iam/admin';
 
 type RouteContext = { params: Promise<{ operation: string[] }> };
-const actions = ['roles', 'archive-role', 'grants', 'revoke', 'delegate', 'invitations', 'revoke-invitation', 'disable', 'enable', 'sessions', 'profile'];
+const actions = ['roles', 'archive-role', 'grants', 'revoke', 'delegate', 'invitations', 'revoke-invitation', 'disable', 'enable', 'sessions', 'profile', 'reset-password', 'development-mode'];
 const options = {
-  path: '/api/v1/iam', studio: '/administration/acces', denial: 'iam.access', label: 'iam', returns: ['/espace', '/connexion'],
+  path: '/api/v1/iam', studio: '/administration/acces', denial: 'iam.access', label: 'iam', returns: ['/espace', '/connexion', '/administration/creer', '/administration'],
   repeated: ['permissions'],
   // Without an explicit return, a form comes back to the scope, with the invitation link shown once.
   view: (input: Record<string, unknown>, result: Record<string, unknown> | null) => {

@@ -150,6 +150,11 @@ export default async function Access({ searchParams }: { searchParams: Promise<S
                 <td>{item.revoked_at ? 'Révoquée' : new Date(item.expires_at) < new Date() ? 'Expirée' : 'Active'}</td></tr>)}
             </Table>
           )}
+          {data.manageable && !data.self && (
+            <ActionForm inline action={api + 'reset-password'} back={back} hidden={{ accountId: account.id }} submit="Réinitialiser le mot de passe">
+              <input name="password" type="text" required maxLength={200} placeholder="Nouveau mot de passe" aria-label="Nouveau mot de passe" autoComplete="off" />
+            </ActionForm>
+          )}
           {data.manageable && !data.self && <div className="studio-actions">
             <ActionForm inline action={api + 'sessions'} back={back} hidden={{ accountId: account.id }} submit="Révoquer toutes les sessions" />
             {account.disabled_at

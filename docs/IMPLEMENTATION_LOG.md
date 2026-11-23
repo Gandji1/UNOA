@@ -191,3 +191,12 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0017 : création de compte candidat par identifiant et mot de passe (`/inscription`) sur un site
   qui l'autorise. Vérifications : PostgreSQL 7, HTTP 11, build : PASS.
 - Site public de « Université de test » relié à unoa-web.vercel.app (textes publiés par un tiers), création de compte ouverte ; compte etudiant.test créé par /inscription.
+
+## 23 novembre 2026 — Assistants de création et mode développement
+
+- Page `/administration/creer` : un assistant par élément (pays, établissement, campus, faculté, département,
+  filière, formation, matière, responsable), limité à ce que la personne peut créer et où ; validation des
+  composantes en attente ; types usuels créés en un clic par le super-administrateur (données modifiables).
+- Migration 0018 : mode développement (mot de passe libre, sans blocage, affiché à la connexion, journalisé)
+  décidé par le propriétaire jusqu'à la fin du développement ; réinitialisation de mot de passe par un administrateur.
+- Vérifications : PostgreSQL 7, HTTP 11, build : PASS.

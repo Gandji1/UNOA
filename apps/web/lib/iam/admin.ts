@@ -2,6 +2,7 @@ import 'server-only';
 import { createHash, randomBytes } from 'node:crypto';
 import type { IamSettings } from './settings';
 import { database } from './sessions';
+import { resetPassword, setDevelopmentMode } from './local';
 import { boundedText, choice, ensure, flag, optional, Problem, text, technicalCode, utcTime, uuid, type Input } from '@/lib/shared/validation';
 
 // Administration of accounts and access (IAM). Every write goes through a
@@ -185,6 +186,10 @@ export async function accessAction(settings: IamSettings, actor: string, action:
       const { rows } = await call('SELECT unoa.revoke_account_sessions($1, $2, $3) AS total', [actor, uuid(input.accountId), correlation]);
       return { accountId: String(input.accountId), revoked: rows[0].total };
     }
+    case 'reset-password':
+      return resetPassword(settings, actor, uuid(input.accountId), input.password, correlation);
+    case 'development-mode':
+      return setDevelopmentMode(settings, actor, flag(input.enabled), correlation);
     case 'profile': {
       await store.query('UPDATE unoa.account SET display_name = $2, email = $3 WHERE id = $1', [actor,
         boundedText(input.displayName, 200, 'Nom'), optional(input.email, email)]);
