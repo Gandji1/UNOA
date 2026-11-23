@@ -152,3 +152,12 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   Pixel 5 et 640 px (zoom 200 %) : 0 violation WCAG 2.2 A/AA ; clavier, focus, alerte, réseau dégradé : PASS.
 - Correction : débordement horizontal des groupes de permissions à 200 % (fieldset).
 - Vérifications : unitaires 23, PostgreSQL 7, HTTP 9, build : PASS. Captures : `docs/preuves/lot013/`.
+
+## 23 novembre 2026 — Connexion locale et premier administrateur en production
+
+- Lot connexion locale (ADR-0010) : migration 0013, scrypt, TOTP, verrouillage, installation unique.
+- Vérifications : unitaires 25, PostgreSQL 7, HTTP 10, build : PASS.
+- Production : installation exécutée le 23 novembre (compte `admin.unoa`, rôle d'amorçage sur la racine
+  « Université Numérique Ouest-Africaine (UNOA) ») ; connexion mot de passe + code vérifiée sur
+  https://unoa-web.vercel.app (redirection vers le changement du mot de passe provisoire). Les secrets ont
+  été remis au propriétaire hors dépôt ; le jeton d'installation est désormais sans effet.
