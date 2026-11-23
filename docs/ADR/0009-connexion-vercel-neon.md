@@ -10,9 +10,10 @@ l'adresse du rôle propriétaire (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), pas 
 ## Décision
 
 - Le site lit `UNOA_IAM_DATABASE_URL` (rôle restreint dédié) en priorité ; à défaut, il utilise
-  l'adresse directe déposée par l'intégration et ouvre chaque session avec le paramètre de démarrage
-  `role=unoa_web` : toutes les requêtes s'exécutent avec les seuls droits du rôle web ; un rôle invalide
-  fait échouer la connexion (fermeture sûre). Certificat vérifié (`sslmode=verify-full`).
+  l'adresse directe déposée par l'intégration ; chaque connexion du pool exécute `SET ROLE unoa_web` et
+  vérifie `current_user` avant d'être confiée à l'application (le proxy Neon refuse le paramètre de
+  démarrage `role`, code 22023) ; tout échec ferme la connexion (fermeture sûre). Les requêtes sont
+  toutes paramétrées, ce qui écarte un `RESET ROLE` injecté. Certificat vérifié (`sslmode=verify-full`).
 - Le traitement « Base Neon » accorde `unoa_web` au propriétaire avec `SET TRUE, INHERIT FALSE`
   et vérifie que la session du site est bien `unoa_web`, sans écriture directe des droits.
 - L'origine publique est `UNOA_WEB_ORIGIN` ou, à défaut, l'adresse de production Vercel.
