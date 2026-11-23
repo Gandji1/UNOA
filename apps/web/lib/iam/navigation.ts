@@ -39,7 +39,7 @@ export const studioDescriptions: Record<string, string> = {
 // Creation shortcuts by level (owner's hierarchy): shown only where the
 // person may create the object (same rule as the creation assistants).
 const creations: { kind: string; label: string; check: string }[] = [
-  { kind: 'pays', label: 'Un pays', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature IN ('platform', 'territory')" },
+  { kind: 'pays', label: 'Un pays', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature = 'platform'" },
   { kind: 'etablissement', label: 'Un établissement', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature IN ('territory', 'jurisdiction')" },
   { kind: 'campus', label: 'Un campus', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature = 'institution'" },
   { kind: 'faculte', label: 'Une faculté', check: "unoa.has_scope_permission($1, 'org.write', scope.id) AND kind.nature = 'institution'" },
@@ -50,12 +50,28 @@ const creations: { kind: string; label: string; check: string }[] = [
   { kind: 'responsable', label: 'Nommer un responsable', check: "unoa.has_scope_permission($1, 'iam.manage', scope.id)" },
 ];
 
+// What each role creates in the hierarchy (a person holding several roles
+// sees the union); custom roles fall back to their permissions.
+const roleCreations: Record<string, string[]> = {
+  platform_admin: ['pays', 'responsable'], territory_manager: ['pays', 'etablissement', 'campus'],
+  country_admin: ['etablissement', 'campus', 'responsable'],
+  institution_admin: ['faculte', 'departement', 'responsable'], dean: ['departement', 'responsable'],
+  department_head: ['filiere', 'formation', 'matiere', 'responsable'], academic_manager: ['faculte', 'departement', 'filiere', 'formation', 'matiere'],
+  program_manager: ['formation', 'matiere'],
+};
+
 export async function allowedCreations(actor: string) {
   const settings = iamSettings();
   if (!settings) return [];
-  const { rows } = await database(settings).query<Record<string, boolean>>(`SELECT ${creations.map(item =>
-    `EXISTS (SELECT 1 FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE ${item.check}) AS "${item.kind}"`).join(', ')}`, [actor]);
-  return creations.filter(item => rows[0]?.[item.kind]);
+  const store = database(settings);
+  const [{ rows }, { rows: roles }] = await Promise.all([
+    store.query<Record<string, boolean>>(`SELECT ${creations.map(item =>
+      `EXISTS (SELECT 1 FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE ${item.check}) AS "${item.kind}"`).join(', ')}`, [actor]),
+    store.query<{ role_code: string }>('SELECT DISTINCT role_code FROM unoa.iam_account($1, $1) WHERE revoked_at IS NULL AND (effective_until IS NULL OR effective_until > now())', [actor]),
+  ]);
+  const custom = roles.some(role => !(role.role_code in roleCreations));
+  const expected = new Set(roles.flatMap(role => roleCreations[role.role_code] ?? []));
+  return creations.filter(item => rows[0]?.[item.kind] && (custom || expected.has(item.kind)));
 }
 
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
