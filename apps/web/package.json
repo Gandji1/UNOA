@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "node ../../packages/db/src/deploy.mjs && next build --webpack",
     "start": "next start",
     "test:http": "node --test test/recette.test.mjs"
   },
@@ -17,7 +17,8 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "server-only": "0.0.1",
-    "@unoa/jobs": "workspace:*"
+    "@unoa/jobs": "workspace:*",
+    "@unoa/db": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "24.10.0",

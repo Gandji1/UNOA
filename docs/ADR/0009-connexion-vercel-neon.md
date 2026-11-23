@@ -24,3 +24,10 @@ l'adresse du rôle propriétaire (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`), pas 
 
 Le secret propriétaire est stocké par Vercel (chiffré, hors dépôt). Le passage à un rôle de connexion
 dédié reste possible en renseignant `UNOA_IAM_DATABASE_URL`.
+
+## Complément (23 novembre 2026)
+
+L'intégration a relié Vercel à la base `neondb` d'une autre branche que celle migrée par GitHub. Le build
+Vercel exécute donc `packages/db/src/deploy.mjs` avant `next build` : migrations, rôle `unoa_web`, droits et
+40 contrôles sur la base effectivement liée ; un contrôle en échec arrête le déploiement. Le workflow GitHub
+reste disponible pour la base `unoa`.

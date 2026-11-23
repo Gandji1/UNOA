@@ -17,6 +17,9 @@ importers:
       '@unoa/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@unoa/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@unoa/domain':
         specifier: workspace:*
         version: link:../../packages/domain
