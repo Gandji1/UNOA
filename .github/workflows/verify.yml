@@ -43,9 +43,18 @@ jobs:
       - run: pnpm test:integration
         env:
           UNOA_TEST_DATABASE_URL: postgresql://unoa_ci:unoa_ci_ephemeral@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
+      - name: Navigateur de recette (Chromium)
+        run: pnpm --filter @unoa/web exec playwright install --with-deps chromium
       - run: pnpm test:http
         env:
+          UNOA_TEST_EVIDENCE: ${{ runner.temp }}/preuves
           UNOA_TEST_DATABASE_URL: postgresql://unoa_ci:unoa_ci_ephemeral@127.0.0.1:${{ job.services.postgres.ports[5432] }}/postgres
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preuves-navigateur
+          path: ${{ runner.temp }}/preuves
+          if-no-files-found: ignore
       - run: pnpm build
       - name: Recette HTTP du campus compilé
         shell: bash

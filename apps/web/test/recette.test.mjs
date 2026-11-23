@@ -17,6 +17,7 @@ import { exerciseLearning } from './fixtures/learning.fixture.mjs';
 import { exerciseAdmissions } from './fixtures/admissions.fixture.mjs';
 import { exerciseAdministration } from './fixtures/administration.fixture.mjs';
 import { exerciseNotifications, startRelay } from './fixtures/notifications.fixture.mjs';
+import { exerciseBrowser } from './fixtures/browser.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -218,6 +219,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 240_000 }, async 
     );
     await context.test('Administration des accès : amorçage, rôles, invitations, délégations, comptes et audit', () =>
       exerciseAdministration({ database, issuer, call, login, origin, root, alpha }),
+    );
+    await context.test('Navigateur : accessibilité WCAG 2.2 AA, clavier, mobile, zoom et réseau dégradé', () =>
+      exerciseBrowser({ issuer, login, origin, evidence: process.env.UNOA_TEST_EVIDENCE ?? fileURLToPath(new URL('../../../docs/preuves/lot013', import.meta.url)) }),
     );
     const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));
     if (storageLog.length) context.diagnostic(storageLog.join('\n'));

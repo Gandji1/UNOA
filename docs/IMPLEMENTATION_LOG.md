@@ -145,3 +145,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   `{"database":"connected","restricted":true,"schema":true,"provision":{"status":"ok","checks":40}}`.
 - Non-régression : unitaires 23, PostgreSQL 7, HTTP 8, build : PASS.
 - Reste : fournisseur OIDC (EXT-001) puis amorçage du premier administrateur ; contenu créé par l'administration.
+
+## 23 novembre 2026 — Lot 013 (recette navigateur et accessibilité)
+
+- Chromium + axe-core dans la recette : 25 écrans (public, administrateur de plateforme, candidat) × bureau,
+  Pixel 5 et 640 px (zoom 200 %) : 0 violation WCAG 2.2 A/AA ; clavier, focus, alerte, réseau dégradé : PASS.
+- Correction : débordement horizontal des groupes de permissions à 200 % (fieldset).
+- Vérifications : unitaires 23, PostgreSQL 7, HTTP 9, build : PASS. Captures : `docs/preuves/lot013/`.

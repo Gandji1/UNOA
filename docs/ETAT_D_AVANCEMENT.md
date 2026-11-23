@@ -58,3 +58,6 @@
 - Lot 012. File durable (outbox, worker, rejeu) et notifications multicanal : modèles par portée et
   langue, consentements, préférences, courriel/SMS par adaptateurs, preuve de livraison, export.
   [Fiche](lots/LOT_012.md), [ADR-0008](ADR/0008-file-durable-et-notifications.md), [audit des écarts](AUDIT_ECARTS.md).
+
+- Lot 013. Recette navigateur et accessibilité : tous les écrans, trois formats, WCAG 2.2 AA sans violation,
+  clavier, mobile, zoom 200 %, réseau dégradé. [Fiche](lots/LOT_013.md), [preuves](preuves/lot013/).
