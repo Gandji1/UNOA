@@ -214,3 +214,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0019, module `lib/governance`, écrans `/administration/gouvernance`, `/conseils`, `/decisions`.
 - Correction : formulaires imbriqués dans des paragraphes sur `/espace` (HTML invalide, relevé par la recette navigateur).
 - Vérifications : unitaires 27, PostgreSQL 7, HTTP 12, build : PASS.
+
+## 24 novembre 2026 — Lot 018 (enseignants)
+
+- Migration 0020, module `lib/teachers`, écrans `/enseignement` et `/administration/enseignants`, expiration quotidienne des missions.
+- Vérifications : PostgreSQL 7, HTTP 13, build : PASS.

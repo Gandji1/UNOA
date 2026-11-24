@@ -43,6 +43,12 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Ordre du jour modifié · {{council}}', body: '{{title}} — version {{version}}' }, en: { subject: 'Agenda updated · {{council}}', body: '{{title}} — version {{version}}' } } },
   { code: 'gov.minutes_signed', module: 'GOV', variables: ['council', 'title'], sensitive: false, defaults: {
     fr: { subject: 'Procès-verbal signé · {{council}}', body: '{{title}}' }, en: { subject: 'Minutes signed · {{council}}', body: '{{title}}' } } },
+  { code: 'tea.application_decided', module: 'TEA', variables: ['title'], sensitive: true, defaults: {
+    fr: { subject: 'Décision sur votre candidature enseignante', body: '{{title}}' }, en: { subject: 'Decision on your teaching application', body: '{{title}}' } } },
+  { code: 'tea.contract_ready', module: 'TEA', variables: ['scope', 'function'], sensitive: false, defaults: {
+    fr: { subject: 'Contrat à signer · {{scope}}', body: 'Mission : {{function}}' }, en: { subject: 'Contract to sign · {{scope}}', body: 'Assignment: {{function}}' } } },
+  { code: 'tea.assigned', module: 'TEA', variables: ['course', 'function'], sensitive: false, defaults: {
+    fr: { subject: 'Nouvelle affectation : {{course}}', body: 'Fonction : {{function}}' }, en: { subject: 'New assignment: {{course}}', body: 'Function: {{function}}' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

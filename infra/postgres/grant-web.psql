@@ -189,4 +189,19 @@ GRANT INSERT (council_id, delegate_member, starts_on, ends_on, reason, granted_b
 GRANT INSERT (meeting_id, title, url, added_by) ON unoa.meeting_document TO :"web_role";
 GRANT INSERT (decision_id, filed_by, reason), UPDATE (state, ruled_by, ruled_at, ruling) ON unoa.decision_appeal TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.public_decisions(uuid) TO :"web_role";
+-- 0020: teachers.
+GRANT SELECT ON unoa.teacher_profile, unoa.job_opening, unoa.teacher_application, unoa.teacher_review, unoa.teacher_contract,
+      unoa.teaching_assignment, unoa.teaching_obligation TO :"web_role";
+GRANT SELECT (id, application_id, kind, filename, format, size_bytes, sha256, content, state, note, checked_by, uploaded_at) ON unoa.teacher_document TO :"web_role";
+GRANT INSERT, UPDATE (title, discipline, biography, publications, availability, updated_at) ON unoa.teacher_profile TO :"web_role";
+GRANT INSERT (scope_id, title, discipline, level, region, description, closes_at, created_by), UPDATE (state) ON unoa.job_opening TO :"web_role";
+GRANT INSERT (opening_id, scope_id, applicant_id, course_title, syllabus, pedagogy),
+      UPDATE (course_title, syllabus, pedagogy, state, decision, decision_reason, decided_by, submitted_at) ON unoa.teacher_application TO :"web_role";
+GRANT INSERT (application_id, kind, filename, format, size_bytes, sha256, content), UPDATE (state, note, checked_by) ON unoa.teacher_document TO :"web_role";
+GRANT INSERT (application_id, kind, reviewer_id, recommendation, note, scheduled_at) ON unoa.teacher_review TO :"web_role";
+GRANT INSERT (account_id, scope_id, application_id, function, starts_on, ends_on, hours, hourly_rate, currency, terms, renewed_from, created_by),
+      UPDATE (state, teacher_signed_at, institution_signed_by, institution_signed_at, ended_at, end_reason) ON unoa.teacher_contract TO :"web_role";
+GRANT INSERT (contract_id, offering_id, function, hours, grading_days, created_by), UPDATE (state, ended_at) ON unoa.teaching_assignment TO :"web_role";
+GRANT INSERT (assignment_id, label, due_on, created_by), UPDATE (done_at) ON unoa.teaching_obligation TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.expire_teacher_contracts() TO :"web_role";
 COMMIT;

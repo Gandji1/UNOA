@@ -21,6 +21,7 @@ import { exerciseBrowser } from './fixtures/browser.fixture.mjs';
 import { exerciseLocal } from './fixtures/local.fixture.mjs';
 import { exerciseStudents } from './fixtures/students.fixture.mjs';
 import { exerciseGovernance } from './fixtures/governance.fixture.mjs';
+import { exerciseTeachers } from './fixtures/teachers.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -224,6 +225,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 900_000 }, async 
     );
     await context.test('Gouvernance : conseils, quorum, conflits, votes, procès-verbal, publication et recours', () =>
       exerciseGovernance({ database, issuer, call, login, origin }),
+    );
+    await context.test('Enseignants : appel, candidature, pièces, expertises, contrat, affectation et fin de mission', () =>
+      exerciseTeachers({ database, issuer, call, login, origin }),
     );
     await context.test('Notifications : modèles, consentements, file durable, relais, rejeu et confidentialité', () =>
       exerciseNotifications({ database, issuer, call, login, origin, relay, jobsToken }),

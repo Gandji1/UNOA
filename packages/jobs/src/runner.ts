@@ -45,6 +45,8 @@ const handlers: Record<string, (client: PoolClient, env: AdapterEnvironment, job
 
 export async function runJobs(pool: Pool, env: AdapterEnvironment, limit = 20): Promise<RunSummary> {
   const summary: RunSummary = { claimed: 0, done: 0, skipped: 0, failed: 0, dead: 0 };
+  // Daily housekeeping run by the same scheduled task: missions past their end lose their access.
+  await pool.query('SELECT unoa.expire_teacher_contracts()').catch(() => undefined);
   const { rows: jobs } = await pool.query<Job>(`
     UPDATE unoa.job SET state = 'running', attempts = attempts + 1, locked_until = now() + interval '2 minutes'
     WHERE id IN (
