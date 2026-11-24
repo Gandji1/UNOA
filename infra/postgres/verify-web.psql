@@ -42,5 +42,7 @@ SELECT current_database() AS base,
        NOT has_column_privilege(:'web_role', 'unoa.local_credential', 'login', 'UPDATE') AS credential_login_frozen,
        NOT has_table_privilege(:'web_role', 'unoa.student_event', 'UPDATE, DELETE, TRUNCATE') AS student_history_kept,
        NOT has_column_privilege(:'web_role', 'unoa.student', 'matricule', 'UPDATE') AS matricule_frozen,
+       NOT has_table_privilege(:'web_role', 'unoa.council_vote', 'UPDATE, DELETE, TRUNCATE') AS votes_append_only,
+       NOT has_column_privilege(:'web_role', 'unoa.council_decision', 'outcome', 'UPDATE') AS decisions_frozen,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;

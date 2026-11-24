@@ -173,4 +173,20 @@ GRANT EXECUTE ON FUNCTION unoa.set_role_level(uuid, text, text, uuid) TO :"web_r
 GRANT EXECUTE ON FUNCTION unoa.register_local_account(uuid, text, text, text, text) TO :"web_role";
 -- 0018: development mode and password reset.
 GRANT EXECUTE ON FUNCTION unoa.set_development_mode(uuid, boolean, uuid), unoa.reset_local_password(uuid, uuid, text, boolean, uuid) TO :"web_role";
+-- 0019: governance.
+GRANT SELECT ON unoa.council, unoa.council_member, unoa.meeting, unoa.agenda_item, unoa.meeting_attendance, unoa.conflict_declaration,
+      unoa.council_vote, unoa.council_decision, unoa.meeting_minutes, unoa.signature_delegation, unoa.meeting_document, unoa.decision_appeal TO :"web_role";
+GRANT INSERT (scope_id, name, kind, quorum_percent, majority, created_by), UPDATE (name, quorum_percent, majority, archived_at) ON unoa.council TO :"web_role";
+GRANT INSERT (council_id, account_id, office, voting, starts_on, ends_on, appointed_by), UPDATE (ends_on) ON unoa.council_member TO :"web_role";
+GRANT INSERT (council_id, title, scheduled_at, place, created_by), UPDATE (state, agenda_version, scheduled_at, place, convened_at, opened_at, closed_at) ON unoa.meeting TO :"web_role";
+GRANT INSERT (meeting_id, ordinal, title, description, kind, added_in_version), UPDATE (withdrawn_in_version, vote_state) ON unoa.agenda_item TO :"web_role";
+GRANT INSERT, UPDATE (present, recorded_by, recorded_at) ON unoa.meeting_attendance TO :"web_role";
+GRANT INSERT ON unoa.conflict_declaration, unoa.council_vote TO :"web_role";
+GRANT INSERT (item_id, outcome, votes_for, votes_against, votes_abstain, present, text, effective_on, recorded_by),
+      UPDATE (public_summary, published_by, published_at) ON unoa.council_decision TO :"web_role";
+GRANT INSERT (meeting_id, body, drafted_by), UPDATE (body, drafted_by, drafted_at, signed_by, signed_at, sha256) ON unoa.meeting_minutes TO :"web_role";
+GRANT INSERT (council_id, delegate_member, starts_on, ends_on, reason, granted_by) ON unoa.signature_delegation TO :"web_role";
+GRANT INSERT (meeting_id, title, url, added_by) ON unoa.meeting_document TO :"web_role";
+GRANT INSERT (decision_id, filed_by, reason), UPDATE (state, ruled_by, ruled_at, ruling) ON unoa.decision_appeal TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.public_decisions(uuid) TO :"web_role";
 COMMIT;

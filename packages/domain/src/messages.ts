@@ -37,6 +37,12 @@ export const events: EventDefinition[] = [
   { code: 'sis.status_changed', module: 'SIS', variables: ['status', 'reason'], sensitive: true, defaults: {
     fr: { subject: 'Changement de votre situation', body: '{{status}} — {{reason}}' },
     en: { subject: 'Change to your student status', body: '{{status}} — {{reason}}' } } },
+  { code: 'gov.convened', module: 'GOV', variables: ['council', 'title', 'start'], sensitive: false, defaults: {
+    fr: { subject: 'Convocation · {{council}}', body: '{{title}} — {{start}}' }, en: { subject: 'Notice of meeting · {{council}}', body: '{{title}} — {{start}}' } } },
+  { code: 'gov.agenda_changed', module: 'GOV', variables: ['council', 'title', 'version'], sensitive: false, defaults: {
+    fr: { subject: 'Ordre du jour modifié · {{council}}', body: '{{title}} — version {{version}}' }, en: { subject: 'Agenda updated · {{council}}', body: '{{title}} — version {{version}}' } } },
+  { code: 'gov.minutes_signed', module: 'GOV', variables: ['council', 'title'], sensitive: false, defaults: {
+    fr: { subject: 'Procès-verbal signé · {{council}}', body: '{{title}}' }, en: { subject: 'Minutes signed · {{council}}', body: '{{title}}' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

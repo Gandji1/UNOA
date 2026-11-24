@@ -95,9 +95,9 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
           <label>Téléphone (format international)<input name="phone" type="tel" defaultValue={contact.phone ?? ''} placeholder="+229…" maxLength={20} /></label>
         </ActionForm>
         {(['email', 'sms'] as const).map(channel => (
-          <p key={channel}>{channel === 'email' ? 'Courriel' : 'SMS'} : {contact.current[channel] ? <Badge tone="ok">accepté</Badge> : <Badge tone="muted">refusé</Badge>}{' '}
+          <div key={channel} className="studio-actions">{channel === 'email' ? 'Courriel' : 'SMS'} : {contact.current[channel] ? <Badge tone="ok">accepté</Badge> : <Badge tone="muted">refusé</Badge>}{' '}
             <ActionForm inline action="/api/v1/notifications/consent" back="/espace" hidden={{ channel, granted: contact.current[channel] ? 'false' : 'true' }}
-              submit={contact.current[channel] ? 'Retirer mon consentement' : 'Accepter de recevoir des messages'} /></p>
+              submit={contact.current[channel] ? 'Retirer mon consentement' : 'Accepter de recevoir des messages'} /></div>
         ))}
         {(contact.current.email || contact.current.sms) && (
           <details><summary>Choisir les messages reçus hors de la plateforme</summary>

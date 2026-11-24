@@ -8,6 +8,7 @@
     "./time": "./src/time.ts",
     "./forms": "./src/forms.ts",
     "./messages": "./src/messages.ts",
-    "./totp": "./src/totp.ts"
+    "./totp": "./src/totp.ts",
+    "./governance": "./src/governance.ts"
   }
 }

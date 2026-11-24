@@ -17,6 +17,7 @@ const administration: [string, NavItem][] = [
   ['adm.read', { href: '/administration/admissions', label: 'Admissions', icon: 'inbox' }],
   ['not.read', { href: '/administration/notifications', label: 'Notifications', icon: 'bell' }],
   ['sis.read', { href: '/administration/scolarite', label: 'Scolarité', icon: 'cap' }],
+  ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
   ['config.read', { href: '/administration/parametres', label: 'Réglages', icon: 'sliders' }],
@@ -31,6 +32,7 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/admissions': 'Campagnes, formulaires et grilles, instruction des dossiers, décisions et recours.',
   '/administration/notifications': 'Modèles de messages par événement, canal et langue ; journal des envois, files et rejeu.',
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
+  '/administration/gouvernance': 'Conseils, membres et mandats, séances, ordres du jour, quorum, votes, décisions, procès-verbaux signés et publication.',
   '/administration/site': 'Site public de l’établissement : noms d’hôte, textes, mise en ligne, création de compte.',
   '/administration/territoires': 'Pays, régions, établissements universitaires et campus.',
   '/administration/parametres': 'Règles et réglages par pays ou établissement, avec versions et dates d’effet.',
@@ -76,7 +78,7 @@ export async function allowedCreations(actor: string) {
 
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
-  { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/site'] },
+  { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
   { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours'] },
   { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
@@ -90,6 +92,7 @@ export const navigation = cache(async () => {
       { href: '/', label: 'Accueil', icon: 'home' },
       { href: '/formations', label: 'Formations', icon: 'cap' },
       { href: '/structures', label: 'Structures', icon: 'landmark' },
+      { href: '/decisions', label: 'Décisions', icon: 'file' },
     ],
   }];
   const settings = iamSettings();
@@ -107,6 +110,7 @@ export const navigation = cache(async () => {
         { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
+        { href: '/conseils', label: 'Mes conseils', icon: 'landmark' },
       ] });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
       if (admin.length) {

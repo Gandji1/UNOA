@@ -208,3 +208,9 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Tableau de bord : boutons « Ce que vous pouvez créer », « Prochaines étapes » (tâches du profil, personnes invitées
   à qui demander de se connecter et pour quoi) ; étape suivante après chaque création.
 - Définitions de types déplacées en réglage avancé. Vérifications : HTTP 11, build : PASS.
+
+## 24 novembre 2026 — Lot 017 (gouvernance)
+
+- Migration 0019, module `lib/governance`, écrans `/administration/gouvernance`, `/conseils`, `/decisions`.
+- Correction : formulaires imbriqués dans des paragraphes sur `/espace` (HTML invalide, relevé par la recette navigateur).
+- Vérifications : unitaires 27, PostgreSQL 7, HTTP 12, build : PASS.

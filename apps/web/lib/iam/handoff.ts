@@ -22,6 +22,7 @@ export const roleTasks: Record<string, string> = {
   registrar_validator: 'valider les inscriptions',
   site_editor: 'rédiger les textes du site public',
   communication_manager: 'adapter les messages envoyés',
+  council_secretary: 'convoquer les séances des conseils, tenir les présences et rédiger les procès-verbaux',
 };
 
 export interface Handoff { name: string; role: string; roleCode: string; scope: string; state: 'pending' | 'accepted' | 'expired' | 'revoked'; task: string }
