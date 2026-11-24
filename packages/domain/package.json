@@ -9,6 +9,7 @@
     "./forms": "./src/forms.ts",
     "./messages": "./src/messages.ts",
     "./totp": "./src/totp.ts",
-    "./governance": "./src/governance.ts"
+    "./governance": "./src/governance.ts",
+    "./assessment": "./src/assessment.ts"
   }
 }

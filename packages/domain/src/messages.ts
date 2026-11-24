@@ -49,6 +49,14 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Contrat à signer · {{scope}}', body: 'Mission : {{function}}' }, en: { subject: 'Contract to sign · {{scope}}', body: 'Assignment: {{function}}' } } },
   { code: 'tea.assigned', module: 'TEA', variables: ['course', 'function'], sensitive: false, defaults: {
     fr: { subject: 'Nouvelle affectation : {{course}}', body: 'Fonction : {{function}}' }, en: { subject: 'New assignment: {{course}}', body: 'Function: {{function}}' } } },
+  { code: 'ass.published', module: 'ASS', variables: ['title', 'course', 'opens', 'closes'], sensitive: false, defaults: {
+    fr: { subject: 'Nouvelle évaluation : {{title}}', body: '{{course}} — du {{opens}} au {{closes}}' }, en: { subject: 'New assessment: {{title}}', body: '{{course}} — {{opens}} to {{closes}}' } } },
+  { code: 'ass.receipt', module: 'ASS', variables: ['title', 'receipt'], sensitive: false, defaults: {
+    fr: { subject: 'Copie reçue · {{title}}', body: 'Accusé de réception : {{receipt}}' }, en: { subject: 'Submission received · {{title}}', body: 'Receipt: {{receipt}}' } } },
+  { code: 'ass.graded', module: 'ASS', variables: ['title'], sensitive: false, defaults: {
+    fr: { subject: 'Copie corrigée · {{title}}', body: 'Consultez la correction et les commentaires.' }, en: { subject: 'Submission graded · {{title}}', body: 'See the grading and feedback.' } } },
+  { code: 'ass.integrity', module: 'ASS', variables: ['title'], sensitive: true, defaults: {
+    fr: { subject: 'Procédure relative à votre copie', body: '{{title}} — vous pouvez présenter vos observations.' }, en: { subject: 'Procedure concerning your submission', body: '{{title}} — you may respond.' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

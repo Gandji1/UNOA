@@ -204,4 +204,17 @@ GRANT INSERT (account_id, scope_id, application_id, function, starts_on, ends_on
 GRANT INSERT (contract_id, offering_id, function, hours, grading_days, created_by), UPDATE (state, ended_at) ON unoa.teaching_assignment TO :"web_role";
 GRANT INSERT (assignment_id, label, due_on, created_by), UPDATE (done_at) ON unoa.teaching_obligation TO :"web_role";
 GRANT EXECUTE ON FUNCTION unoa.expire_teacher_contracts() TO :"web_role";
+-- 0021: assessments.
+GRANT SELECT ON unoa.question_bank, unoa.question, unoa.assessment, unoa.assessment_question, unoa.accommodation, unoa.attempt,
+      unoa.attempt_file, unoa.grading, unoa.integrity_case TO :"web_role";
+GRANT INSERT (scope_id, title, created_by) ON unoa.question_bank TO :"web_role";
+GRANT INSERT (bank_id, lineage, version, kind, prompt, choices, answer, points, tags, author_id), UPDATE (retired_at, tags) ON unoa.question TO :"web_role";
+GRANT INSERT (offering_id, title, kind, team, instructions, opens_at, closes_at, duration_minutes, attempts_allowed, draw_count, rubric, double_grading, created_by),
+      UPDATE (title, instructions, opens_at, closes_at, duration_minutes, attempts_allowed, draw_count, rubric, double_grading, state, published_at) ON unoa.assessment TO :"web_role";
+GRANT INSERT, DELETE ON unoa.assessment_question TO :"web_role";
+GRANT INSERT, UPDATE (extra_minutes, extra_days, reason, granted_by, granted_at) ON unoa.accommodation TO :"web_role";
+GRANT INSERT (id, assessment_id, account_id, number, team_label, team_members, questions, deadline), UPDATE (team_members, answers, saved_at, state, submitted_at, receipt, auto_score) ON unoa.attempt TO :"web_role";
+GRANT INSERT (attempt_id, question_id, filename, format, size_bytes, sha256, content) ON unoa.attempt_file TO :"web_role";
+GRANT INSERT (attempt_id, round, grader_id, scores, total, feedback) ON unoa.grading TO :"web_role";
+GRANT INSERT (attempt_id, reported_by, reason), UPDATE (state, learner_response, answered_at, decision, decided_by, decided_at) ON unoa.integrity_case TO :"web_role";
 COMMIT;

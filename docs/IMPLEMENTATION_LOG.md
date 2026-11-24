@@ -219,3 +219,10 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 
 - Migration 0020, module `lib/teachers`, écrans `/enseignement` et `/administration/enseignants`, expiration quotidienne des missions.
 - Vérifications : PostgreSQL 7, HTTP 13, build : PASS.
+
+## 24 novembre 2026 — Lot 019 (évaluations internes)
+
+- Migration 0021, domaine `assessment`, module `lib/assessments`, API `/api/v1/ass`, écrans `/evaluations`,
+  `/evaluations/gestion`, `/evaluations/copie` ; entrée « Mes évaluations » dans la barre latérale.
+- Correction pendant la recette : droit d'insertion manquant sur `attempt.id` (42501), note masquée pendant une procédure de fraude.
+- Vérifications : unitaires 30, PostgreSQL 7, HTTP 14 (dont navigateur), build : PASS.

@@ -44,7 +44,7 @@ export async function exerciseBrowser({ issuer, login, origin, evidence }) {
       public: ['/', '/formations', '/structures', '/connexion', '/inscription', '/decisions', '/mentions-legales', '/confidentialite', '/a-propos', '/invitation/' + 'x'.repeat(43)],
       'iam-admin': ['/espace', '/administration', '/administration/acces', '/administration/acces?vue=roles', '/administration/structures',
         '/administration/catalogue', '/administration/cours', '/administration/admissions', '/administration/site', '/administration/territoires',
-        '/administration/parametres', '/administration/notifications', '/administration/scolarite', '/administration/guide', '/administration/creer', '/administration/creer?quoi=faculte', '/administration/gouvernance', '/conseils', '/administration/enseignants', '/enseignement', '/apprendre', '/candidature', '/etudiant'],
+        '/administration/parametres', '/administration/notifications', '/administration/scolarite', '/administration/guide', '/administration/creer', '/administration/creer?quoi=faculte', '/administration/gouvernance', '/conseils', '/administration/enseignants', '/enseignement', '/evaluations', '/evaluations/gestion', '/evaluations/copie', '/apprendre', '/candidature', '/etudiant'],
       'not-candidate': ['/espace', '/candidature', '/apprendre'],
     };
     const shapes = { bureau: { viewport: { width: 1280, height: 860 } }, mobile: devices['Pixel 5'], zoom200: { viewport: { width: 640, height: 860 } } };

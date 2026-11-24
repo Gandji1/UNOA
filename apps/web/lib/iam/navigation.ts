@@ -110,6 +110,7 @@ export const navigation = cache(async () => {
       groups.push({ label: 'Mon espace', items: [
         { href: '/espace', label: 'Mon espace', icon: 'user' },
         { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
+        { href: '/evaluations', label: 'Mes évaluations', icon: 'file' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
         { href: '/conseils', label: 'Mes conseils', icon: 'landmark' },
