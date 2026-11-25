@@ -281,4 +281,7 @@ GRANT INSERT (enrollment_id, module_id, score, evidence, recorded_by) ON unoa.mo
 GRANT INSERT (enrollment_id, rating, comment) ON unoa.short_feedback TO :"web_role";
 GRANT INSERT (scope_id, title, course_ids, credential_type_id, created_by) ON unoa.credential_stack TO :"web_role";
 GRANT INSERT (scope_id, account_id, course_id, target, experience), UPDATE (state, reviewer_id, decision, decided_at) ON unoa.rpl_request TO :"web_role";
+-- 0027: administrative cascade.
+GRANT EXECUTE ON FUNCTION unoa.cascade_level(uuid), unoa.cascade_anchor(uuid), unoa.holds_here(uuid, text, uuid), unoa.may_create(uuid, text, uuid, text),
+      unoa.cascade_head(uuid), unoa.cascade_allows(uuid, text, uuid) TO :"web_role";
 COMMIT;

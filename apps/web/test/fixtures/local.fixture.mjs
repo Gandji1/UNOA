@@ -53,7 +53,12 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   const iam = (action, data) => call('/api/v1/iam/' + action, { method: 'POST', headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   const { rows: [alpha] } = await database.query("SELECT id FROM unoa.scope WHERE label = 'Université Alpha'");
   const { rows: [root] } = await database.query('SELECT id FROM unoa.scope WHERE parent_id IS NULL');
-  const invited = await (await iam('invitations', { scopeId: alpha.id, displayName: 'Admin Alpha', role: 'institution_admin', reason: 'Nomination', validDays: 7, includeDescendants: true })).json();
+  const rector = { scopeId: alpha.id, displayName: 'Admin Alpha', role: 'institution_admin', reason: 'Nomination', validDays: 7, includeDescendants: true };
+  // Cascade (ADR-0016): the rector is named by the country administrator, not by the super-administrator.
+  assert.equal((await iam('invitations', rector)).status, 403, 'le super-administrateur ne nomme pas le recteur');
+  await database.query(`INSERT INTO unoa.role_grant(account_id, scope_id, role_code, effective_from, include_descendants)
+    SELECT account_id, (SELECT parent_id FROM unoa.scope WHERE id = $1), 'country_admin', now(), true FROM unoa.local_credential WHERE login = 'admin.local'`, [alpha.id]);
+  const invited = await (await iam('invitations', rector)).json();
   assert.ok(invited.link, JSON.stringify(invited));
   const token = invited.link.split('/invitation/')[1];
   const accept = data => call('/api/v1/auth/invitation', { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -66,7 +71,7 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.match(where(await accept({ login: 'admin.alpha2', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' })), /erreur=410$/, 'invitation à usage unique');
   const alphaCookie = session(await signIn('admin.alpha', 'Alpha-Secret-2026'));
   const alphaConsole = await (await call('/administration', { headers: { Cookie: alphaCookie } })).text();
-  assert.match(alphaConsole, /Administrateur d’établissement \(campus\) \(Université Alpha\)/);
+  assert.match(alphaConsole, /Recteur ou administrateur d’établissement \(Université Alpha\)/);
   assert.match(alphaConsole, /href="\/administration\/structures"/);
   assert.doesNotMatch(alphaConsole, /Mise en route de la plateforme/, 'réservé à la plateforme');
   assert.match(await (await call('/administration/guide', { headers: { Cookie: alphaCookie } })).text(), /Qui crée quoi/);

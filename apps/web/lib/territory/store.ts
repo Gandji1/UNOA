@@ -1,3 +1,4 @@
+import { requireCascade } from '@/lib/server/cascade';
 import 'server-only';
 import type { Pool, PoolClient } from 'pg';
 import type { IamSettings } from '@/lib/iam/settings';
@@ -173,6 +174,8 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
     // Academic units are proposed and approved through the organisation studio.
     const nature = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
     ensure(nature.rows[0]?.nature !== 'academic_unit', 422, 'Une unité académique se crée dans le studio des structures');
+    const created = nature.rows[0]?.nature;
+    await requireCascade(store, actor, 'territory.write', parentId, created === 'institution' ? 'institution' : created === 'centre' ? 'centre' : 'territory');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, time_zone, currency, locale,
                              legal_name, contact, present_from, present_until)

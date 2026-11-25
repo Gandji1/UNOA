@@ -43,6 +43,10 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
     INSERT INTO unoa.role_grant(account_id, scope_id, role_code, effective_from, include_descendants)
     VALUES ($1, $4, 'academic_admin', now(), true), ($2, $4, 'academic_reviewer', now(), true), ($3, $5, 'academic_local', now(), true)
   `, [admin, reviewer, agent, root, betaUniv]);
+  // Cascade (ADR-0016): each creation needs a nomination on the scope itself (test-only nominations).
+  const name = (account, scopeId, role = 'academic_admin') => database.query(
+    'INSERT INTO unoa.role_grant(account_id, scope_id, role_code, effective_from, include_descendants) VALUES ($1, $2, $3, now(), true)', [account, scopeId, role]);
+  await name(admin, alphaUniv);
 
   async function signIn(subject) {
     issuer.useIdentity(subject, 'test-mfa');
@@ -80,6 +84,7 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   await status(await propose(faculty.scopeId, { typeCode: 'departement', code: 'DINF', label: 'Informatique' }), 422, 'mère non active');
   await status(await post(`${org}units/${faculty.scopeId}/decide`, A, { decision: 'approve' }), 403, 'auto-validation');
   await okay(await post(`${org}units/${faculty.scopeId}/decide`, R, { decision: 'approve' }));
+  await name(admin, faculty.scopeId);
   await status(await post(`${org}units/${faculty.scopeId}/decide`, R, { decision: 'approve' }), 409, 'double décision');
   await status(await propose(alphaUniv, { typeCode: 'labo', code: 'LAB', label: 'Hors hiérarchie' }), 422, 'hiérarchie non déclarée');
   await status(await propose(alphaUniv, { typeCode: 'faculte', code: 'FSA', label: 'Doublon' }), 409, 'code en double');
@@ -132,6 +137,8 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   assert.notEqual(moved.scopeId, department.scopeId);
   const lineage = await database.query('SELECT kind FROM unoa.org_succession WHERE predecessor_id = $1 AND successor_id = $2', [department.scopeId, moved.scopeId]);
   assert.equal(lineage.rows[0].kind, 'transfer');
+  // The department now belongs to the second faculty; its head (here the fixture admin) builds the catalogue.
+  await name(admin, moved.scopeId);
   const ended = await database.query(`
     SELECT count(*)::int AS total FROM unoa.org_appointment WHERE position_id = $1 AND effective_until IS NOT NULL
   `, [head.id]);
@@ -149,25 +156,27 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   await okay(await post(cat + 'field-types', A, { code: 'domaine', label: 'Domaine', rootAllowed: true }));
   await okay(await post(cat + 'field-types', A, { code: 'filiere', label: 'Filière', parentTypes: ['domaine'] }));
   await okay(await post(cat + 'field-types', A, { code: 'specialite', label: 'Spécialité', parentTypes: ['filiere'] }));
-  const field = (data, cookie = A) => post(cat + 'fields', cookie, { scopeId: alphaUniv, ...data });
+  const field = (data, cookie = A) => post(cat + 'fields', cookie, { scopeId: moved.scopeId, ...data });
   const domain = await okay(await field({ typeCode: 'domaine', code: 'D-SCI', label: 'Sciences et technologies' }));
   const branch = await okay(await field({ typeCode: 'filiere', code: 'F-INFO', label: 'Informatique', parentId: domain.id }));
   const speciality = await okay(await field({ typeCode: 'specialite', code: 'S-RES', label: 'Réseaux', parentId: branch.id }));
   await status(await field({ typeCode: 'specialite', code: 'S-ROOT', label: 'Sans parent' }), 422, 'spécialité sans filière');
   await status(await field({ typeCode: 'filiere', code: 'F-SUB', label: 'Filière sous filière', parentId: branch.id }), 422, 'taxonomie non déclarée');
 
-  const course = (code, title, scopeId = alphaUniv, cookie = A) => post(cat + 'courses', cookie, { scopeId, code, title });
+  const course = (code, title, scopeId = moved.scopeId, cookie = A) => post(cat + 'courses', cookie, { scopeId, code, title });
   const algo = await okay(await course('C-ALGO', 'Algorithmique'));
   const nets = await okay(await course('C-RES', 'Réseaux'));
   const skill = await okay(await post(cat + 'competencies', A, { scopeId: alphaUniv, code: 'K1', label: 'Concevoir un algorithme' }));
 
   // 5. A programme is drafted under an active faculty with its own rules.
   const program = await okay(await post(cat + 'programs', A, {
-    scopeId: second.scopeId, kindCode: 'licence', fieldId: speciality.id, code: 'L-INFO', title: 'Licence d’informatique',
+    scopeId: moved.scopeId, kindCode: 'licence', fieldId: speciality.id, code: 'L-INFO', title: 'Licence d’informatique',
     organisation: 'Semestrielle', duration: 'Deux semestres', deliveryMode: 'À distance', creditUnit: 'crédits',
     expectedCredits: 12, languages: ['fr', 'en'],
   }));
-  await status(await post(cat + 'programs', A, { scopeId: faculty.scopeId, kindCode: 'licence', code: 'L-INFO', title: 'Doublon',
+  await status(await post(cat + 'programs', A, { scopeId: faculty.scopeId, kindCode: 'licence', code: 'L-AUTRE', title: 'Hors département',
+    organisation: 'S', duration: 'D', deliveryMode: 'M', creditUnit: 'c' }), 403, 'formation créée dans un département seulement');
+  await status(await post(cat + 'programs', A, { scopeId: moved.scopeId, kindCode: 'licence', code: 'L-INFO', title: 'Doublon',
     organisation: 'S', duration: 'D', deliveryMode: 'M', creditUnit: 'c' }), 409, 'code de programme en double');
   const v1 = program.versionId;
   const edit = (versionId, part, data, cookie = A) => post(`${cat}program-versions/${versionId}/${part}`, cookie, data);
@@ -295,7 +304,7 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
 
   // 10. Shared courses stay within the establishment; Bêta keeps its own rules.
   const other = await okay(await post(cat + 'programs', A, {
-    scopeId: alphaUniv, kindCode: 'certificat', code: 'C-ALG', title: 'Certificat d’algorithmique',
+    scopeId: moved.scopeId, kindCode: 'certificat', code: 'C-ALG', title: 'Certificat d’algorithmique',
     organisation: 'Modulaire', duration: 'Six semaines', deliveryMode: 'À distance', creditUnit: 'unités',
   }));
   const otherPeriod = await okay(await edit(other.versionId, 'periods', { ordinal: 1, label: 'Module unique' }));
@@ -304,11 +313,16 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   await okay(await edit(other.versionId, 'units', { periodId: otherDraft.periods[0].id, code: 'M1', title: 'Module', credits: 3 }));
   const otherUnit = (await detail(other.versionId)).units[0].id;
   await okay(await edit(other.versionId, 'courses', { unitId: otherUnit, courseId: algo.id }));
-  const overview = await okay(await get(`${cat}scopes?scopeId=${alphaUniv}`, A));
+  const overview = await okay(await get(`${cat}scopes?scopeId=${moved.scopeId}`, A));
   assert.equal(overview.courses.find(item => item.code === 'C-ALGO').programs, 2);
 
+  await okay(await post(`${org}units/${betaFaculty.scopeId}/decide`, R, { decision: 'approve' }));
+  await name(agent, betaFaculty.scopeId, 'academic_local');
+  const betaDepartment = await okay(await propose(betaFaculty.scopeId, { typeCode: 'departement', code: 'DB1', label: 'Département Bêta' }, B));
+  await okay(await post(`${org}units/${betaDepartment.scopeId}/decide`, R, { decision: 'approve' }));
+  await name(agent, betaDepartment.scopeId, 'academic_local');
   const betaProgram = await okay(await post(cat + 'programs', B, {
-    scopeId: betaUniv, kindCode: 'certificat', code: 'C-B1', title: 'Certificat Bêta',
+    scopeId: betaDepartment.scopeId, kindCode: 'certificat', code: 'C-B1', title: 'Certificat Bêta',
     organisation: 'Trimestrielle', duration: 'Un trimestre', deliveryMode: 'Présentiel', creditUnit: 'unités de valeur',
   }));
   const betaDraft = await detail(betaProgram.versionId, B);

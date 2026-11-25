@@ -1,3 +1,4 @@
+import { requireCascade } from '@/lib/server/cascade';
 import 'server-only';
 // Catalogue references: programme natures and taxonomy types (platform root),
 // then fields, courses and competencies owned by an establishment or a unit.
@@ -124,6 +125,7 @@ export async function createField(settings: IamSettings, actor: string, input: I
   };
   return transaction(settings, 'unoa.catalog.' + scopeId, async store => {
     await requireContext(store, actor, scopeId, 'write');
+    await requireCascade(store, actor, 'catalog.write', scopeId, 'catalog');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.academic_field(owner_scope_id, type_code, parent_id, code, label, description, created_by)
       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
@@ -155,6 +157,7 @@ export async function createCourse(settings: IamSettings, actor: string, input: 
   };
   return transaction(settings, 'unoa.catalog.' + scopeId, async store => {
     await requireContext(store, actor, scopeId, 'write');
+    await requireCascade(store, actor, 'catalog.write', scopeId, 'catalog');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.course(owner_scope_id, code, title, description, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING id
     `, [scopeId, item.code, item.title, item.description, actor]);

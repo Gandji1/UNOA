@@ -53,23 +53,23 @@ export const studioDescriptions: Record<string, string> = {
 // Creation shortcuts by level (owner's hierarchy): shown only where the
 // person may create the object (same rule as the creation assistants).
 const creations: { kind: string; label: string; check: string }[] = [
-  { kind: 'pays', label: 'Un pays', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature = 'platform'" },
-  { kind: 'etablissement', label: 'Un établissement', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature IN ('territory', 'jurisdiction')" },
-  { kind: 'campus', label: 'Un campus', check: "unoa.has_scope_permission($1, 'territory.write', scope.id) AND kind.nature = 'institution'" },
-  { kind: 'faculte', label: 'Une faculté', check: "unoa.has_scope_permission($1, 'org.write', scope.id) AND kind.nature = 'institution'" },
-  { kind: 'departement', label: 'Un département', check: "unoa.has_scope_permission($1, 'org.write', scope.id) AND kind.nature = 'academic_unit'" },
-  { kind: 'filiere', label: 'Une filière', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
-  { kind: 'formation', label: 'Une formation', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
-  { kind: 'matiere', label: 'Une matière', check: "unoa.has_scope_permission($1, 'catalog.write', scope.id) AND kind.nature IN ('institution', 'academic_unit')" },
-  { kind: 'responsable', label: 'Nommer un responsable', check: "unoa.has_scope_permission($1, 'iam.manage', scope.id)" },
+  { kind: 'pays', label: 'Un pays', check: "kind.nature = 'platform' AND unoa.may_create($1, 'territory.write', scope.id, 'territory')" },
+  { kind: 'etablissement', label: 'Un établissement', check: "kind.nature IN ('territory', 'jurisdiction') AND unoa.may_create($1, 'territory.write', scope.id, 'institution')" },
+  { kind: 'campus', label: 'Un campus', check: "kind.nature = 'institution' AND unoa.may_create($1, 'territory.write', scope.id, 'centre')" },
+  { kind: 'faculte', label: 'Une faculté', check: "kind.nature IN ('institution', 'centre') AND unoa.may_create($1, 'org.write', scope.id, 'faculty')" },
+  { kind: 'departement', label: 'Un département', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'org.write', scope.id, 'department')" },
+  { kind: 'filiere', label: 'Une filière', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
+  { kind: 'formation', label: 'Une formation', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
+  { kind: 'matiere', label: 'Une matière', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
+  { kind: 'responsable', label: 'Nommer un responsable', check: "unoa.holds_here($1, 'iam.assign', scope.id)" },
 ];
 
 // What each role creates in the hierarchy (a person holding several roles
 // sees the union); custom roles fall back to their permissions.
 const roleCreations: Record<string, string[]> = {
   platform_admin: ['pays', 'responsable'], territory_manager: ['pays', 'etablissement', 'campus'],
-  country_admin: ['etablissement', 'campus', 'responsable'],
-  institution_admin: ['faculte', 'departement', 'responsable'], dean: ['departement', 'responsable'],
+  country_admin: ['etablissement', 'responsable'],
+  institution_admin: ['faculte', 'campus', 'responsable'], dean: ['departement', 'responsable'],
   department_head: ['filiere', 'formation', 'matiere', 'responsable'], academic_manager: ['faculte', 'departement', 'filiere', 'formation', 'matiere'],
   program_manager: ['formation', 'matiere'],
 };

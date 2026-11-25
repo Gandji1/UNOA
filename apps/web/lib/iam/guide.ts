@@ -23,7 +23,7 @@ export const setupSteps: SetupStep[] = [
   { key: 'site', title: '4. Site public de l’établissement', href: '/administration/site', level: 'institution',
     detail: 'Créer le site, son adresse, ses textes, puis le mettre en ligne.', roles: ['institution_admin', 'site_editor'] },
   { key: 'units', title: '5. Facultés puis départements', href: '/administration/structures', level: 'institution',
-    detail: 'Créer les facultés, puis les départements au sein de chaque faculté ; nommer doyens et chefs de département.',
+    detail: 'Le recteur crée les facultés et nomme les doyens ; chaque doyen crée ses départements et nomme les chefs de département.',
     roles: ['institution_admin', 'dean'] },
   { key: 'catalogue', title: '6. Filières, formations et matières', href: '/administration/catalogue', level: 'unit',
     detail: 'Dans chaque département : filières et spécialités, formations et leur maquette (semestres, UE, crédits), matières (cours) ; puis publication.',

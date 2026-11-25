@@ -1,3 +1,4 @@
+import { requireCascade } from '@/lib/server/cascade';
 import 'server-only';
 import type { IamSettings } from '@/lib/iam/settings';
 import { database } from '@/lib/iam/sessions';
@@ -161,6 +162,7 @@ export async function proposeUnit(settings: IamSettings, actor: string, input: I
     ensure(parent.nature === 'institution' || parent.status === 'active', 422, 'La structure mère doit être active');
     const { rows } = await store.query<{ nature: string }>('SELECT nature FROM unoa.scope_type WHERE code = $1', [kind]);
     ensure(rows[0]?.nature === 'academic_unit', 422, 'Ce type n’est pas une unité académique');
+    await requireCascade(store, actor, 'org.write', parentId, parent.nature === 'academic_unit' ? 'department' : 'faculty');
     const scope = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, present_from) VALUES ($1, $2, $3, $4) RETURNING id
     `, [kind, parentId, label, presentFrom]);

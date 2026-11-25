@@ -28,3 +28,4 @@
 | 2026-11-25 | Règle de notation en objet versionné dédié (jeu complet daté) plutôt que clés grading.* isolées | Cohérence d'une délibération, rattachement de chaque décision à la règle appliquée (ADR-0012) | Appliqué |
 | 2026-11-25 | Paiement crédité seulement par événement signé du prestataire ; bac à sable signé ; prestataires réels bloqués faute de contrat | ADR-0013 | Appliqué |
 | 2026-11-25 | Registre unique des documents délivrés (étudiants et formations courtes), vérificateur à divulgation minimale | ADR-0014 | Appliqué |
+| 2026-11-25 | Cascade stricte : chaque niveau crée le niveau inférieur et en nomme le responsable, les niveaux supérieurs suivent | Décision du propriétaire (ADR-0016) | Appliqué |

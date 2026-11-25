@@ -1,3 +1,4 @@
+import { requireCascade } from '@/lib/server/cascade';
 import 'server-only';
 // Programmes, their translated titles and their regulatory authorizations.
 import type { IamSettings } from '@/lib/iam/settings';
@@ -35,6 +36,7 @@ export async function createProgram(settings: IamSettings, actor: string, input:
   const version = versionFields({ ...input, versionTitle: input.title });
   return transaction(settings, 'unoa.catalog.' + scopeId, async store => {
     await requireContext(store, actor, scopeId, 'write');
+    await requireCascade(store, actor, 'catalog.write', scopeId, 'catalog');
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.program(owner_scope_id, field_id, kind_code, code, title, created_by)
       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id

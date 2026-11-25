@@ -11,19 +11,19 @@ export type WizardKind = 'pays' | 'etablissement' | 'campus' | 'faculte' | 'depa
 export const wizardKinds: { kind: WizardKind; title: string; help: string; who: string }[] = [
   { kind: 'pays', title: 'Créer un pays', help: 'Premier niveau : un pays (ou une région) où des établissements seront ouverts.', who: 'Super-administrateur' },
   { kind: 'etablissement', title: 'Créer un établissement', help: 'Une université ou un institut, dans un pays.', who: 'Administrateur pays' },
-  { kind: 'campus', title: 'Créer un campus', help: 'Un site physique ou un centre rattaché à un établissement.', who: 'Administrateur pays ou d’établissement' },
-  { kind: 'faculte', title: 'Créer une faculté', help: 'Une faculté, une école ou un institut au sein de l’établissement.', who: 'Administrateur d’établissement' },
-  { kind: 'departement', title: 'Créer un département', help: 'Un département au sein d’une faculté.', who: 'Administrateur d’établissement ou doyen' },
-  { kind: 'filiere', title: 'Créer une filière ou une spécialité', help: 'Une filière d’un département, puis ses spécialités.', who: 'Chef de département ou doyen' },
-  { kind: 'formation', title: 'Créer une formation', help: 'Une licence, un master, un certificat… avec sa maquette à compléter ensuite.', who: 'Chef de département ou responsable de formation' },
-  { kind: 'matiere', title: 'Créer une matière', help: 'Un cours du catalogue, à rattacher aux unités d’enseignement de la maquette.', who: 'Chef de département ou responsable de formation' },
-  { kind: 'responsable', title: 'Nommer un responsable', help: 'Inviter une personne avec un rôle sur un pays, un établissement, une faculté ou un département.', who: 'Chaque administrateur, dans son périmètre' },
+  { kind: 'campus', title: 'Créer un campus', help: 'Un site physique ou un centre rattaché à un établissement.', who: 'Recteur (administrateur d’établissement)' },
+  { kind: 'faculte', title: 'Créer une faculté', help: 'Une faculté, une école ou un institut au sein de l’établissement ; le recteur en nomme ensuite le doyen.', who: 'Recteur (administrateur d’établissement)' },
+  { kind: 'departement', title: 'Créer un département', help: 'Un département au sein d’une faculté ; le doyen en nomme ensuite le chef.', who: 'Doyen de la faculté' },
+  { kind: 'filiere', title: 'Créer une filière ou une spécialité', help: 'Une filière d’un département, puis ses spécialités.', who: 'Chef de département' },
+  { kind: 'formation', title: 'Créer une formation', help: 'Une licence, un master, un certificat… avec sa maquette à compléter ensuite.', who: 'Chef de département' },
+  { kind: 'matiere', title: 'Créer une matière', help: 'Un cours du catalogue, à rattacher aux unités d’enseignement de la maquette.', who: 'Chef de département' },
+  { kind: 'responsable', title: 'Nommer un responsable', help: 'Chaque niveau nomme le responsable du niveau juste en dessous et sa propre équipe.', who: 'Super-admin → admin pays → recteur → doyen → chef de département' },
 ];
 
 interface Place { id: string; label: string; nature: string; path: string }
 
 // Scopes where the actor holds a permission, with a readable path ("Pays › Université › Faculté").
-async function places(settings: IamSettings, actor: string, permission: string, natures: string[]) {
+async function places(settings: IamSettings, actor: string, permission: string, natures: string[], cascade: string | null = null) {
   const { rows } = await database(settings).query<Place>(`
     WITH RECURSIVE tree AS (
       SELECT id, label, parent_id, type_code, label::text AS path FROM unoa.scope WHERE parent_id IS NULL
@@ -34,9 +34,11 @@ async function places(settings: IamSettings, actor: string, permission: string, 
     FROM tree JOIN unoa.scope_type AS kind ON kind.code = tree.type_code
     LEFT JOIN unoa.org_unit AS unit ON unit.scope_id = tree.id
     WHERE kind.nature = ANY($3::text[]) AND (unit.scope_id IS NULL OR unit.status = 'active')
-      AND unoa.has_scope_permission($1, $2, tree.id)
+      AND CASE WHEN $4::text IS NULL THEN unoa.has_scope_permission($1, $2, tree.id)
+        WHEN $4 = 'naming' THEN unoa.holds_here($1, $2, tree.id) OR unoa.holds_here($1, $2, unoa.cascade_anchor(tree.parent_id))
+        ELSE unoa.may_create($1, $2, tree.id, $4) END
     ORDER BY path LIMIT 300
-  `, [actor, permission, natures]);
+  `, [actor, permission, natures, cascade]);
   return rows;
 }
 
@@ -51,19 +53,19 @@ async function childTypes(settings: IamSettings, parentId: string, nature: strin
   return rows;
 }
 
-const scopeKinds: Partial<Record<WizardKind, { permission: string; parents: string[]; nature: string }>> = {
-  pays: { permission: 'territory.write', parents: ['platform', 'territory'], nature: 'territory' },
-  etablissement: { permission: 'territory.write', parents: ['territory', 'jurisdiction'], nature: 'institution' },
-  campus: { permission: 'territory.write', parents: ['institution'], nature: 'centre' },
-  faculte: { permission: 'org.write', parents: ['institution'], nature: 'academic_unit' },
-  departement: { permission: 'org.write', parents: ['academic_unit'], nature: 'academic_unit' },
+const scopeKinds: Partial<Record<WizardKind, { permission: string; parents: string[]; nature: string; cascade: string }>> = {
+  pays: { permission: 'territory.write', parents: ['platform', 'territory'], nature: 'territory', cascade: 'territory' },
+  etablissement: { permission: 'territory.write', parents: ['territory', 'jurisdiction'], nature: 'institution', cascade: 'institution' },
+  campus: { permission: 'territory.write', parents: ['institution'], nature: 'centre', cascade: 'centre' },
+  faculte: { permission: 'org.write', parents: ['institution', 'centre'], nature: 'academic_unit', cascade: 'faculty' },
+  departement: { permission: 'org.write', parents: ['academic_unit'], nature: 'academic_unit', cascade: 'department' },
 };
 
 export async function wizardData(settings: IamSettings, actor: string, kind: WizardKind, parent?: string) {
   const store = database(settings);
   const scoped = scopeKinds[kind];
   if (scoped) {
-    const parents = await places(settings, actor, scoped.permission, scoped.parents);
+    const parents = await places(settings, actor, scoped.permission, scoped.parents, scoped.cascade);
     const chosen = parents.find(item => item.id === parent) ?? (parents.length === 1 ? parents[0] : undefined);
     const types = chosen ? await childTypes(settings, chosen.id, scoped.nature) : [];
     const pending = scoped.nature === 'academic_unit' ? (await store.query<{ id: string; label: string; type_label: string; parent_label: string }>(`
@@ -78,7 +80,7 @@ export async function wizardData(settings: IamSettings, actor: string, kind: Wiz
     return { kind, parents, chosen, types, pending, mine };
   }
   if (kind === 'filiere' || kind === 'formation' || kind === 'matiere') {
-    const owners = await places(settings, actor, 'catalog.write', ['institution', 'academic_unit']);
+    const owners = await places(settings, actor, 'catalog.write', ['academic_unit'], 'catalog');
     const chosen = owners.find(item => item.id === parent) ?? (owners.length === 1 ? owners[0] : undefined);
     const [fieldTypes, kinds, fields] = await Promise.all([
       store.query<{ code: string; label: string; root_allowed: boolean; parents: string[] }>(`
@@ -92,11 +94,11 @@ export async function wizardData(settings: IamSettings, actor: string, kind: Wiz
     return { kind, owners, chosen, fieldTypes: fieldTypes.rows, programKinds: kinds.rows, fields: fields.rows };
   }
   // responsable
-  const scopes = await places(settings, actor, 'iam.manage', ['platform', 'territory', 'jurisdiction', 'institution', 'centre', 'academic_unit']);
+  const scopes = await places(settings, actor, 'iam.assign', ['platform', 'territory', 'jurisdiction', 'institution', 'centre', 'academic_unit'], 'naming');
   const chosen = scopes.find(item => item.id === parent) ?? (scopes.length === 1 ? scopes[0] : undefined);
   const roles = chosen ? (await store.query<{ code: string; label: string | null; description: string | null }>(`
     SELECT role.code, role.label, role.description FROM unoa.access_role AS role, unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code
-    WHERE scope.id = $2 AND role.archived_at IS NULL AND unoa.can_grant($1, role.code, $2)
+    WHERE scope.id = $2 AND role.archived_at IS NULL AND unoa.can_grant($1, role.code, $2) AND unoa.cascade_allows($1, role.code, $2)
       AND CASE role.level WHEN 'platform' THEN scope.parent_id IS NULL WHEN 'territory' THEN kind.nature IN ('territory', 'jurisdiction')
         WHEN 'institution' THEN kind.nature IN ('institution', 'centre', 'academic_unit') ELSE kind.nature = 'academic_unit' END
     ORDER BY role.ordinal`, [actor, chosen.id])).rows : [];

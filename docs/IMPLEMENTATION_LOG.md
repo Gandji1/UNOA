@@ -252,3 +252,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Remise à zéro de développement (ADR-0015) : `POST /api/v1/installation/reset`, puis base de production vidée à la
   demande du propriétaire, un seul super-administrateur restant.
 - Recette : délai global porté à 40 min (CI 50 min), la recette navigateur couvrant désormais tous les écrans.
+
+## 25 novembre 2026 — Cascade administrative stricte (ADR-0016)
+
+- Migration 0027 : `cascade_level`, `cascade_anchor`, `holds_here`, `may_create`, `cascade_head`, `cascade_allows` ;
+  `grant_role` et `invite_account` refusent toute nomination hors cascade ; créations des studios territoires,
+  structures et catalogue contrôlées ; menus « Créer », assistants et rôles nommables alignés ; libellés des rôles.
+- Recettes adaptées (nominations à chaque niveau, refus explicites du super-administrateur et du recteur hors de leur niveau).
+- Vérifications : unitaires 39, PostgreSQL 7, HTTP 18 (sans navigateur), build : PASS.

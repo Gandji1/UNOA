@@ -265,7 +265,7 @@ test('Connexion, droits et configuration via HTTP', { timeout: 2_400_000 }, asyn
     await context.test('Connexion locale : mot de passe, code, verrouillage, changement et installation', () =>
       exerciseLocal({ database, call, origin, setupToken }),
     );
-    await context.test('Navigateur : accessibilité WCAG 2.2 AA, clavier, mobile, zoom et réseau dégradé', () =>
+    if (process.env.UNOA_TEST_SKIP_BROWSER !== '1') await context.test('Navigateur : accessibilité WCAG 2.2 AA, clavier, mobile, zoom et réseau dégradé', () =>
       exerciseBrowser({ issuer, login, origin, evidence: process.env.UNOA_TEST_EVIDENCE ?? fileURLToPath(new URL('../../../docs/preuves/lot013', import.meta.url)) }),
     );
     const storageLog = serverLog.split('\n').filter(line => /unoa-[a-z-]+-storage/.test(line));

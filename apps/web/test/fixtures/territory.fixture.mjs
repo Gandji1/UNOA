@@ -67,6 +67,9 @@ export async function exerciseTerritory({ database, issuer, login, call, origin,
     typeCode: 'pays', label: 'Gamma', presentFrom: soon(1),
     timeZone: 'Africa/Porto-Novo', currency: 'XOF', locale: 'fr-BJ',
   }));
+  // Cascade (ADR-0016): creating inside a country requires being named on that country.
+  assert.equal((await create(country.scopeId, { typeCode: 'region', label: 'Sans nomination', presentFrom: soon(2) })).status, 403);
+  await database.query("INSERT INTO unoa.role_grant(account_id, scope_id, role_code, effective_from, include_descendants) VALUES ($1, $2, 'territory_steward', now(), true)", [steward, country.scopeId]);
   const region = await okay(await create(country.scopeId, {
     typeCode: 'region', label: 'Gamma Littoral', presentFrom: soon(2),
     timeZone: 'Africa/Porto-Novo', currency: 'XOF', locale: 'fr-BJ',
