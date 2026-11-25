@@ -226,3 +226,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   `/evaluations/gestion`, `/evaluations/copie` ; entrée « Mes évaluations » dans la barre latérale.
 - Correction pendant la recette : droit d'insertion manquant sur `attempt.id` (42501), note masquée pendant une procédure de fraude.
 - Vérifications : unitaires 30, PostgreSQL 7, HTTP 14 (dont navigateur), build : PASS.
+
+## 25 novembre 2026 — Lot 020 (notes, crédits et jurys)
+
+- Migration 0022, domaine `grading`, module `lib/grades`, API `/api/v1/grd`, écrans « Notes et jurys » (règles,
+  saisie, jury, contrôles) et « Mes résultats » ; ADR-0012.
+- Corrections pendant la recette : droit de mise à jour du rôle d'un membre de jury, étudiants sans unité dans
+  la période exclus de la délibération, colonne ambiguë dans les contrôles, avenant remplaçant un crédit compensé.
+- Vérifications : unitaires 35, PostgreSQL 7, HTTP 15 (dont navigateur), build : PASS.

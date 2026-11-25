@@ -217,4 +217,20 @@ GRANT INSERT (id, assessment_id, account_id, number, team_label, team_members, q
 GRANT INSERT (attempt_id, question_id, filename, format, size_bytes, sha256, content) ON unoa.attempt_file TO :"web_role";
 GRANT INSERT (attempt_id, round, grader_id, scores, total, feedback) ON unoa.grading TO :"web_role";
 GRANT INSERT (attempt_id, reported_by, reason), UPDATE (state, learner_response, answered_at, decision, decided_by, decided_at) ON unoa.integrity_case TO :"web_role";
+-- 0022: grades, credits and juries.
+GRANT SELECT ON unoa.grading_policy, unoa.jury, unoa.jury_member, unoa.rectification, unoa.grade_entry, unoa.jury_decision, unoa.jury_signature,
+      unoa.credit_award, unoa.grade_appeal, unoa.transcript TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.grading_policy_for(uuid, date) TO :"web_role";
+GRANT INSERT (scope_id, program_version_id, label, scale_max, pass_mark, unit_pass_mark, rounding, decimals, compensation, compensation_floor, resit, resit_rule,
+      jury_quorum, appeal_days, effective_from, author_id), UPDATE (state, publisher_id, published_at) ON unoa.grading_policy TO :"web_role";
+GRANT INSERT (scope_id, cohort_id, period_id, session, label, policy_id, quorum, publish_at, created_by),
+      UPDATE (state, minutes, minutes_sha256, deliberated_at, published_at, publish_at) ON unoa.jury TO :"web_role";
+GRANT INSERT (jury_id, account_id, role, added_by), UPDATE (present, role), DELETE ON unoa.jury_member TO :"web_role";
+GRANT INSERT (id, jury_id, registration_id, appeal_id, reason, decided_by, sha256) ON unoa.rectification TO :"web_role";
+GRANT INSERT (registration_id, unit_id, session, mark, absence, state, reason, supersedes, rectification_id, author_id) ON unoa.grade_entry TO :"web_role";
+GRANT INSERT (id, jury_id, registration_id, average, outcome, credits, units, policy_id, amends, rectification_id) ON unoa.jury_decision TO :"web_role";
+GRANT INSERT (jury_id, account_id, sha256, rectification_id) ON unoa.jury_signature TO :"web_role";
+GRANT INSERT (student_id, unit_id, credits, mode, decision_id), UPDATE (revoked_at, revoked_by) ON unoa.credit_award TO :"web_role";
+GRANT INSERT (decision_id, appellant_id, reason), UPDATE (state, response, decided_by, decided_at) ON unoa.grade_appeal TO :"web_role";
+GRANT INSERT (student_id, content, sha256, issued_by) ON unoa.transcript TO :"web_role";
 COMMIT;

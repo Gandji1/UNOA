@@ -57,6 +57,12 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Copie corrigée · {{title}}', body: 'Consultez la correction et les commentaires.' }, en: { subject: 'Submission graded · {{title}}', body: 'See the grading and feedback.' } } },
   { code: 'ass.integrity', module: 'ASS', variables: ['title'], sensitive: true, defaults: {
     fr: { subject: 'Procédure relative à votre copie', body: '{{title}} — vous pouvez présenter vos observations.' }, en: { subject: 'Procedure concerning your submission', body: '{{title}} — you may respond.' } } },
+  { code: 'grd.results_published', module: 'GRD', variables: ['jury', 'period'], sensitive: false, defaults: {
+    fr: { subject: 'Résultats publiés · {{period}}', body: '{{jury}} — consultez vos résultats et votre relevé.' }, en: { subject: 'Results published · {{period}}', body: '{{jury}} — see your results and transcript.' } } },
+  { code: 'grd.appeal_decided', module: 'GRD', variables: ['jury', 'outcome'], sensitive: true, defaults: {
+    fr: { subject: 'Réponse à votre contestation', body: '{{jury}} : {{outcome}}' }, en: { subject: 'Answer to your appeal', body: '{{jury}}: {{outcome}}' } } },
+  { code: 'grd.rectified', module: 'GRD', variables: ['jury'], sensitive: true, defaults: {
+    fr: { subject: 'Rectification de vos résultats', body: '{{jury}} — un avenant modifie votre résultat.' }, en: { subject: 'Results rectified', body: '{{jury}} — an amendment changes your result.' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.
