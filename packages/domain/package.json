@@ -11,6 +11,7 @@
     "./totp": "./src/totp.ts",
     "./governance": "./src/governance.ts",
     "./assessment": "./src/assessment.ts",
-    "./grading": "./src/grading.ts"
+    "./grading": "./src/grading.ts",
+    "./finance": "./src/finance.ts"
   }
 }

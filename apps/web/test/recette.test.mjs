@@ -25,11 +25,14 @@ import { exerciseTeachers } from './fixtures/teachers.fixture.mjs';
 import { exerciseAssessments } from './fixtures/assessments.fixture.mjs';
 import { exerciseGrades } from './fixtures/grades.fixture.mjs';
 import { exerciseExternal } from './fixtures/external.fixture.mjs';
+import { exerciseFinance } from './fixtures/finance.fixture.mjs';
+import { exerciseCredentials } from './fixtures/credentials.fixture.mjs';
+import { exerciseShort } from './fixtures/short.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
 
-test('Connexion, droits et configuration via HTTP', { timeout: 900_000 }, async context => {
+test('Connexion, droits et configuration via HTTP', { timeout: 2_400_000 }, async context => {
   const suffix = randomUUID().replaceAll('-', '');
   const name = 'unoa_iam_' + suffix;
   const role = 'unoa_web_' + suffix;
@@ -106,6 +109,7 @@ test('Connexion, droits et configuration via HTTP', { timeout: 900_000 }, async 
   const relay = await startRelay();
   context.after(() => relay.close());
   const jobsToken = randomBytes(32).toString('base64url');
+  const paymentSecret = randomBytes(32).toString('base64url');
   const setupToken = randomBytes(32).toString('base64url');
   const live = { domain: 'visio.recette.invalid', appId: 'unoa-recette', secret: randomBytes(32).toString('hex') };
   dataUrl.username = role;
@@ -131,6 +135,8 @@ test('Connexion, droits et configuration via HTTP', { timeout: 900_000 }, async 
       UNOA_SMS_HTTP_URL: relay.url,
       UNOA_SMS_HTTP_TOKEN: relay.token,
       UNOA_JOBS_TOKEN: jobsToken,
+      UNOA_PAYMENT_ADAPTER: 'sandbox',
+      UNOA_PAYMENT_SANDBOX_SECRET: paymentSecret,
       UNOA_SETUP_TOKEN_SHA256: createHash('sha256').update(setupToken).digest('hex'),
       UNOA_JOBS_DRAIN_AFTER_WRITE: 'off',
       UNOA_LIVE_JITSI_DOMAIN: live.domain,
@@ -240,6 +246,15 @@ test('Connexion, droits et configuration via HTTP', { timeout: 900_000 }, async 
     );
     await context.test('Examens nationaux : information officielle, déclaration, dépôt, vérification, aucune génération de résultat', () =>
       exerciseExternal({ database, issuer, call, login, origin }),
+    );
+    await context.test('Finances : tarifs, factures, avoirs, remises, paiement par événement signé, reçus, remboursements, rapprochement, retenues, exports', () =>
+      exerciseFinance({ database, issuer, call, login, origin, paymentSecret }),
+    );
+    await context.test('Documents et diplômes : types, modèles, conditions, habilitation, signatures, QR, révocation, réémission, badge', () =>
+      exerciseCredentials({ database, issuer, call, login, origin }),
+    );
+    await context.test('Formations courtes : catalogue, licence, sessions, clients, progression prouvée, attestation, microcertification, avis, acquis', () =>
+      exerciseShort({ database, issuer, call, login, origin }),
     );
     await context.test('Notifications : modèles, consentements, file durable, relais, rejeu et confidentialité', () =>
       exerciseNotifications({ database, issuer, call, login, origin, relay, jobsToken }),

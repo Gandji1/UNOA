@@ -65,6 +65,22 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Rectification de vos résultats', body: '{{jury}} — un avenant modifie votre résultat.' }, en: { subject: 'Results rectified', body: '{{jury}} — an amendment changes your result.' } } },
   { code: 'exn.verified', module: 'EXN', variables: ['exam', 'state'], sensitive: true, defaults: {
     fr: { subject: 'Vérification de votre pièce officielle', body: '{{exam}} : {{state}}' }, en: { subject: 'Verification of your official document', body: '{{exam}}: {{state}}' } } },
+  { code: 'fin.invoice_issued', module: 'FIN', variables: ['number', 'amount'], sensitive: true, defaults: {
+    fr: { subject: 'Nouvelle facture {{number}}', body: 'Montant : {{amount}}' }, en: { subject: 'New invoice {{number}}', body: 'Amount: {{amount}}' } } },
+  { code: 'fin.payment_confirmed', module: 'FIN', variables: ['receipt', 'amount'], sensitive: true, defaults: {
+    fr: { subject: 'Paiement confirmé · reçu {{receipt}}', body: 'Montant : {{amount}}' }, en: { subject: 'Payment confirmed · receipt {{receipt}}', body: 'Amount: {{amount}}' } } },
+  { code: 'fin.payment_failed', module: 'FIN', variables: ['amount'], sensitive: true, defaults: {
+    fr: { subject: 'Paiement non abouti', body: 'Le paiement de {{amount}} n’a pas abouti. Aucun montant n’a été enregistré.' }, en: { subject: 'Payment failed', body: 'The payment of {{amount}} failed. Nothing was recorded.' } } },
+  { code: 'cred.issued', module: 'CRED', variables: ['type', 'number'], sensitive: false, defaults: {
+    fr: { subject: 'Document délivré : {{type}}', body: 'Numéro {{number}} — disponible dans « Mes documents ».' }, en: { subject: 'Document issued: {{type}}', body: 'Number {{number}} — available in “My documents”.' } } },
+  { code: 'cred.revoked', module: 'CRED', variables: ['type', 'number'], sensitive: true, defaults: {
+    fr: { subject: 'Document révoqué', body: '{{type}} n° {{number}}' }, en: { subject: 'Document revoked', body: '{{type}} no. {{number}}' } } },
+  { code: 'short.enrolled', module: 'SHORT', variables: ['course', 'session'], sensitive: false, defaults: {
+    fr: { subject: 'Inscription confirmée : {{course}}', body: 'Session : {{session}}' }, en: { subject: 'Enrolment confirmed: {{course}}', body: 'Session: {{session}}' } } },
+  { code: 'short.completed', module: 'SHORT', variables: ['course'], sensitive: false, defaults: {
+    fr: { subject: 'Formation réussie : {{course}}', body: 'Félicitations ! Votre attestation sera disponible dans « Mes documents ».' }, en: { subject: 'Course completed: {{course}}', body: 'Congratulations! Your certificate will be available in “My documents”.' } } },
+  { code: 'short.rpl_decided', module: 'SHORT', variables: ['target', 'decision'], sensitive: true, defaults: {
+    fr: { subject: 'Reconnaissance des acquis', body: '{{target}} : {{decision}}' }, en: { subject: 'Recognition of prior learning', body: '{{target}}: {{decision}}' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

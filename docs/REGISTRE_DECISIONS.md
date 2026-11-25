@@ -26,3 +26,5 @@
 | 2026-11-23 | Hiérarchie super-admin → admin pays → admin établissement → doyen → chef de département → enseignant | Choix du propriétaire, conforme aux portées configurables (ADR-0011) | Appliqué |
 | 2026-11-23 | Mode développement (mot de passe « 1 », sans blocage) jusqu’à la fin du développement | Décision du propriétaire ; verrous à rétablir avant ouverture | En vigueur |
 | 2026-11-25 | Règle de notation en objet versionné dédié (jeu complet daté) plutôt que clés grading.* isolées | Cohérence d'une délibération, rattachement de chaque décision à la règle appliquée (ADR-0012) | Appliqué |
+| 2026-11-25 | Paiement crédité seulement par événement signé du prestataire ; bac à sable signé ; prestataires réels bloqués faute de contrat | ADR-0013 | Appliqué |
+| 2026-11-25 | Registre unique des documents délivrés (étudiants et formations courtes), vérificateur à divulgation minimale | ADR-0014 | Appliqué |

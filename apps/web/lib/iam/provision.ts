@@ -14,7 +14,7 @@ let running: Promise<void> | null = null;
 let failedAt = 0;
 export let provisionState: ProvisionState = { status: 'pending', at: new Date().toISOString() };
 
-function root() {
+export function root() {
   const found = [join(process.cwd(), '../..'), process.cwd(), join(process.cwd(), '..')]
     .find(candidate => existsSync(join(candidate, 'packages/db/migrations')) && existsSync(join(candidate, 'infra/postgres/grant-web.psql')));
   if (!found) throw Object.assign(new Error('Migration files not deployed'), { code: 'UNOA_FILES' });

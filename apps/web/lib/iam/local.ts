@@ -203,6 +203,24 @@ export async function credentialState(settings: IamSettings, actor: string) {
 // SHA-256 is known to the code (UNOA_SETUP_TOKEN_SHA256 may replace it).
 const setupTokenHash = process.env.UNOA_SETUP_TOKEN_SHA256 || '2a83e23fc193d386f538d2719bdef0bc37d61449df3d09adcdd6071061fe2e82';
 
+// Development reset (ADR-0015): only while development mode is on, with the
+// installation token and an explicit confirmation; leaves one administrator.
+export async function resetPlatform(settings: IamSettings, token: string | null, input: Record<string, unknown>) {
+  const given = createHash('sha256').update(token ?? '').digest();
+  const wanted = Buffer.from(setupTokenHash, 'hex');
+  ensure(token && wanted.length === 32 && timingSafeEqual(given, wanted), 403, 'Jeton d’installation invalide');
+  ensure(input.confirm === 'EFFACER TOUTES LES DONNÉES', 400, 'Confirmation exacte requise');
+  ensure(await developmentMode(settings), 409, 'Remise à zéro possible seulement en mode développement');
+  ensure(settings.databaseRole, 503, 'Remise à zéro réservée au mode intégration (adresse propriétaire)');
+  const login = boundedText(input.login, 120, 'Identifiant').toLowerCase();
+  ensure(/^[a-z0-9][a-z0-9._@-]{2,119}$/.test(login), 400, 'Identifiant invalide');
+  const { resetDatabase } = await import('@unoa/db/provision');
+  const { root } = await import('./provision');
+  const result = await resetDatabase({ connectionString: settings.databaseUrl, role: settings.databaseRole, root: root(),
+    admin: { login, hash: await hashPassword(String(input.password ?? '')), name: boundedText(input.displayName, 200, 'Nom'), platform: boundedText(input.platformLabel, 120, 'Nom de la plateforme') } });
+  return { login, account: result.account, checks: result.checks };
+}
+
 export async function installPlatform(settings: IamSettings, token: string | null, input: Record<string, unknown>) {
   const given = createHash('sha256').update(token ?? '').digest();
   const wanted = Buffer.from(setupTokenHash, 'hex');

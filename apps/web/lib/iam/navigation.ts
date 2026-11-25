@@ -20,6 +20,9 @@ const administration: [string, NavItem][] = [
   ['tea.read', { href: '/administration/enseignants', label: 'Enseignants', icon: 'user' }],
   ['grd.read', { href: '/administration/notes', label: 'Notes et jurys', icon: 'file' }],
   ['exn.read', { href: '/administration/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' }],
+  ['fin.read', { href: '/administration/finances', label: 'Finances', icon: 'sliders' }],
+  ['cred.read', { href: '/administration/documents', label: 'Documents et diplômes', icon: 'file' }],
+  ['short.read', { href: '/administration/formations-courtes', label: 'Formations courtes', icon: 'cap' }],
   ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
@@ -36,6 +39,9 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/notifications': 'Modèles de messages par événement, canal et langue ; journal des envois, files et rejeu.',
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/gouvernance': 'Conseils, membres et mandats, séances, ordres du jour, quorum, votes, décisions, procès-verbaux signés et publication.',
+  '/administration/finances': 'Tarifs approuvés, factures et avoirs, échéances, remises et bourses, paiements confirmés par le prestataire, reçus, remboursements, rapprochement et exports.',
+  '/administration/formations-courtes': 'Catalogue de formations courtes, modules et compétences, sessions, clients entreprises, progression, attestations, microcertifications, reconnaissance des acquis et rapports.',
+  '/administration/documents': 'Types et modèles de documents, délivrance sous conditions et habilitation, signatures, registre, révocation et vérification par QR.',
   '/administration/examens-nationaux': 'Suivi documentaire des examens nationaux : information officielle, déclarations, pièces déposées et vérification.',
   '/administration/notes': 'Règles de notation versionnées, saisie et validation des notes, jurys, procès-verbaux signés, publication, crédits, contestations et rectifications.',
   '/administration/enseignants': 'Appels à candidatures, contrôle des pièces, expertises, recrutement, contrats, affectations et rémunérations.',
@@ -85,8 +91,8 @@ export async function allowedCreations(actor: string) {
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
   { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
-  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants'] },
-  { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux'] },
+  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes'] },
+  { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux', '/administration/documents', '/administration/finances'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
   { label: 'Réglages', icon: 'sliders', hrefs: ['/administration/notifications', '/administration/parametres'] },
 ];
@@ -97,9 +103,11 @@ export const navigation = cache(async () => {
     items: [
       { href: '/', label: 'Accueil', icon: 'home' },
       { href: '/formations', label: 'Formations', icon: 'cap' },
+      { href: '/formations-courtes', label: 'Formations courtes', icon: 'cap' },
       { href: '/structures', label: 'Structures', icon: 'landmark' },
       { href: '/decisions', label: 'Décisions', icon: 'file' },
       { href: '/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' },
+      { href: '/verifier', label: 'Vérifier un document', icon: 'key' },
     ],
   }];
   const settings = iamSettings();
@@ -118,6 +126,9 @@ export const navigation = cache(async () => {
         { href: '/evaluations', label: 'Mes évaluations', icon: 'file' },
         { href: '/resultats', label: 'Mes résultats', icon: 'cap' },
         { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' },
+        { href: '/finances', label: 'Mes finances', icon: 'sliders' },
+        { href: '/documents', label: 'Mes documents', icon: 'file' },
+        { href: '/formations-courtes/mes', label: 'Mes formations courtes', icon: 'cap' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
         { href: '/conseils', label: 'Mes conseils', icon: 'landmark' },

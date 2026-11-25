@@ -277,3 +277,6 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
 .head-tools form { display: inline-flex; margin: 0; }
 @media (max-width: 40rem) { .tool.account-button span { display: inline; } }
 .minutes { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: .6rem; padding: .8rem 1rem; font-family: inherit; }
+.qr { width: 11rem; max-width: 100%; background: #fff; padding: .4rem; border-radius: .4rem; }
+.qr svg { display: block; width: 100%; height: auto; }
+@media print { .sidebar, .topbar, .site-footer, .skip { display: none !important; } .credential { box-shadow: none; border: 0; } }

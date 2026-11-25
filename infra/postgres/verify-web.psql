@@ -50,5 +50,10 @@ SELECT current_database() AS base,
        NOT has_table_privilege(:'web_role', 'unoa.jury_decision', 'UPDATE, DELETE') AS jury_decisions_append_only,
        NOT has_table_privilege(:'web_role', 'unoa.external_verification', 'UPDATE, DELETE, TRUNCATE') AS external_checks_append_only,
        NOT has_column_privilege(:'web_role', 'unoa.external_evidence', 'content', 'UPDATE') AS external_documents_kept,
+       NOT has_table_privilege(:'web_role', 'unoa.ledger_entry', 'UPDATE, DELETE, TRUNCATE') AS ledger_append_only,
+       NOT has_table_privilege(:'web_role', 'unoa.invoice', 'UPDATE, DELETE, TRUNCATE') AS invoices_append_only,
+       NOT has_table_privilege(:'web_role', 'unoa.credential_lookup', 'SELECT') AS lookups_private,
+       NOT has_column_privilege(:'web_role', 'unoa.credential', 'content', 'UPDATE') AS credentials_sealed,
+       NOT has_table_privilege(:'web_role', 'unoa.module_result', 'UPDATE, DELETE, TRUNCATE') AS module_results_append_only,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;

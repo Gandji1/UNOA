@@ -239,3 +239,16 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 
 - Migration 0023, module `lib/external`, API `/api/v1/exn`, écrans public, déclarant et administration.
 - Corrections pendant la recette : paramètre manquant à la création d'une information, assertion HTML.
+
+## 25 novembre 2026 — Lots 022 (finances), 023 (documents et diplômes), 024 (formations courtes)
+
+- Migrations 0024 à 0026 ; domaine `finance` ; modules `lib/finance`, `lib/credentials`, `lib/short` ; API `/api/v1/fin`
+  (+ `checkout`, `webhooks/{prestataire}`), `/api/v1/cred`, `/api/v1/short` ; écrans payeur, prestataire fictif,
+  administration financière, registre des documents, mes documents, vue imprimable avec QR, vérificateur public,
+  catalogue court, espace apprenant, administration des formations courtes ; ADR-0013 et ADR-0014 ;
+  dépendance `qrcode` 1.5.4.
+- Corrections pendant la recette : verrou `FOR SHARE` interdit sur une table append-only (remplacé par un verrou
+  consultatif par facture), paramètre ambigu dans `verify_credential`, journal des consultations exact.
+- Remise à zéro de développement (ADR-0015) : `POST /api/v1/installation/reset`, puis base de production vidée à la
+  demande du propriétaire, un seul super-administrateur restant.
+- Recette : délai global porté à 40 min (CI 50 min), la recette navigateur couvrant désormais tous les écrans.

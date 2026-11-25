@@ -242,4 +242,43 @@ GRANT INSERT (participation_id, kind, issuing_authority, document_reference, sta
       UPDATE (state) ON unoa.external_evidence TO :"web_role";
 GRANT INSERT (evidence_id, step, method, note, verifier_id, proof_filename, proof_sha256, proof_content) ON unoa.external_verification TO :"web_role";
 GRANT INSERT (participation_id, kind, detail, actor_id) ON unoa.external_event TO :"web_role";
+-- 0024: finance.
+GRANT SELECT ON unoa.price_rule, unoa.fin_counter, unoa.invoice, unoa.invoice_line, unoa.instalment, unoa.allowance, unoa.payment, unoa.provider_event,
+      unoa.refund, unoa.ledger_entry, unoa.receipt, unoa.bank_line, unoa.hold_rule TO :"web_role";
+GRANT INSERT (scope_id, program_version_id, academic_year, profile, kind, recurrence, label, amount_minor, currency, instalments, interval_days, effective_from, effective_until, author_id),
+      UPDATE (state, publisher_id, published_at) ON unoa.price_rule TO :"web_role";
+GRANT INSERT, UPDATE (next_value) ON unoa.fin_counter TO :"web_role";
+GRANT INSERT (id, institution_id, number, kind, credit_of, account_id, price_rule_id, billing_period, profile, currency, total_minor, reason, issued_by) ON unoa.invoice TO :"web_role";
+GRANT INSERT ON unoa.invoice_line, unoa.instalment TO :"web_role";
+GRANT INSERT (invoice_id, kind, label, funder, basis, value, amount_minor, proposed_by), UPDATE (state, decided_by, decided_at, decision_note) ON unoa.allowance TO :"web_role";
+GRANT INSERT (institution_id, invoice_id, account_id, amount_minor, currency, provider, provider_ref, idempotency_key, created_by),
+      UPDATE (state, failure, confirmed_at) ON unoa.payment TO :"web_role";
+GRANT INSERT (provider, event_id, type, payload, signature_valid, outcome) ON unoa.provider_event TO :"web_role";
+GRANT INSERT (payment_id, amount_minor, reason, requested_by), UPDATE (state, approved_by, provider_ref, failure, updated_at) ON unoa.refund TO :"web_role";
+GRANT INSERT (institution_id, account_id, currency, amount_minor, kind, invoice_id, payment_id, allowance_id, refund_id, label) ON unoa.ledger_entry TO :"web_role";
+GRANT INSERT (institution_id, number, payment_id, sha256) ON unoa.receipt TO :"web_role";
+GRANT INSERT (institution_id, statement_label, booked_on, amount_minor, currency, reference, fingerprint, imported_by),
+      UPDATE (matched_payment_id, matched_by, matched_at, note) ON unoa.bank_line TO :"web_role";
+GRANT INSERT (scope_id, label, min_overdue_days, min_amount_minor, currency, effect, legal_basis, author_id), UPDATE (state, publisher_id, published_at) ON unoa.hold_rule TO :"web_role";
+-- 0025: documents and diplomas.
+GRANT SELECT ON unoa.credential_type, unoa.document_template, unoa.cred_counter, unoa.credential, unoa.credential_signature, unoa.credential_revocation TO :"web_role";
+GRANT INSERT (scope_id, code, label, category, issuing_authority, program_id, eligibility, required_signatures, author_id), UPDATE (state, publisher_id) ON unoa.credential_type TO :"web_role";
+GRANT INSERT (type_id, language, version, title, body, author_id), UPDATE (state, publisher_id) ON unoa.document_template TO :"web_role";
+GRANT INSERT, UPDATE (next_value) ON unoa.cred_counter TO :"web_role";
+GRANT INSERT (id, type_id, template_id, holder_id, student_id, source_id, number, exclusive, content, rendered, sha256, verification_code, replaces, requested_by), UPDATE (state, issued_at) ON unoa.credential TO :"web_role";
+GRANT INSERT (credential_id, signer_id, sha256) ON unoa.credential_signature TO :"web_role";
+GRANT INSERT (credential_id, reason, revoked_by) ON unoa.credential_revocation TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.verify_credential(text) TO :"web_role";
+-- 0026: short courses.
+GRANT SELECT ON unoa.short_course, unoa.short_module, unoa.short_client, unoa.training_session, unoa.short_enrollment, unoa.module_result, unoa.short_feedback,
+      unoa.credential_stack, unoa.rpl_request TO :"web_role";
+GRANT INSERT (scope_id, code, title, description, audience, duration_hours, competencies, pass_threshold, credential_type_id, author_id), UPDATE (state, publisher_id) ON unoa.short_course TO :"web_role";
+GRANT INSERT (course_id, ordinal, title, hours, competencies, content_version_id, licence) ON unoa.short_module TO :"web_role";
+GRANT INSERT (scope_id, name, registration, contact_account_id, created_by) ON unoa.short_client TO :"web_role";
+GRANT INSERT (course_id, label, modality, starts_on, ends_on, capacity, price_rule_id, client_id, trainer_id, created_by), UPDATE (state, capacity, trainer_id) ON unoa.training_session TO :"web_role";
+GRANT INSERT (session_id, account_id, client_id, invoice_id, enrolled_by), UPDATE (state, concluded_at, invoice_id) ON unoa.short_enrollment TO :"web_role";
+GRANT INSERT (enrollment_id, module_id, score, evidence, recorded_by) ON unoa.module_result TO :"web_role";
+GRANT INSERT (enrollment_id, rating, comment) ON unoa.short_feedback TO :"web_role";
+GRANT INSERT (scope_id, title, course_ids, credential_type_id, created_by) ON unoa.credential_stack TO :"web_role";
+GRANT INSERT (scope_id, account_id, course_id, target, experience), UPDATE (state, reviewer_id, decision, decided_at) ON unoa.rpl_request TO :"web_role";
 COMMIT;
