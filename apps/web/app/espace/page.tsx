@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { passwordRule } from '../password-rule';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cookieName, iamSettings } from '@/lib/iam/settings';
@@ -20,6 +21,7 @@ export const metadata: Metadata = { title: 'Mon espace' };
 export const dynamic = 'force-dynamic';
 
 export default async function Espace({ searchParams }: { searchParams: Promise<{ statut?: string; error?: string; message?: string; changer?: string }> }) {
+  const rule = await passwordRule();
   const settings = iamSettings();
   if (!settings) redirect('/connexion');
   const token = (await cookies()).get(cookieName(settings, 'session'))?.value;
@@ -126,8 +128,8 @@ export default async function Espace({ searchParams }: { searchParams: Promise<{
           )}
           <ActionForm action="/api/v1/auth/password" back="/espace" submit="Changer le mot de passe">
             <label>Mot de passe actuel<input name="current" type="password" required autoComplete="current-password" /></label>
-            <label>Nouveau mot de passe (12 caractères au moins, majuscules, minuscules et chiffres)
-              <input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
+            <label>Nouveau mot de passe ({rule.help})
+              <input name="password" type="password" required minLength={rule.minLength} maxLength={200} autoComplete="new-password" /></label>
           </ActionForm>
         </section>
       )}

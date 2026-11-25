@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { passwordRule } from '../../password-rule';
 import { iamSettings } from '@/lib/iam/settings';
 import { invitationPreview } from '@/lib/iam/admin';
 import { formatTime } from '../../administration/forms';
@@ -10,12 +11,13 @@ const states: Record<string, string> = {
   accepted: 'Cette invitation a déjà été acceptée : connectez-vous avec votre identifiant.', revoked: 'Cette invitation a été retirée.', expired: 'Cette invitation a expiré.',
 };
 const errors: Record<string, string> = {
-  '400': 'Vérifiez l’identifiant (lettres minuscules, chiffres, . _ @ -) et le mot de passe (12 caractères au moins, majuscules, minuscules et chiffres).',
+  '400': 'Vérifiez l’identifiant (lettres minuscules, chiffres, . _ @ -) et le mot de passe.',
   '409': 'Cet identifiant est déjà pris : choisissez-en un autre.', '410': 'Invitation expirée, retirée ou déjà utilisée.',
   '422': 'Les deux mots de passe ne sont pas identiques.', '503': 'Service momentanément indisponible. Réessayez.',
 };
 
 export default async function Invitation({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ erreur?: string }> }) {
+  const rule = await passwordRule();
   const { token } = await params;
   const { erreur } = await searchParams;
   const settings = iamSettings();
@@ -34,9 +36,9 @@ export default async function Invitation({ params, searchParams }: { params: Pro
             <form action="/api/v1/auth/invitation" method="post" className="studio-form">
               <input type="hidden" name="invitation" value={token} />
               <label className="studio-wide">Identifiant de connexion<input name="login" required minLength={3} maxLength={120} pattern="[a-z0-9][a-z0-9._@-]{2,119}" autoComplete="username" /></label>
-              <label>Mot de passe<input name="password" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
-              <label>Confirmation<input name="confirm" type="password" required minLength={12} maxLength={200} autoComplete="new-password" /></label>
-              <p className="studio-wide studio-help">12 caractères au moins, avec majuscules, minuscules et chiffres.</p>
+              <label>Mot de passe<input name="password" type="password" required minLength={rule.minLength} maxLength={200} autoComplete="new-password" /></label>
+              <label>Confirmation<input name="confirm" type="password" required minLength={rule.minLength} maxLength={200} autoComplete="new-password" /></label>
+              <p className="studio-wide studio-help">{rule.help}</p>
               <div className="studio-wide"><button className="action" type="submit">Accepter l’invitation</button></div>
             </form>
           </>
