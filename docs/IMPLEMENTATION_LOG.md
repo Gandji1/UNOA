@@ -234,3 +234,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Corrections pendant la recette : droit de mise à jour du rôle d'un membre de jury, étudiants sans unité dans
   la période exclus de la délibération, colonne ambiguë dans les contrôles, avenant remplaçant un crédit compensé.
 - Vérifications : unitaires 35, PostgreSQL 7, HTTP 15 (dont navigateur), build : PASS.
+
+## 25 novembre 2026 — Lot 021 (examens nationaux, suivi documentaire)
+
+- Migration 0023, module `lib/external`, API `/api/v1/exn`, écrans public, déclarant et administration.
+- Corrections pendant la recette : paramètre manquant à la création d'une information, assertion HTML.

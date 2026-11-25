@@ -19,6 +19,7 @@ const administration: [string, NavItem][] = [
   ['sis.read', { href: '/administration/scolarite', label: 'Scolarité', icon: 'cap' }],
   ['tea.read', { href: '/administration/enseignants', label: 'Enseignants', icon: 'user' }],
   ['grd.read', { href: '/administration/notes', label: 'Notes et jurys', icon: 'file' }],
+  ['exn.read', { href: '/administration/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' }],
   ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
@@ -35,6 +36,7 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/notifications': 'Modèles de messages par événement, canal et langue ; journal des envois, files et rejeu.',
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/gouvernance': 'Conseils, membres et mandats, séances, ordres du jour, quorum, votes, décisions, procès-verbaux signés et publication.',
+  '/administration/examens-nationaux': 'Suivi documentaire des examens nationaux : information officielle, déclarations, pièces déposées et vérification.',
   '/administration/notes': 'Règles de notation versionnées, saisie et validation des notes, jurys, procès-verbaux signés, publication, crédits, contestations et rectifications.',
   '/administration/enseignants': 'Appels à candidatures, contrôle des pièces, expertises, recrutement, contrats, affectations et rémunérations.',
   '/administration/site': 'Site public de l’établissement : noms d’hôte, textes, mise en ligne, création de compte.',
@@ -84,7 +86,7 @@ export async function allowedCreations(actor: string) {
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
   { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
   { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants'] },
-  { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes'] },
+  { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
   { label: 'Réglages', icon: 'sliders', hrefs: ['/administration/notifications', '/administration/parametres'] },
 ];
@@ -97,6 +99,7 @@ export const navigation = cache(async () => {
       { href: '/formations', label: 'Formations', icon: 'cap' },
       { href: '/structures', label: 'Structures', icon: 'landmark' },
       { href: '/decisions', label: 'Décisions', icon: 'file' },
+      { href: '/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' },
     ],
   }];
   const settings = iamSettings();
@@ -114,6 +117,7 @@ export const navigation = cache(async () => {
         { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
         { href: '/evaluations', label: 'Mes évaluations', icon: 'file' },
         { href: '/resultats', label: 'Mes résultats', icon: 'cap' },
+        { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' },
         { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
         { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
         { href: '/conseils', label: 'Mes conseils', icon: 'landmark' },

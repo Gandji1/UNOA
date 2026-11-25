@@ -48,5 +48,7 @@ SELECT current_database() AS base,
        NOT has_column_privilege(:'web_role', 'unoa.question', 'prompt', 'UPDATE') AS questions_versioned,
        NOT has_table_privilege(:'web_role', 'unoa.grade_entry', 'UPDATE, DELETE, TRUNCATE') AS grades_append_only,
        NOT has_table_privilege(:'web_role', 'unoa.jury_decision', 'UPDATE, DELETE') AS jury_decisions_append_only,
+       NOT has_table_privilege(:'web_role', 'unoa.external_verification', 'UPDATE, DELETE, TRUNCATE') AS external_checks_append_only,
+       NOT has_column_privilege(:'web_role', 'unoa.external_evidence', 'content', 'UPDATE') AS external_documents_kept,
        (SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
           FROM pg_roles WHERE rolname = :'web_role') AS app_role_restricted;

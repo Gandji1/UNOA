@@ -63,6 +63,8 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Réponse à votre contestation', body: '{{jury}} : {{outcome}}' }, en: { subject: 'Answer to your appeal', body: '{{jury}}: {{outcome}}' } } },
   { code: 'grd.rectified', module: 'GRD', variables: ['jury'], sensitive: true, defaults: {
     fr: { subject: 'Rectification de vos résultats', body: '{{jury}} — un avenant modifie votre résultat.' }, en: { subject: 'Results rectified', body: '{{jury}} — an amendment changes your result.' } } },
+  { code: 'exn.verified', module: 'EXN', variables: ['exam', 'state'], sensitive: true, defaults: {
+    fr: { subject: 'Vérification de votre pièce officielle', body: '{{exam}} : {{state}}' }, en: { subject: 'Verification of your official document', body: '{{exam}}: {{state}}' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

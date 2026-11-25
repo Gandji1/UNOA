@@ -233,4 +233,13 @@ GRANT INSERT (jury_id, account_id, sha256, rectification_id) ON unoa.jury_signat
 GRANT INSERT (student_id, unit_id, credits, mode, decision_id), UPDATE (revoked_at, revoked_by) ON unoa.credit_award TO :"web_role";
 GRANT INSERT (decision_id, appellant_id, reason), UPDATE (state, response, decided_by, decided_at) ON unoa.grade_appeal TO :"web_role";
 GRANT INSERT (student_id, content, sha256, issued_by) ON unoa.transcript TO :"web_role";
+-- 0023: external national examinations (documentary follow-up).
+GRANT SELECT ON unoa.external_exam, unoa.external_participation, unoa.external_evidence, unoa.external_verification, unoa.external_event TO :"web_role";
+GRANT INSERT (scope_id, title, authority, official_url, session_label, description, created_by),
+      UPDATE (title, authority, official_url, session_label, description, state, published_at) ON unoa.external_exam TO :"web_role";
+GRANT INSERT (exam_id, account_id, candidate_number, statement), UPDATE (candidate_number, statement, withdrawn_at) ON unoa.external_participation TO :"web_role";
+GRANT INSERT (participation_id, kind, issuing_authority, document_reference, stated_outcome, filename, format, size_bytes, sha256, content, deposited_by),
+      UPDATE (state) ON unoa.external_evidence TO :"web_role";
+GRANT INSERT (evidence_id, step, method, note, verifier_id, proof_filename, proof_sha256, proof_content) ON unoa.external_verification TO :"web_role";
+GRANT INSERT (participation_id, kind, detail, actor_id) ON unoa.external_event TO :"web_role";
 COMMIT;
