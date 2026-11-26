@@ -260,3 +260,5 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
   structures et catalogue contrôlées ; menus « Créer », assistants et rôles nommables alignés ; libellés des rôles.
 - Recettes adaptées (nominations à chaque niveau, refus explicites du super-administrateur et du recteur hors de leur niveau).
 - Vérifications : unitaires 39, PostgreSQL 7, HTTP 18 (sans navigateur), build : PASS.
+
+- Migration 0028 : permissions des rôles réduites à leur niveau (admin pays : pays et établissements ; recteur et doyen : lecture, validation et suivi du catalogue) ; nomination en cascade du responsable et des fonctions types sans escalade (`cascade_names`).
