@@ -285,4 +285,6 @@ GRANT INSERT (scope_id, account_id, course_id, target, experience), UPDATE (stat
 GRANT EXECUTE ON FUNCTION unoa.cascade_level(uuid), unoa.cascade_anchor(uuid), unoa.holds_here(uuid, text, uuid), unoa.may_create(uuid, text, uuid, text),
       unoa.cascade_head(uuid), unoa.cascade_allows(uuid, text, uuid) TO :"web_role";
 -- 0028: role scopes (no new object for the web role).
+-- 0029: role levels.
+GRANT EXECUTE ON FUNCTION unoa.role_fits(text, uuid) TO :"web_role";
 COMMIT;

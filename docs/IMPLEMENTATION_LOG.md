@@ -262,3 +262,5 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Vérifications : unitaires 39, PostgreSQL 7, HTTP 18 (sans navigateur), build : PASS.
 
 - Migration 0028 : permissions des rôles réduites à leur niveau (admin pays : pays et établissements ; recteur et doyen : lecture, validation et suivi du catalogue) ; nomination en cascade du responsable et des fonctions types sans escalade (`cascade_names`).
+
+- Migration 0029 : rôles rattachés à un niveau (seuls ceux du niveau sont proposés et acceptés), noms clairs (Administrateur pays, Recteur, Doyen, Chef de département…), sélection des enseignants ouverte aux niveaux supérieurs ; formulaires « Créer » des studios affichés seulement là où la création est permise.

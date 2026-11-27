@@ -55,7 +55,8 @@ export async function accessOverview(settings: IamSettings, actor: string, scope
       SELECT code, label, system, level, description,
         unoa.can_grant($1, code, $2) AND coalesce((SELECT CASE level WHEN 'platform' THEN $2 = (SELECT id FROM unoa.scope WHERE parent_id IS NULL)
           WHEN 'territory' THEN kind.nature IN ('territory', 'jurisdiction') WHEN 'institution' THEN kind.nature IN ('institution', 'centre', 'academic_unit')
-          ELSE kind.nature = 'academic_unit' END FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE scope.id = $2), false) AS assignable
+          ELSE kind.nature = 'academic_unit' END FROM unoa.scope JOIN unoa.scope_type AS kind ON kind.code = scope.type_code WHERE scope.id = $2), false)
+          AND coalesce(unoa.cascade_allows($1, code, $2), false) AS assignable
       FROM unoa.access_role WHERE archived_at IS NULL ORDER BY ordinal, coalesce(label, code)
     `, [actor, scopeId]),
     store.query<{ id: string }>('SELECT id FROM unoa.scope WHERE parent_id IS NULL'),

@@ -26,6 +26,7 @@ export interface TerritoryScope {
   present_until: Date | null;
   read: boolean;
   write: boolean;
+  creates: boolean;
   define: boolean;
 }
 
@@ -60,7 +61,9 @@ const scopeFields = `
   parent.label AS parent_label,
   unoa.has_scope_permission($1, 'territory.read', scope.id) AS read,
   unoa.has_scope_permission($1, 'territory.write', scope.id) AS write,
-  unoa.has_scope_permission($1, 'territory.define', scope.id) AS define
+  unoa.has_scope_permission($1, 'territory.define', scope.id) AS define,
+  (unoa.may_create($1, 'territory.write', scope.id, 'territory') OR unoa.may_create($1, 'territory.write', scope.id, 'institution')
+    OR unoa.may_create($1, 'territory.write', scope.id, 'centre')) AS creates
   FROM unoa.scope AS scope
   JOIN unoa.scope_type AS kind ON kind.code = scope.type_code
   LEFT JOIN unoa.scope AS parent ON parent.id = scope.parent_id

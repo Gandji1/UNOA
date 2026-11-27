@@ -71,7 +71,7 @@ export async function exerciseLocal({ database, call, origin, setupToken }) {
   assert.match(where(await accept({ login: 'admin.alpha2', password: 'Alpha-Secret-2026', confirm: 'Alpha-Secret-2026' })), /erreur=410$/, 'invitation à usage unique');
   const alphaCookie = session(await signIn('admin.alpha', 'Alpha-Secret-2026'));
   const alphaConsole = await (await call('/administration', { headers: { Cookie: alphaCookie } })).text();
-  assert.match(alphaConsole, /Recteur ou administrateur d’établissement \(Université Alpha\)/);
+  assert.match(alphaConsole, /Recteur \(administrateur d’établissement\) \(Université Alpha\)/);
   assert.match(alphaConsole, /href="\/administration\/structures"/);
   assert.doesNotMatch(alphaConsole, /Mise en route de la plateforme/, 'réservé à la plateforme');
   assert.match(await (await call('/administration/guide', { headers: { Cookie: alphaCookie } })).text(), /Qui crée quoi/);

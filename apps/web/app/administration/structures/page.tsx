@@ -125,7 +125,7 @@ export default async function Structures({ searchParams }: { searchParams: Promi
         )}
       </Panel>
 
-      {scope.write && living && (unitTypes.length === 0 ? (
+      {scope.creates && living && (unitTypes.length === 0 ? (
         <section className="studio-panel"><h2>Créer une composante</h2>
           <p>Aucun type d’unité académique n’est déclaré sous « {scope.type_label} ». Déclarez-le dans
             le studio des territoires avec la nature « Unité académique ».</p></section>

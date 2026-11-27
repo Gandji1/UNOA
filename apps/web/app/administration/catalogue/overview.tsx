@@ -49,7 +49,7 @@ export function Overview({ data, contexts, notice, advanced = false }: { data: D
             ))}
           </Table>
         )}
-        {scope.write && (kinds.length === 0 ? (
+        {scope.creates && (kinds.length === 0 ? (
           <p className="studio-help">Déclarez d’abord une nature de programme (licence, master, formation courte…) à la racine.</p>
         ) : (
           <Editor summary="Créer un programme et sa première version">
@@ -91,7 +91,7 @@ export function Overview({ data, contexts, notice, advanced = false }: { data: D
             ))}
           </Table>
         )}
-        {scope.write && fieldTypes.length > 0 && (
+        {scope.creates && fieldTypes.length > 0 && (
           <Editor summary="Ajouter un domaine, une filière, une mention, une spécialité ou un parcours">
             <ActionForm action={`${api}fields`} back={back} hidden={{ scopeId: scope.id }} submit="Ajouter">
               <label>Type<select name="typeCode" required>
@@ -116,7 +116,7 @@ export function Overview({ data, contexts, notice, advanced = false }: { data: D
             {courses.map(item => <tr key={item.id}><td>{item.code}</td><td>{item.title}</td><td>{item.programs}</td></tr>)}
           </Table>
         )}
-        {scope.write && (
+        {scope.creates && (
           <Editor summary="Créer un cours">
             <ActionForm action={`${api}courses`} back={back} hidden={{ scopeId: scope.id }} submit="Créer">
               <label>Code<input name="code" required maxLength={32} /></label>
@@ -133,7 +133,7 @@ export function Overview({ data, contexts, notice, advanced = false }: { data: D
             {competencies.map(item => <tr key={item.id}><td>{item.code}</td><td>{item.label}</td><td>{item.description ?? '—'}</td></tr>)}
           </Table>
         )}
-        {scope.write && (
+        {scope.creates && (
           <Editor summary="Définir une compétence">
             <ActionForm action={`${api}competencies`} back={back} hidden={{ scopeId: scope.id }} submit="Définir">
               <label>Code<input name="code" required maxLength={32} /></label>

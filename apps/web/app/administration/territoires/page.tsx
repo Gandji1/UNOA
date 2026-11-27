@@ -203,7 +203,7 @@ export default async function Territoires({ searchParams }: { searchParams: Prom
         {scope.write && isEstablishment(scope) && targets.length > 0 && <AttachmentEditor scope={scope} targets={targets} />}
       </section>
 
-      {scope.write && <ChildEditor scope={scope} types={types} />}
+      {scope.creates && <ChildEditor scope={scope} types={types} />}
       {scope.write && <TerritoryEditor scope={scope} />}
       {scope.root && scope.define && (stringField(search.avance) === '1' ? <TypeEditor scope={scope} types={types} />
         : <p className="muted"><a href={`${path}?scope=${scope.id}&avance=1`}>Types de niveaux (réglage avancé)</a></p>)}

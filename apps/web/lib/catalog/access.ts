@@ -13,6 +13,7 @@ export interface CatalogScope {
   type_label: string;
   root_id: string;
   write: boolean;
+  creates: boolean;
   review: boolean;
   publish: boolean;
   authorize: boolean;
@@ -23,6 +24,7 @@ export const contextFields = `
   scope.id, scope.label, kind.nature, kind.label AS type_label,
   (SELECT id FROM unoa.scope WHERE parent_id IS NULL) AS root_id,
   unoa.has_scope_permission($1, 'catalog.write', scope.id) AS write,
+  unoa.may_create($1, 'catalog.write', scope.id, 'catalog') AS creates,
   unoa.has_scope_permission($1, 'catalog.review', scope.id) AS review,
   unoa.has_scope_permission($1, 'catalog.publish', scope.id) AS publish,
   unoa.has_scope_permission($1, 'catalog.authorize', scope.id) AS authorize,

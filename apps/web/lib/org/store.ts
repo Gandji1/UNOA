@@ -28,6 +28,7 @@ export interface OrgScope {
   institution_label: string | null;
   write: boolean;
   approve: boolean;
+  creates: boolean;
 }
 
 const scopeFields = `
@@ -36,7 +37,8 @@ const scopeFields = `
   unit.code, unit.status, unit.public, unit.mission, unit.proposed_by,
   institution.label AS institution_label,
   unoa.has_scope_permission($1, 'org.write', scope.id) AS write,
-  unoa.has_scope_permission($1, 'org.approve', scope.id) AS approve
+  unoa.has_scope_permission($1, 'org.approve', scope.id) AS approve,
+  unoa.may_create($1, 'org.write', scope.id, CASE WHEN unoa.cascade_level(scope.id) = 'faculty' THEN 'department' ELSE 'faculty' END) AS creates
   FROM unoa.scope AS scope
   JOIN unoa.scope_type AS kind ON kind.code = scope.type_code
   LEFT JOIN unoa.scope AS parent ON parent.id = scope.parent_id
