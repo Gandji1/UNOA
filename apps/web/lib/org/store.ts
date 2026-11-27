@@ -158,7 +158,8 @@ export async function proposeUnit(settings: IamSettings, actor: string, input: I
   const label = boundedText(input.label, 160, 'Libellé');
   const unit = businessCode(input.code);
   const mission = optionalText(input.mission) === null ? null : boundedText(input.mission, 2000, 'Mission');
-  const presentFrom = utcTime(input.presentFrom);
+  // Without a date (assistants), the new scope starts now, never before its parent.
+  const presentFrom = input.presentFrom ? utcTime(input.presentFrom) : null;
   return transaction(settings, 'unoa.org.' + parentId, async store => {
     const parent = await requireScope(store, actor, parentId, 'org.write');
     ensure(parent.nature === 'institution' || parent.status === 'active', 422, 'La structure mère doit être active');
@@ -166,7 +167,8 @@ export async function proposeUnit(settings: IamSettings, actor: string, input: I
     ensure(rows[0]?.nature === 'academic_unit', 422, 'Ce type n’est pas une unité académique');
     await requireCascade(store, actor, 'org.write', parentId, parent.nature === 'academic_unit' ? 'department' : 'faculty');
     const scope = await store.query<{ id: string }>(`
-      INSERT INTO unoa.scope(type_code, parent_id, label, present_from) VALUES ($1, $2, $3, $4) RETURNING id
+      INSERT INTO unoa.scope(type_code, parent_id, label, present_from)
+      VALUES ($1, $2, $3, coalesce($4::timestamptz, greatest(statement_timestamp(), (SELECT present_from FROM unoa.scope WHERE id = $2)))) RETURNING id
     `, [kind, parentId, label, presentFrom]);
     const id = scope.rows[0].id;
     await store.query(`

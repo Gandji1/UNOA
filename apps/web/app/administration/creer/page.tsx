@@ -51,7 +51,6 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
   const search = await searchParams;
   const kind = wizardKinds.find(item => item.kind === field(search.quoi))?.kind as WizardKind | undefined;
   const notice = <Notice error={field(search.error)} message={field(search.message)} />;
-  const now = new Date(Date.now() - 60_000).toISOString().slice(0, 16);
   const { rows: [root] } = await database(settings).query<{ id: string; define: boolean }>(
     "SELECT id, unoa.has_scope_permission($1, 'territory.define', id) AND unoa.has_scope_permission($1, 'catalog.define', id) AS define FROM unoa.scope WHERE parent_id IS NULL", [actor]);
 
@@ -91,7 +90,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
       <ParentPicker kind={kind} items={data.parents} chosen={data.chosen?.id} label={labels[kind]} />
       {data.chosen && (data.types.length === 0 ? empty('Aucun type n’est prévu à cet endroit. Le super-administrateur crée les types usuels depuis la page « Créer ».') : (
         ['pays', 'etablissement', 'campus'].includes(kind) ? (
-          <ActionForm action="/api/v1/territories/scopes" back={back} hidden={{ scopeId: data.chosen.id, parentId: data.chosen.id, presentFrom: now }} submit={meta.title}>
+          <ActionForm action="/api/v1/territories/scopes" back={back} hidden={{ scopeId: data.chosen.id, parentId: data.chosen.id }} submit={meta.title}>
             <label>Type<select name="typeCode">{data.types.map(type => <option key={type.code} value={type.code}>{type.label}</option>)}</select></label>
             <label className="studio-wide">Nom<input name="label" required maxLength={200} /></label>
             <label>Fuseau horaire<input name="timeZone" defaultValue="Africa/Porto-Novo" maxLength={60} /></label>
@@ -99,7 +98,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
             <label>Langue et format<input name="locale" defaultValue="fr-BJ" maxLength={20} /></label>
           </ActionForm>
         ) : (
-          <ActionForm action="/api/v1/org/units" back={back} hidden={{ parentId: data.chosen.id, presentFrom: now, public: 'true' }} submit={meta.title}
+          <ActionForm action="/api/v1/org/units" back={back} hidden={{ parentId: data.chosen.id, public: 'true' }} submit={meta.title}
             >
             <label>Type<select name="typeCode">{data.types.map(type => <option key={type.code} value={type.code}>{type.label}</option>)}</select></label>
             <label className="studio-wide">Nom<input name="label" required maxLength={200} placeholder={kind === 'faculte' ? 'ex. Faculté des sciences et techniques' : 'ex. Département d’informatique'} /></label>

@@ -170,7 +170,8 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
   const parentId = uuid(input.parentId);
   const kind = typeCode(input.typeCode);
   const item = attributes(input);
-  const presentFrom = utcTime(input.presentFrom);
+  // Without a date (assistants), the new scope starts now, never before its parent.
+  const presentFrom = input.presentFrom ? utcTime(input.presentFrom) : null;
   return transaction(settings, 'unoa.territory.' + parentId, async store => {
     const parent = await getTerritory(store, actor, parentId);
     ensure(parent?.write, 403, 'Création de périmètre non autorisée');
@@ -182,7 +183,7 @@ export async function createTerritory(settings: IamSettings, actor: string, inpu
     const { rows } = await store.query<{ id: string }>(`
       INSERT INTO unoa.scope(type_code, parent_id, label, time_zone, currency, locale,
                              legal_name, contact, present_from, present_until)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::timestamptz, greatest(statement_timestamp(), (SELECT present_from FROM unoa.scope WHERE id = $2))), $10) RETURNING id
     `, [kind, parentId, item.label, item.timeZone, item.currency, item.locale,
       item.legalName, item.contact, presentFrom, item.presentUntil]);
     await audit(store, actor, parentId, 'territory.created', correlation, rows[0].id);
