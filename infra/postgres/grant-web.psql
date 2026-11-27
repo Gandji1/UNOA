@@ -31,7 +31,7 @@ GRANT EXECUTE ON FUNCTION unoa.nearest_institution(uuid), unoa.academic_owner(uu
       unoa.program_regulatory_status(uuid), unoa.program_admission_allowed(uuid) TO :"web_role";
 GRANT SELECT ON unoa.org_unit, unoa.org_position, unoa.org_appointment, unoa.org_capacity,
       unoa.org_change, unoa.org_succession TO :"web_role";
-GRANT INSERT (scope_id, code, mission, public, proposed_by, status, decided_by, decided_at),
+GRANT INSERT (scope_id, code, mission, public, proposed_by, status, decided_by, decided_at, by_head),
       UPDATE (status, public, mission, decided_by, decided_at, closed_at) ON unoa.org_unit TO :"web_role";
 GRANT INSERT (unit_id, title, is_head, seats, public, created_by) ON unoa.org_position TO :"web_role";
 GRANT INSERT (position_id, account_id, capacity, public_name, reason, effective_from, effective_until, appointed_by),
@@ -287,4 +287,5 @@ GRANT EXECUTE ON FUNCTION unoa.cascade_level(uuid), unoa.cascade_anchor(uuid), u
 -- 0028: role scopes (no new object for the web role).
 -- 0029: role levels.
 GRANT EXECUTE ON FUNCTION unoa.role_fits(text, uuid) TO :"web_role";
+-- 0030: units created by the head.
 COMMIT;

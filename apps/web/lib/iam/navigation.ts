@@ -61,7 +61,7 @@ const creations: { kind: string; label: string; check: string }[] = [
   { kind: 'filiere', label: 'Une filière', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
   { kind: 'formation', label: 'Une formation', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
   { kind: 'matiere', label: 'Une matière', check: "kind.nature = 'academic_unit' AND unoa.may_create($1, 'catalog.write', scope.id, 'catalog')" },
-  { kind: 'responsable', label: 'Nommer un responsable', check: "unoa.holds_here($1, 'iam.assign', scope.id)" },
+  { kind: 'responsable', label: 'Nommer une personne', check: "unoa.holds_here($1, 'iam.assign', scope.id)" },
 ];
 
 // What each role creates in the hierarchy (a person holding several roles
@@ -85,7 +85,11 @@ export async function allowedCreations(actor: string) {
   ]);
   const custom = roles.some(role => !(role.role_code in roleCreations));
   const expected = new Set(roles.flatMap(role => roleCreations[role.role_code] ?? []));
-  return creations.filter(item => rows[0]?.[item.kind] && (custom || expected.has(item.kind)));
+  // The naming entry says whom the person names next (head of the level below).
+  const naming = ([['platform_admin', 'Nommer un administrateur pays'], ['country_admin', 'Nommer un recteur'], ['institution_admin', 'Nommer un doyen ou un collaborateur'],
+    ['dean', 'Nommer un chef de département'], ['department_head', 'Nommer un enseignant']] as const).find(([code]) => roles.some(role => role.role_code === code))?.[1];
+  return creations.filter(item => rows[0]?.[item.kind] && (custom || expected.has(item.kind)))
+    .map(item => item.kind === 'responsable' && naming ? { ...item, label: naming } : item);
 }
 
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).

@@ -9,15 +9,15 @@ import { database } from './sessions';
 export type WizardKind = 'pays' | 'etablissement' | 'campus' | 'faculte' | 'departement' | 'filiere' | 'formation' | 'matiere' | 'responsable';
 
 export const wizardKinds: { kind: WizardKind; title: string; help: string; who: string }[] = [
-  { kind: 'pays', title: 'Créer un pays', help: 'Premier niveau : un pays (ou une région) où des établissements seront ouverts.', who: 'Super-administrateur' },
-  { kind: 'etablissement', title: 'Créer un établissement', help: 'Une université ou un institut, dans un pays.', who: 'Administrateur pays' },
-  { kind: 'campus', title: 'Créer un campus', help: 'Un site physique ou un centre rattaché à un établissement.', who: 'Recteur (administrateur d’établissement)' },
-  { kind: 'faculte', title: 'Créer une faculté', help: 'Une faculté, une école ou un institut au sein de l’établissement ; le recteur en nomme ensuite le doyen.', who: 'Recteur (administrateur d’établissement)' },
-  { kind: 'departement', title: 'Créer un département', help: 'Un département au sein d’une faculté ; le doyen en nomme ensuite le chef.', who: 'Doyen de la faculté' },
-  { kind: 'filiere', title: 'Créer une filière ou une spécialité', help: 'Une filière d’un département, puis ses spécialités.', who: 'Chef de département' },
-  { kind: 'formation', title: 'Créer une formation', help: 'Une licence, un master, un certificat… avec sa maquette à compléter ensuite.', who: 'Chef de département' },
-  { kind: 'matiere', title: 'Créer une matière', help: 'Un cours du catalogue, à rattacher aux unités d’enseignement de la maquette.', who: 'Chef de département' },
-  { kind: 'responsable', title: 'Nommer un responsable', help: 'Chaque niveau nomme le responsable du niveau juste en dessous et sa propre équipe.', who: 'Super-admin → admin pays → recteur → doyen → chef de département' },
+  { kind: 'pays', title: 'Créer un pays', help: 'Ensuite : nommer l’administrateur du pays.', who: 'Super-administrateur' },
+  { kind: 'etablissement', title: 'Créer un établissement', help: 'Une université ou un institut. Ensuite : nommer son recteur.', who: 'Administrateur pays' },
+  { kind: 'campus', title: 'Créer un campus', help: 'Un site rattaché à l’établissement.', who: 'Recteur' },
+  { kind: 'faculte', title: 'Créer une faculté', help: 'Ensuite : nommer son doyen.', who: 'Recteur' },
+  { kind: 'departement', title: 'Créer un département', help: 'Ensuite : nommer son chef de département.', who: 'Doyen' },
+  { kind: 'filiere', title: 'Créer une filière ou une spécialité', help: 'Par exemple : Économie appliquée, Comptabilité-Contrôle-Audit.', who: 'Chef de département' },
+  { kind: 'formation', title: 'Créer une formation', help: 'Licence, master, certificat… puis sa maquette.', who: 'Chef de département' },
+  { kind: 'matiere', title: 'Créer une matière', help: 'Un cours, rattaché ensuite à la maquette.', who: 'Chef de département' },
+  { kind: 'responsable', title: 'Nommer une personne', help: 'Le responsable du niveau suivant ou un collaborateur.', who: 'Chaque responsable' },
 ];
 
 interface Place { id: string; label: string; nature: string; path: string }

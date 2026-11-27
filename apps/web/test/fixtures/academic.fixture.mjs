@@ -81,18 +81,15 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   const org = '/api/v1/org/';
   const propose = (parentId, data, cookie = A) => post(org + 'units', cookie, { parentId, presentFrom: now, ...data });
   const faculty = await okay(await propose(alphaUniv, { typeCode: 'faculte', code: 'FSA', label: 'Faculté des sciences appliquées', public: true, mission: 'Sciences appliquées' }));
-  await status(await propose(faculty.scopeId, { typeCode: 'departement', code: 'DINF', label: 'Informatique' }), 422, 'mère non active');
-  await status(await post(`${org}units/${faculty.scopeId}/decide`, A, { decision: 'approve' }), 403, 'auto-validation');
-  await okay(await post(`${org}units/${faculty.scopeId}/decide`, R, { decision: 'approve' }));
+  // Cascade (ADR-0016): created by the head of the level above, the unit is active at once.
+  assert.equal((await database.query('SELECT status, by_head FROM unoa.org_unit WHERE scope_id = $1', [faculty.scopeId])).rows[0].status, 'active');
   await name(admin, faculty.scopeId);
-  await status(await post(`${org}units/${faculty.scopeId}/decide`, R, { decision: 'approve' }), 409, 'double décision');
+  await status(await post(`${org}units/${faculty.scopeId}/decide`, R, { decision: 'approve' }), 409, 'déjà active');
   await status(await propose(alphaUniv, { typeCode: 'labo', code: 'LAB', label: 'Hors hiérarchie' }), 422, 'hiérarchie non déclarée');
   await status(await propose(alphaUniv, { typeCode: 'faculte', code: 'FSA', label: 'Doublon' }), 409, 'code en double');
   await status(await propose(alphaUniv, { typeCode: 'faculte', code: 'X', label: 'Territoire', presentFrom: '2020-01-01T00:00' }), 422, 'présence hors mère');
   const department = await okay(await propose(faculty.scopeId, { typeCode: 'departement', code: 'DINF', label: 'Département d’informatique', public: true }));
-  await okay(await post(`${org}units/${department.scopeId}/decide`, R, { decision: 'approve' }));
   const second = await okay(await propose(alphaUniv, { typeCode: 'faculte', code: 'FST', label: 'Faculté des sciences et techniques', public: true }));
-  await okay(await post(`${org}units/${second.scopeId}/decide`, R, { decision: 'approve' }));
   // Bêta reuses the same code in its own establishment, and sees nothing of Alpha.
   const betaFaculty = await okay(await propose(betaUniv, { typeCode: 'faculte', code: 'FSA', label: 'Faculté Bêta' }, B));
   await status(await propose(alphaUniv, { typeCode: 'faculte', code: 'INT', label: 'Intrusion' }, B), 403, 'écriture transverse');
@@ -316,10 +313,8 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
   const overview = await okay(await get(`${cat}scopes?scopeId=${moved.scopeId}`, A));
   assert.equal(overview.courses.find(item => item.code === 'C-ALGO').programs, 2);
 
-  await okay(await post(`${org}units/${betaFaculty.scopeId}/decide`, R, { decision: 'approve' }));
   await name(agent, betaFaculty.scopeId, 'academic_local');
   const betaDepartment = await okay(await propose(betaFaculty.scopeId, { typeCode: 'departement', code: 'DB1', label: 'Département Bêta' }, B));
-  await okay(await post(`${org}units/${betaDepartment.scopeId}/decide`, R, { decision: 'approve' }));
   await name(agent, betaDepartment.scopeId, 'academic_local');
   const betaProgram = await okay(await post(cat + 'programs', B, {
     scopeId: betaDepartment.scopeId, kindCode: 'certificat', code: 'C-B1', title: 'Certificat Bêta',
@@ -373,6 +368,6 @@ export async function exerciseAcademic({ database, issuer, login, call, origin, 
     'catalog.kind_defined', 'catalog.program_created', 'catalog.version_created', 'catalog.version_edited',
     'catalog.version_published', 'catalog.version_reviewed', 'catalog.version_submitted',
     'org.access', 'org.appointed', 'org.appointment_ended', 'org.capacity_recorded', 'org.change_decided',
-    'org.change_requested', 'org.position_created', 'org.unit_decided', 'org.unit_proposed',
+    'org.change_requested', 'org.position_created', 'org.unit_created',
   ]);
 }

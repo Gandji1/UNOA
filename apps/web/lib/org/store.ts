@@ -170,9 +170,11 @@ export async function proposeUnit(settings: IamSettings, actor: string, input: I
     `, [kind, parentId, label, presentFrom]);
     const id = scope.rows[0].id;
     await store.query(`
-      INSERT INTO unoa.org_unit(scope_id, code, mission, public, proposed_by) VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO unoa.org_unit(scope_id, code, mission, public, proposed_by, status, decided_by, decided_at, by_head)
+      VALUES ($1, $2, $3, $4, $5, 'active', $5, now(), true)
     `, [id, unit, mission, flag(input.public), actor]);
-    await audit(store, actor, parentId, 'org.unit_proposed', correlation, id);
+    // Created by the head of the level above (cascade checked above): active at once.
+    await audit(store, actor, parentId, 'org.unit_created', correlation, id);
     return { scopeId: id };
   });
 }

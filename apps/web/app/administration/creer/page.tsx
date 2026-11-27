@@ -61,7 +61,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
       <main id="contenu" className="studio">
         <nav aria-label="Fil d’Ariane" className="crumbs"><a href="/administration">Administration</a> › <span aria-current="page">Créer</span></nav>
         <section className="studio-heading"><p className="eyebrow">Assistants</p><h1>Que voulez-vous créer ?</h1>
-          <p>Suivez l’ordre : pays → établissement → faculté → département → filière → formation → matière. Chaque assistant ne propose que ce que vous avez le droit de créer.</p></section>
+          <p>Vous ne voyez que ce que votre fonction vous permet de créer.</p></section>
         {notice}
         {root?.define && (
           <section className="studio-panel" aria-labelledby="types">
@@ -100,7 +100,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
           </ActionForm>
         ) : (
           <ActionForm action="/api/v1/org/units" back={back} hidden={{ parentId: data.chosen.id, presentFrom: now, public: 'true' }} submit={meta.title}
-            confirm="La création est ensuite validée par une autre personne habilitée (règle des quatre yeux).">
+            >
             <label>Type<select name="typeCode">{data.types.map(type => <option key={type.code} value={type.code}>{type.label}</option>)}</select></label>
             <label className="studio-wide">Nom<input name="label" required maxLength={200} placeholder={kind === 'faculte' ? 'ex. Faculté des sciences et techniques' : 'ex. Département d’informatique'} /></label>
             {code('Unique dans l’établissement.')}
@@ -156,7 +156,7 @@ export default async function Creer({ searchParams }: { searchParams: Promise<Se
       {data.chosen && (data.roles.length === 0 ? empty('Aucun rôle que vous pouvez attribuer à cet endroit.') : (
         <form method="post" action="/api/v1/iam/invitations" className="studio-form">
           <Hidden values={{ scopeId: data.chosen.id, includeDescendants: 'true', validDays: '7', reason: 'Nomination depuis l’assistant' }} />
-          <label className="studio-wide">Rôle<select name="role">{data.roles.map(role => <option key={role.code} value={role.code}>{role.label ?? role.code}{role.description ? ' — ' + role.description : ''}</option>)}</select></label>
+          <label className="studio-wide">Rôle<select name="role">{data.roles.map(role => <option key={role.code} value={role.code}>{role.label ?? role.code}</option>)}</select></label>
           <label>Nom complet<input name="displayName" required maxLength={200} /></label>
           <label>Courriel (facultatif)<input name="email" type="email" maxLength={254} /></label>
           <p className="studio-wide studio-help">Un lien personnel est créé : transmettez-le à la personne, qui choisit son identifiant et son mot de passe.</p>

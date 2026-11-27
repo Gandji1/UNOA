@@ -264,3 +264,5 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0028 : permissions des rôles réduites à leur niveau (admin pays : pays et établissements ; recteur et doyen : lecture, validation et suivi du catalogue) ; nomination en cascade du responsable et des fonctions types sans escalade (`cascade_names`).
 
 - Migration 0029 : rôles rattachés à un niveau (seuls ceux du niveau sont proposés et acceptés), noms clairs (Administrateur pays, Recteur, Doyen, Chef de département…), sélection des enseignants ouverte aux niveaux supérieurs ; formulaires « Créer » des studios affichés seulement là où la création est permise.
+
+- Migration 0030 : faculté ou département créés par le responsable du niveau supérieur, actifs immédiatement (plus de blocage en attente de validation) ; noms courts (Recteur, Doyen, Chef de département) ; assistants et menus « Créer » aux libellés simples (« Nommer un recteur »…).
