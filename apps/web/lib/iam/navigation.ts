@@ -129,20 +129,24 @@ export const navigation = cache(async () => {
         'SELECT unoa.account_permissions($1) AS permissions', [actor],
       ).catch(() => ({ rows: [{ permissions: [] as string[] }] }));
       const held = new Set(rows[0]?.permissions ?? []);
-      groups.push({ label: 'Mon espace', items: [
-        { href: '/espace', label: 'Mon espace', icon: 'user' },
-        { href: '/apprendre', label: 'Mes cours et séances', icon: 'play' },
-        { href: '/evaluations', label: 'Mes évaluations', icon: 'file' },
-        { href: '/resultats', label: 'Mes résultats', icon: 'cap' },
-        { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' },
-        { href: '/finances', label: 'Mes finances', icon: 'sliders' },
-        { href: '/documents', label: 'Mes documents', icon: 'file' },
-        { href: '/formations-courtes/mes', label: 'Mes formations courtes', icon: 'cap' },
-        { href: '/candidature', label: 'Mes candidatures', icon: 'file' },
-        { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' },
-        { href: '/conseils', label: 'Mes conseils', icon: 'landmark' },
-        { href: '/enseignement', label: 'Espace enseignant', icon: 'studio' },
-      ] });
+      const spaces = new Set(await database(settings).query<{ spaces: string[] }>('SELECT unoa.account_spaces($1) AS spaces', [actor])
+        .then(result => result.rows[0]?.spaces ?? []).catch(() => [] as string[]));
+      const staff = held.size > 0;
+      const personal: [boolean, NavItem][] = [
+        [true, { href: '/espace', label: 'Mon espace', icon: 'user' }],
+        [spaces.has('learning') || spaces.has('teaching'), { href: '/apprendre', label: spaces.has('teaching') && !spaces.has('learning') ? 'Mes cours et séances' : 'Mes cours', icon: 'play' }],
+        [spaces.has('learning'), { href: '/evaluations', label: 'Mes évaluations', icon: 'file' }],
+        [spaces.has('learning') || spaces.has('student'), { href: '/resultats', label: 'Mes résultats', icon: 'cap' }],
+        [spaces.has('teaching') || (!staff && !spaces.has('learning')), { href: '/enseignement', label: spaces.has('teaching') ? 'Espace enseignant' : 'Devenir enseignant', icon: 'studio' }],
+        [spaces.has('admission') || (!staff && !spaces.has('learning') && !spaces.has('teaching')), { href: '/candidature', label: 'Mes candidatures', icon: 'file' }],
+        [spaces.has('student'), { href: '/etudiant', label: 'Mon dossier étudiant', icon: 'user' }],
+        [spaces.has('finance'), { href: '/finances', label: 'Mes finances', icon: 'sliders' }],
+        [spaces.has('documents'), { href: '/documents', label: 'Mes documents', icon: 'file' }],
+        [spaces.has('short'), { href: '/formations-courtes/mes', label: 'Mes formations courtes', icon: 'cap' }],
+        [spaces.has('external'), { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' }],
+        [spaces.has('councils'), { href: '/conseils', label: 'Mes conseils', icon: 'landmark' }],
+      ];
+      groups.push({ label: 'Mon espace', items: personal.filter(([shown]) => shown).map(([, item]) => item) });
       const admin = administration.filter(([permission]) => held.has(permission)).map(([, item]) => item);
       if (admin.length) {
         groups.push({ label: 'Tableau de bord', items: [

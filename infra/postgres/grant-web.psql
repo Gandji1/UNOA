@@ -288,4 +288,5 @@ GRANT EXECUTE ON FUNCTION unoa.cascade_level(uuid), unoa.cascade_anchor(uuid), u
 -- 0029: role levels.
 GRANT EXECUTE ON FUNCTION unoa.role_fits(text, uuid) TO :"web_role";
 -- 0030: units created by the head.
+GRANT EXECUTE ON FUNCTION unoa.account_spaces(uuid) TO :"web_role";
 COMMIT;

@@ -281,7 +281,7 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
 .qr svg { display: block; width: 100%; height: auto; }
 @media print { .sidebar, .topbar, .site-footer, .skip { display: none !important; } .credential { box-shadow: none; border: 0; } }
 .markup-figure { margin: 1.2rem 0; text-align: center; }
-.markup-figure img { max-width: 100%; height: auto; border-radius: .6rem; border: 1px solid var(--line); background: #fff; }
+.markup-figure img { display: block; margin: 0 auto; width: 100%; max-width: 680px; height: auto; border-radius: .6rem; border: 1px solid var(--line); background: #fff; }
 .markup-figure figcaption { font-size: .9rem; color: var(--muted, #555); margin-top: .4rem; }
 .markup-callout { margin: 1rem 0; padding: .8rem 1rem; border-radius: .6rem; border-left: 4px solid #0b469c; background: #eef4fd; color: #102a4c; }
 .markup-callout.markup-key { border-color: #f97316; background: #fff4ec; color: #4a2208; }
@@ -291,7 +291,7 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
 .account-menu { position: relative; }
 .account-menu > summary { list-style: none; cursor: pointer; }
 .account-menu > summary::-webkit-details-marker { display: none; }
-.account-list { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 240px; display: grid; gap: 2px; padding: 6px;
+.account-list { color: var(--ink); position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 240px; display: grid; gap: 2px; padding: 6px;
   background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 32px rgba(16, 42, 76, .16); }
 .account-list form { margin: 0; }
 .account-list a, .account-list button { display: grid; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-radius: 8px; background: none;

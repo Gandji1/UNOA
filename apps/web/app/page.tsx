@@ -41,7 +41,9 @@ export default async function Home() {
             <p className="muted">Formations publiées par l’établissement, avec leur statut réglementaire vérifié.</p></div>
           {programs.length > 0 && <a className="secondary" href="/formations">Rechercher et comparer</a>}
         </div>
-        {programs.length === 0 ? <p>Aucune formation n’est encore publiée.</p> : (
+        {programs.length === 0 ? (
+          <p>Les formations diplômantes s’afficheront ici dès leur publication officielle. En attendant, découvrez <a href="/structures">nos facultés et départements</a>.</p>
+        ) : (
           <>
             <form method="get" action="/formations" className="filters compact" role="search" aria-label="Rechercher une formation">
               <label className="grow">Recherche<input type="search" name="q" placeholder="Filière, code, structure…" /></label>
