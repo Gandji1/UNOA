@@ -5,6 +5,7 @@ import { scopeIdFormat } from '@/lib/iam/settings';
 import { canModerate, canTeach, offeringView } from '@/lib/lms/offerings';
 import { ActionForm, Badge, Editor, Notice, Panel, shortId, Table } from '../../administration/forms';
 import { learner, refusedAs, roleLabels } from '../session';
+import { liveProvider } from '@/lib/live/provider';
 
 export const metadata: Metadata = { title: 'Cours' };
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,7 @@ export default async function Offering({ params, searchParams }: Props) {
   const { settings, actor } = await learner();
   const search = await searchParams;
   const view = await offeringView(settings, actor, id).catch(refusedAs(null));
+  const live = liveProvider() !== null;
   if (!view) {
     return <main id="contenu" className="studio"><section className="studio-panel"><h1>Cours</h1>
       <p>Vous n’êtes pas membre de cette offre.</p><p><a href="/apprendre">Mes cours</a></p></section></main>;
@@ -67,11 +69,11 @@ export default async function Offering({ params, searchParams }: Props) {
                       submit={item.consent === 'refused' ? '✓ Je refuse l’enregistrement' : 'Je refuse l’enregistrement'} />
                   </>
                 )}
-                {offering.role && (
-                  <form method="post" action={`/api/v1/live/sessions/${item.id}/join`}>
-                    <button className="action" type="submit">Rejoindre la séance</button>
-                  </form>
-                )}
+                {offering.role && (live
+                  ? <form method="post" action={`/api/v1/live/sessions/${item.id}/join`}>
+                      <button className="action" type="submit">Rejoindre la séance</button>
+                    </form>
+                  : <p className="muted">La salle de conférence ouvrira dès que l’établissement aura activé son service de visioconférence.</p>)}
               </div>
             )}
             {teach && item.state === 'scheduled' && (

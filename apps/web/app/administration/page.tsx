@@ -87,19 +87,18 @@ export default async function Administration() {
         </section>
       )}
 
-      {levels.map(([level, who, hrefs]) => {
-        const available = hrefs.map(href => studios.get(href)).filter(Boolean);
+      {(() => {
+        const available = levels.flatMap(([, , hrefs]) => hrefs).map(href => studios.get(href)).filter(Boolean);
         if (!available.length) return null;
         return (
-          <section key={level} aria-labelledby={'niveau-' + level}>
-            <h2 id={'niveau-' + level}>{level}</h2>
-            <p className="muted">{who}</p>
+          <section aria-labelledby="outils">
+            <h2 id="outils">Vos outils</h2>
             <ul className="admin-grid">
               {available.map(item => <li key={item!.href}><a href={item!.href}><strong>{item!.label}</strong><span className="muted">{studioDescriptions[item!.href]}</span></a></li>)}
             </ul>
           </section>
         );
-      })}
+      })()}
     </main>
   );
 }

@@ -35,8 +35,8 @@ export async function openAccounts(settings: IamSettings, value: string | undefi
   if (current && shape.test(current) && !tokens.includes(current)) tokens.unshift(current);
   if (!tokens.length) return [];
   const hashes = tokens.map(token => createHash('sha256').update(token).digest());
-  const { rows } = await database(settings).query<{ position: number; display_name: string | null; login: string | null }>(`
-    SELECT item.position::int AS position, account.display_name, credential.login
+  const { rows } = await database(settings).query<{ position: number; id: string; display_name: string | null; login: string | null }>(`
+    SELECT item.position::int AS position, account.id, account.display_name, credential.login
     FROM unnest($1::bytea[]) WITH ORDINALITY AS item(hash, position)
     JOIN unoa.login_session AS session ON session.token_hash = item.hash
     JOIN unoa.account AS account ON account.id = session.account_id
@@ -44,5 +44,8 @@ export async function openAccounts(settings: IamSettings, value: string | undefi
     WHERE session.expires_at > statement_timestamp() AND session.revoked_at IS NULL
       AND account.disabled_at IS NULL AND session.account_epoch = account.session_epoch
     ORDER BY item.position`, [hashes]);
-  return rows.map(row => ({ index: row.position - 1, name: row.display_name ?? row.login ?? 'Compte', login: row.login, current: tokens[row.position - 1] === current }));
+  const seen = new Set<string>();
+  // One entry per account: the current session first, then the most recent one.
+  rows.sort((a, b) => Number(tokens[b.position - 1] === current) - Number(tokens[a.position - 1] === current) || a.position - b.position);
+  return rows.filter(row => !seen.has(row.id) && !!seen.add(row.id)).map(row => ({ index: row.position - 1, name: row.display_name ?? row.login ?? 'Compte', login: row.login, current: tokens[row.position - 1] === current }));
 }
