@@ -11,7 +11,13 @@ export type Inline =
 export type Block =
   | { type: 'heading'; level: 2 | 3 | 4; inlines: Inline[] }
   | { type: 'paragraph'; inlines: Inline[] }
-  | { type: 'list'; items: Inline[][] };
+  | { type: 'list'; items: Inline[][] }
+  | { type: 'image'; src: string; alt: string; caption: string | null }
+  | { type: 'callout'; tone: 'info' | 'key' | 'warn'; inlines: Inline[] };
+
+// Images: HTTPS or a path of the platform's own illustrations; the description is required.
+const imagePattern = /^!\[([^\]]{3,200})\]\(((?:https:\/\/|\/)[^\s)]+)(?:\s+"([^"]{1,200})")?\)$/;
+const calloutPattern = /^>\s*(?:\[(info|cle|attention)\]\s*)?(.+)$/;
 
 const inlinePattern = /\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g;
 
@@ -46,6 +52,18 @@ export function parseMarkup(source: string): Block[] {
     const line = raw.trim();
     const heading = /^(#{1,3})\s+(.+)$/.exec(line);
     if (!line) { flush(); continue; }
+    const image = imagePattern.exec(line);
+    if (image && !image[2].startsWith('//')) {
+      flush();
+      blocks.push({ type: 'image', alt: image[1], src: image[2], caption: image[3] ?? null });
+      continue;
+    }
+    const callout = calloutPattern.exec(line);
+    if (callout) {
+      flush();
+      blocks.push({ type: 'callout', tone: callout[1] === 'cle' ? 'key' : callout[1] === 'attention' ? 'warn' : 'info', inlines: parseInline(callout[2]) });
+      continue;
+    }
     if (heading) {
       flush();
       blocks.push({ type: 'heading', level: (heading[1].length + 1) as 2 | 3 | 4, inlines: parseInline(heading[2]) });

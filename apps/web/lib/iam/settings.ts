@@ -84,7 +84,7 @@ export const loginDurationSeconds = 5 * 60;
 export const scopeIdFormat = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 export const permissionFormat = /^[a-z][a-z0-9_.]{0,95}$/;
 
-export function cookieName(settings: IamSettings, kind: 'login' | 'session' | 'invitation') {
+export function cookieName(settings: IamSettings, kind: 'login' | 'session' | 'invitation' | 'accounts') {
   return (settings.origin.protocol === 'https:' ? '__Host-' : '') + 'unoa_' + kind;
 }
 

@@ -60,7 +60,7 @@ function usePreference(name: 'dark' | 'eco') {
   return [on, setOn] as const;
 }
 
-export function Shell({ groups, brand, title, children, signedIn = false }: { groups: NavGroup[]; brand: string | null; title: string; children: ReactNode; signedIn?: boolean }) {
+export function Shell({ groups, brand, title, children, signedIn = false, accounts = [] }: { groups: NavGroup[]; brand: string | null; title: string; children: ReactNode; signedIn?: boolean; accounts?: { index: number; name: string; login: string | null; current: boolean }[] }) {
   const path = usePathname() ?? '/';
   const [open, setOpen] = useState(false);
   const [dark, setDark] = usePreference('dark');
@@ -106,7 +106,21 @@ export function Shell({ groups, brand, title, children, signedIn = false }: { gr
               <button type="button" className={'tool' + (eco ? ' on' : '')} onClick={() => setEco(!eco)} aria-pressed={eco}
                 title="Mode faible débit : sans illustrations ni animations"><Icon name="wifi" /><span>{eco ? 'Éco' : 'Débit normal'}</span></button>
               {signedIn
-                ? <form action="/api/v1/auth/logout" method="post"><button type="submit" className="tool account-button"><Icon name="user" /><span>Se déconnecter</span></button></form>
+                ? (
+                  <details className="account-menu">
+                    <summary className="tool account-button"><Icon name="user" /><span>{accounts.find(item => item.current)?.name ?? 'Mon compte'}</span></summary>
+                    <div className="account-list" role="menu">
+                      {accounts.filter(item => !item.current).map(item => (
+                        <form key={item.index} action="/api/v1/auth/switch" method="post">
+                          <input type="hidden" name="compte" value={item.index} />
+                          <button type="submit" role="menuitem">{item.name}{item.login && <small>{item.login}</small>}</button>
+                        </form>
+                      ))}
+                      <a href="/connexion" role="menuitem">Ajouter un compte</a>
+                      <form action="/api/v1/auth/logout" method="post"><button type="submit" role="menuitem">Se déconnecter</button></form>
+                    </div>
+                  </details>
+                )
                 : <a href="/connexion" className="tool account-button"><Icon name="user" /><span>Se connecter</span></a>}
               <button type="button" className={'tool' + (dark ? ' on' : '')} onClick={() => setDark(!dark)} aria-pressed={dark} title="Mode sombre"><Icon name="moon" /><span className="sr">Mode sombre</span></button>
             </div>

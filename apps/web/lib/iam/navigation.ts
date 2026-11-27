@@ -1,4 +1,5 @@
 import 'server-only';
+import { openAccounts, type OpenAccount } from './accounts';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
 import { cookieName, iamSettings } from './settings';
@@ -116,8 +117,12 @@ export const navigation = cache(async () => {
   }];
   const settings = iamSettings();
   let signedIn = false;
+  let accounts: OpenAccount[] = [];
   if (settings) {
-    const actor = await sessionAccount(settings, (await cookies()).get(cookieName(settings, 'session'))?.value).catch(() => null);
+    const jar = await cookies();
+    const token = jar.get(cookieName(settings, 'session'))?.value;
+    const actor = await sessionAccount(settings, token).catch(() => null);
+    if (actor) accounts = await openAccounts(settings, jar.get(cookieName(settings, 'accounts'))?.value, token).catch(() => []);
     if (actor) {
       signedIn = true;
       const { rows } = await database(settings).query<{ permissions: string[] }>(
@@ -153,5 +158,5 @@ export const navigation = cache(async () => {
   }
   if (!signedIn) groups.push({ label: 'Compte', items: [
     { href: '/connexion', label: 'Connexion', icon: 'user' }, { href: '/inscription', label: 'Créer un compte', icon: 'file' }] });
-  return { groups, signedIn };
+  return { groups, signedIn, accounts };
 });

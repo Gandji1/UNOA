@@ -20,6 +20,14 @@ export function Markup({ source }: { source: string }) {
           const Tag = (`h${block.level + 1}`) as 'h3' | 'h4' | 'h5';
           return <Tag key={index}><Inlines items={block.inlines} /></Tag>;
         }
+        if (block.type === 'image') return (
+          <figure key={index} className="markup-figure">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={block.src} alt={block.alt} loading="lazy" />
+            {block.caption && <figcaption>{block.caption}</figcaption>}
+          </figure>
+        );
+        if (block.type === 'callout') return <aside key={index} className={'markup-callout markup-' + block.tone}><Inlines items={block.inlines} /></aside>;
         if (block.type === 'list') return <ul key={index}>{block.items.map((item, at) => <li key={at}><Inlines items={item} /></li>)}</ul>;
         return <p key={index}><Inlines items={block.inlines} /></p>;
       })}

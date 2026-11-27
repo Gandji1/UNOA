@@ -1,5 +1,6 @@
+import { openAccount } from '@/lib/iam/accounts';
 import type { NextRequest } from 'next/server';
-import { callbackPath, cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
+import { callbackPath, cookieName, cookieOptions, iamSettings } from '@/lib/iam/settings';
 import { verifiedSubject } from '@/lib/iam/oidc';
 import { openSession } from '@/lib/iam/sessions';
 import { provisionIdentity } from '@/lib/iam/admin';
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
   response.cookies.set(loginName, '', cookieOptions(settings, 0));
   response.cookies.set(cookieName(settings, 'invitation'), '', cookieOptions(settings, 0));
   if (token) {
-    response.cookies.set(cookieName(settings, 'session'), token, cookieOptions(settings, sessionDurationSeconds));
+    openAccount(response, settings, token, [request.cookies.get(cookieName(settings, 'session'))?.value, request.cookies.get(cookieName(settings, 'accounts'))?.value].filter(Boolean).join('.'));
   }
   return response;
 }

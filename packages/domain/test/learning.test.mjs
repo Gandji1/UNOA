@@ -37,3 +37,11 @@ test('Une heure locale est convertie selon le fuseau IANA, changement d’heure 
   assert.equal(zonedToUtc('2027-07-15T10:00', 'America/Toronto').toISOString(), '2027-07-15T14:00:00.000Z');
   assert.equal(zonedToUtc('2027-07-15 10:00', 'UTC'), null);
 });
+
+test('Images et encadrés dans les leçons', async () => {
+  const { parseMarkup } = await import('../src/learning.ts');
+  const blocks = parseMarkup('![Schéma du cours](/cours/donnees.svg "Figure 1")\n> [cle] À retenir\n![x](javascript:alert(1))');
+  assert.deepEqual(blocks[0], { type: 'image', alt: 'Schéma du cours', src: '/cours/donnees.svg', caption: 'Figure 1' });
+  assert.equal(blocks[1].type, 'callout');
+  assert.equal(blocks[2].type, 'paragraph', 'adresse non HTTPS refusée');
+});

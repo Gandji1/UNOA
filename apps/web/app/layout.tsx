@@ -24,7 +24,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
     <html lang={site?.language ?? 'fr'}>
       <body>
         <a className="skip" href="#contenu">Aller au contenu</a>
-        <Shell signedIn={nav.signedIn} groups={nav.groups} brand={site?.short_name ?? null} title={site?.name ?? ''}>
+        <Shell signedIn={nav.signedIn} accounts={nav.accounts} groups={nav.groups} brand={site?.short_name ?? null} title={site?.name ?? ''}>
           {children}
           <footer className="site-footer">
             {site && <p>{site.footer ?? site.name}</p>}

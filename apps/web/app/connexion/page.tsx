@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 type Search = { statut?: string | string[] };
 const messages: Record<string, string> = {
   deconnecte: 'Vous êtes déconnecté.',
+  expire: 'Ce compte n’est plus connecté. Connectez-vous à nouveau.',
   refuse: 'Connexion refusée. Vérifiez votre identifiant et votre mot de passe.',
   code: 'Code de vérification incorrect ou expiré. Saisissez le code affiché par votre application d’authentification.',
   verrouille: 'Trop d’essais : le compte est verrouillé pendant 15 minutes.',

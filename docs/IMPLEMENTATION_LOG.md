@@ -266,3 +266,9 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Migration 0029 : rôles rattachés à un niveau (seuls ceux du niveau sont proposés et acceptés), noms clairs (Administrateur pays, Recteur, Doyen, Chef de département…), sélection des enseignants ouverte aux niveaux supérieurs ; formulaires « Créer » des studios affichés seulement là où la création est permise.
 
 - Migration 0030 : faculté ou département créés par le responsable du niveau supérieur, actifs immédiatement (plus de blocage en attente de validation) ; noms courts (Recteur, Doyen, Chef de département) ; assistants et menus « Créer » aux libellés simples (« Nommer un recteur »…).
+
+## 2026-11-27 — Changement de compte et leçons illustrées
+
+- Menu du compte : comptes ouverts, « Ajouter un compte », déconnexion du seul compte actif (ADR-0017) ; route `POST /api/v1/auth/switch`.
+- Leçons : images (`![texte](/cours/x.svg "légende")`, HTTPS ou chemin local uniquement) et encadrés (`> [info|cle|attention]`) ; six illustrations SVG sous `apps/web/public/cours/`.
+- Preuves : `pnpm test` 40/40 ; recette HTTP 18/18 (`UNOA_TEST_SKIP_BROWSER=1`), recette navigateur non relancée.

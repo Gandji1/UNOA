@@ -1,5 +1,6 @@
+import { openAccount } from '@/lib/iam/accounts';
 import type { NextRequest } from 'next/server';
-import { cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
+import { cookieName, cookieOptions, iamSettings } from '@/lib/iam/settings';
 import { acceptInvitationLocally } from '@/lib/iam/local';
 import { Problem } from '@/lib/shared/validation';
 import { problem, redirectTo, unavailable } from '@/lib/server/responses';
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await acceptInvitationLocally(settings, token, form.get('login'), form.get('password'));
     const response = redirectTo(new URL('/espace?bienvenue=1', settings.origin));
-    response.cookies.set(cookieName(settings, 'session'), session, cookieOptions(settings, sessionDurationSeconds));
+    openAccount(response, settings, session, [request.cookies.get(cookieName(settings, 'session'))?.value, request.cookies.get(cookieName(settings, 'accounts'))?.value].filter(Boolean).join('.'));
     return response;
   } catch (error) {
     return back(error instanceof Problem ? error.status : 503);

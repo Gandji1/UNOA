@@ -1,5 +1,6 @@
+import { openAccount } from '@/lib/iam/accounts';
 import type { NextRequest } from 'next/server';
-import { cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
+import { cookieName, cookieOptions, iamSettings } from '@/lib/iam/settings';
 import { localLogin } from '@/lib/iam/local';
 import { problem, redirectTo, unavailable } from '@/lib/server/responses';
 
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     const outcome = await localLogin(settings, form.get('login'), form.get('password'), form.get('code'));
     if ('refused' in outcome) return redirectTo(new URL('/connexion?statut=' + statuses[outcome.refused], settings.origin));
     const response = redirectTo(new URL(outcome.mustChange ? '/espace?changer=1#mot-de-passe' : '/espace', settings.origin));
-    response.cookies.set(cookieName(settings, 'session'), outcome.token, cookieOptions(settings, sessionDurationSeconds));
+    openAccount(response, settings, outcome.token, [request.cookies.get(cookieName(settings, 'session'))?.value, request.cookies.get(cookieName(settings, 'accounts'))?.value].filter(Boolean).join('.'));
     return response;
   } catch {
     return redirectTo(new URL('/connexion?statut=indisponible', settings.origin));

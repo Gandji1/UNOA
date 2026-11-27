@@ -1,5 +1,6 @@
+import { openAccount } from '@/lib/iam/accounts';
 import type { NextRequest } from 'next/server';
-import { cookieName, cookieOptions, iamSettings, sessionDurationSeconds } from '@/lib/iam/settings';
+import { cookieName, cookieOptions, iamSettings } from '@/lib/iam/settings';
 import { registerLocally } from '@/lib/iam/local';
 import { siteForRequest } from '@/lib/site/store';
 import { Problem } from '@/lib/shared/validation';
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     const site = await siteForRequest(request).catch(() => null);
     const session = await registerLocally(settings, site?.site_id ?? null, form);
     const response = redirectTo(new URL('/espace?bienvenue=1', settings.origin));
-    response.cookies.set(cookieName(settings, 'session'), session, cookieOptions(settings, sessionDurationSeconds));
+    openAccount(response, settings, session, [request.cookies.get(cookieName(settings, 'session'))?.value, request.cookies.get(cookieName(settings, 'accounts'))?.value].filter(Boolean).join('.'));
     return response;
   } catch (error) {
     return redirectTo(new URL('/inscription?erreur=' + (error instanceof Problem ? error.status : 503), settings.origin));
