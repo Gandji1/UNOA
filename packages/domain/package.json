@@ -12,6 +12,7 @@
     "./governance": "./src/governance.ts",
     "./assessment": "./src/assessment.ts",
     "./grading": "./src/grading.ts",
-    "./finance": "./src/finance.ts"
+    "./finance": "./src/finance.ts",
+    "./pdf": "./src/pdf.ts"
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { scopeIdFormat } from '@/lib/iam/settings';
 import { companiesOverview, companyContexts, companyStates, documentKinds } from '@/lib/companies/store';
+import { jobsOverview, kindLabels } from '@/lib/careers/store';
 import { ActionForm, Badge, Editor, Notice, Panel, Table } from '../forms';
 import { learner, refusedAs } from '../../apprendre/session';
 
@@ -39,6 +40,8 @@ export default async function EntreprisesAdmin({ searchParams }: { searchParams:
   }
   const back = `${path}?scope=${data.scope.id}`;
   const can = data.rights;
+  const jobs = await jobsOverview(settings, actor, data.scope.id);
+  const offerStates: Record<string, string> = { draft: 'Brouillon', review: 'À examiner', published: 'Publiée', suspended: 'Suspendue', closed: 'Close' };
   return (
     <main id="contenu" className="studio">{crumbs}
       <section className="studio-heading"><p className="eyebrow">Campus-Entreprise</p><h1>Entreprises partenaires — {data.scope.label}</h1>
@@ -88,6 +91,28 @@ export default async function EntreprisesAdmin({ searchParams }: { searchParams:
           <div key={report.id}><p><strong>{report.company}</strong> — {report.reason} {report.state === 'closed' ? <Badge tone="muted">Traité : {report.outcome}</Badge> : <Badge tone="warn">Ouvert</Badge>}</p>
             {can.manage && report.state === 'open' && <ActionForm inline action={api + 'handle-report'} back={back} hidden={{ reportId: report.id }} submit="Clore le signalement"><label>Suite donnée<input name="outcome" required maxLength={2000} /></label></ActionForm>}</div>
         ))}
+      </Panel>
+      <Panel title="Offres à modérer et publiées" id="offres">
+        {jobs.offers.length === 0 ? <p>Aucune offre.</p> : jobs.offers.map(offer => (
+          <div key={offer.id}><p><a href={'/offres?id=' + offer.id}>{offer.title}</a> — {offer.company} ({kindLabels[offer.kind]}) <Badge tone={offer.state === 'review' ? 'warn' : offer.state === 'published' ? 'ok' : 'muted'}>{offerStates[offer.state]}</Badge>
+            {offer.risk_flags.length > 0 && <span className="muted"> · alertes : {offer.risk_flags.join(', ')}</span>}</p>
+            {jobs.rights.verify && !offer.own && ['review', 'published', 'suspended'].includes(offer.state) && (
+              <ActionForm inline action="/api/v1/car/moderate" back={back} hidden={{ opportunityId: offer.id }} submit="Enregistrer">
+                <select name="decision" aria-label="Décision">{offer.state !== 'published' && <option value="published">Publier</option>}{offer.state !== 'suspended' && <option value="suspended">Suspendre</option>}</select>
+                <input name="note" maxLength={2000} placeholder="Motif (requis pour suspendre)" aria-label="Motif" />
+              </ActionForm>
+            )}</div>
+        ))}
+        {jobs.reports.length > 0 && <><h3>Signalements d’offres</h3>{jobs.reports.map(report => <p key={report.id}>{report.title} — {report.reason} {report.state === 'closed' ? <Badge tone="muted">Traité : {report.outcome}</Badge> : jobs.rights.manage
+          ? <ActionForm inline action="/api/v1/car/handle-opportunity-report" back={back} hidden={{ reportId: report.id }} submit="Clore"><input name="outcome" required maxLength={2000} placeholder="Suite donnée" aria-label="Suite donnée" /></ActionForm> : <Badge tone="warn">Ouvert</Badge>}</p>)}</>}
+      </Panel>
+      <Panel title="Insertion (statistiques anonymisées)" id="insertion">
+        <p className="muted">Les effectifs inférieurs à 5 sont masqués pour éviter toute identification.</p>
+        {jobs.statistics.length === 0 ? <p>Aucune donnée.</p> : (
+          <Table label="Insertion" head={['Pays', 'Nature', 'Offres', 'Candidatures', 'Propositions']}>
+            {jobs.statistics.map((row, index) => <tr key={index}><td>{row.country}</td><td>{kindLabels[row.kind]}</td><td>{row.offers}</td><td>{row.applications ?? '< 5'}</td><td>{row.offers_made ?? '< 5'}</td></tr>)}
+          </Table>
+        )}
       </Panel>
       <Panel title="Activité des entreprises" id="activite">
         {data.activity.length === 0 ? <p>Aucune activité.</p> : (

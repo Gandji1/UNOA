@@ -103,6 +103,14 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Convention de stage à signer : {{title}}', body: 'La convention est prête : lisez-la et signez-la dans votre espace stages.' }, en: { subject: 'Internship agreement to sign: {{title}}', body: 'The agreement is ready: read and sign it in your internship space.' } } },
   { code: 'stg.validated', module: 'STG', variables: ['title'], sensitive: true, defaults: {
     fr: { subject: 'Stage validé : {{title}}', body: 'Votre stage a été validé académiquement. La note suit la délibération.' }, en: { subject: 'Internship validated: {{title}}', body: 'Your internship was academically validated. The mark follows the deliberation.' } } },
+  { code: 'job.alert', module: 'JOB', variables: ['title', 'company'], sensitive: false, defaults: {
+    fr: { subject: 'Nouvelle offre : {{title}}', body: '{{company}} publie une offre qui correspond à votre alerte.' }, en: { subject: 'New opportunity: {{title}}', body: '{{company}} published an opportunity matching your alert.' } } },
+  { code: 'job.status', module: 'JOB', variables: ['title', 'status'], sensitive: false, defaults: {
+    fr: { subject: 'Candidature « {{title}} » : {{status}}', body: 'Consultez le suivi de votre candidature dans votre espace carrière.' }, en: { subject: 'Application “{{title}}”: {{status}}', body: 'See your application in your career space.' } } },
+  { code: 'job.interview', module: 'JOB', variables: ['title', 'date'], sensitive: false, defaults: {
+    fr: { subject: 'Entretien proposé : {{title}}', body: 'Un entretien vous est proposé le {{date}}. Confirmez-le dans votre espace carrière.' }, en: { subject: 'Interview proposed: {{title}}', body: 'An interview is proposed on {{date}}. Confirm it in your career space.' } } },
+  { code: 'job.application', module: 'JOB', variables: ['title'], sensitive: false, defaults: {
+    fr: { subject: 'Nouvelle candidature : {{title}}', body: 'Une candidature a été déposée sur votre offre.' }, en: { subject: 'New application: {{title}}', body: 'An application was submitted for your opportunity.' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

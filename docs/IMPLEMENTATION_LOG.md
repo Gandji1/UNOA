@@ -288,3 +288,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 
 - Migration 0034, stores `lib/companies` et `lib/internships`, API `/api/v1/ent` et `/api/v1/stg`, six écrans, menus (« Entreprises partenaires », « Mes stages », « Mon entreprise », outils d’administration).
 - Preuves : base 7/7, recette HTTP 21/21 (`internships.fixture.mjs`). Registre officiel des entreprises : BLOCKED_EXTERNAL.
+
+## 2026-11-28 — Lot 028 : offres, candidatures, compétences et portfolio
+
+- Migration 0035, `lib/careers`, `@unoa/domain/pdf`, API `/api/v1/car`, écrans `/offres`, `/carriere`, `/carriere/referentiel`, `/entreprise/recrutement`, modération et insertion dans l’administration des entreprises.
+- Preuves : unitaires 41/41, base 7/7, recette HTTP 22/22 (`careers.fixture.mjs`).

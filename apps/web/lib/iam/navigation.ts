@@ -28,6 +28,7 @@ const administration: [string, NavItem][] = [
   ['phd.read', { href: '/administration/doctorat', label: 'Doctorat', icon: 'cap' }],
   ['stg.read', { href: '/administration/stages', label: 'Stages', icon: 'file' }],
   ['ent.read', { href: '/administration/entreprises', label: 'Entreprises partenaires', icon: 'landmark' }],
+  ['catalog.write', { href: '/carriere/referentiel', label: 'Compétences', icon: 'key' }],
   ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
@@ -104,7 +105,7 @@ export async function allowedCreations(actor: string) {
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
   { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
-  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes', '/administration/memoires', '/administration/doctorat'] },
+  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes', '/administration/memoires', '/administration/doctorat', '/carriere/referentiel'] },
   { label: 'Stages et entreprises', icon: 'landmark', hrefs: ['/administration/stages', '/administration/entreprises'] },
   { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux', '/administration/documents', '/administration/finances'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
@@ -122,6 +123,7 @@ export const navigation = cache(async () => {
       { href: '/decisions', label: 'Décisions', icon: 'file' },
       { href: '/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' },
       { href: '/memoires', label: 'Mémoires publiés', icon: 'book' },
+      { href: '/offres', label: 'Offres de stage et d’emploi', icon: 'file' },
       { href: '/entreprises', label: 'Entreprises partenaires', icon: 'landmark' },
       { href: '/verifier', label: 'Vérifier un document', icon: 'key' },
     ],
@@ -159,6 +161,8 @@ export const navigation = cache(async () => {
         [spaces.has('doctorate') || spaces.has('student'), { href: '/doctorat', label: 'Mon doctorat', icon: 'cap' }],
         [spaces.has('internship') || spaces.has('student'), { href: '/stages', label: 'Mes stages', icon: 'file' }],
         [spaces.has('company'), { href: '/entreprise', label: 'Mon entreprise', icon: 'landmark' }],
+        [spaces.has('company'), { href: '/entreprise/recrutement', label: 'Recrutement', icon: 'user' }],
+        [spaces.has('career') || spaces.has('student') || spaces.has('learning') || !staff, { href: '/carriere', label: 'Ma carrière', icon: 'cap' }],
         [spaces.has('councils'), { href: '/conseils', label: 'Mes conseils', icon: 'landmark' }],
       ];
       groups.push({ label: 'Mon espace', items: personal.filter(([shown]) => shown).map(([, item]) => item) });

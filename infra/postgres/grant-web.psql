@@ -348,4 +348,28 @@ GRANT INSERT (internship_id, author_id, body) ON unoa.internship_message TO :"we
 GRANT INSERT (internship_id, version, confidential, filename, size_bytes, sha256, content, submitted_by) ON unoa.internship_report TO :"web_role";
 GRANT INSERT (internship_id, reviewer_id, role, grid_id, scores, mark, comment) ON unoa.internship_review TO :"web_role";
 GRANT INSERT (internship_id, kind, reason, new_start, new_end, actor_id) ON unoa.internship_event TO :"web_role";
+-- 0035: careers, skills, opportunities and applications.
+GRANT SELECT ON unoa.competency_label, unoa.course_competency, unoa.assessment_competency, unoa.career_profile, unoa.declared_skill, unoa.portfolio_item, unoa.cv_version,
+      unoa.career_consent, unoa.recruiter_access, unoa.opportunity, unoa.opportunity_report, unoa.job_favorite, unoa.job_alert, unoa.job_application,
+      unoa.job_application_document, unoa.job_application_event, unoa.interview TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.career_skills(uuid) TO :"web_role";
+GRANT INSERT (competency_id, language, label, updated_by), UPDATE (label, updated_by, updated_at) ON unoa.competency_label TO :"web_role";
+GRANT INSERT (course_id, competency_id, linked_by), DELETE ON unoa.course_competency TO :"web_role";
+GRANT INSERT (assessment_id, competency_id, linked_by), DELETE ON unoa.assessment_competency TO :"web_role";
+GRANT INSERT (account_id, headline, summary, country, languages, availability, open_to_offers),
+      UPDATE (headline, summary, country, languages, availability, open_to_offers, updated_at) ON unoa.career_profile TO :"web_role";
+GRANT INSERT (account_id, competency_id, label, level), UPDATE (removed_at) ON unoa.declared_skill TO :"web_role";
+GRANT INSERT (account_id, kind, title, organisation, description, starts_on, ends_on, url, shared), UPDATE (shared, verified_by, verified_at, removed_at) ON unoa.portfolio_item TO :"web_role";
+GRANT INSERT (account_id, version, title, content, pdf, sha256) ON unoa.cv_version TO :"web_role";
+GRANT INSERT (account_id, company_id, statement), UPDATE (revoked_at) ON unoa.career_consent TO :"web_role";
+GRANT INSERT (account_id, company_id, recruiter_id, resource) ON unoa.recruiter_access TO :"web_role";
+GRANT INSERT (company_id, kind, title, description, criteria, country, city, remote, languages, competencies, required_documents, starts_on, opens_at, closes_at, state, risk_flags, created_by),
+      UPDATE (state, moderated_by, moderation_note) ON unoa.opportunity TO :"web_role";
+GRANT INSERT (opportunity_id, reporter_id, reason), UPDATE (state, outcome, handled_by) ON unoa.opportunity_report TO :"web_role";
+GRANT INSERT (account_id, opportunity_id), DELETE ON unoa.job_favorite TO :"web_role";
+GRANT INSERT (account_id, label, kind, country, language, keywords), UPDATE (removed_at) ON unoa.job_alert TO :"web_role";
+GRANT INSERT (opportunity_id, account_id, consent_statement, snapshot, snapshot_sha256, cv_version_id, letter), UPDATE (state, withdrawn_at, snapshot) ON unoa.job_application TO :"web_role";
+GRANT INSERT (application_id, kind, filename, size_bytes, sha256, content), UPDATE (content, purged_at) ON unoa.job_application_document TO :"web_role";
+GRANT INSERT (application_id, state, note, actor_id) ON unoa.job_application_event TO :"web_role";
+GRANT INSERT (application_id, starts_at, duration_minutes, mode, place, created_by), UPDATE (state, confirmed_at, cancel_reason) ON unoa.interview TO :"web_role";
 COMMIT;
