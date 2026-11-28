@@ -321,4 +321,31 @@ GRANT INSERT (project_id, academic_year, report), UPDATE (opinion, decision, dec
 GRANT INSERT (project_id, kind, title, hours, evidence), UPDATE (validated_by, validated_at) ON unoa.doctoral_training TO :"web_role";
 GRANT INSERT (project_id, kind, title, venue, year, status, doi) ON unoa.publication TO :"web_role";
 GRANT INSERT (project_id, committee, reference, decision, note, recorded_by) ON unoa.ethics_review TO :"web_role";
+-- 0034: partner companies and internships.
+GRANT SELECT ON unoa.company, unoa.company_document, unoa.company_verification, unoa.company_member, unoa.company_activity, unoa.company_report, unoa.partnership,
+      unoa.internship_template, unoa.internship_grid, unoa.internship, unoa.internship_supervisor, unoa.internship_signature, unoa.internship_log,
+      unoa.internship_message, unoa.internship_report, unoa.internship_review, unoa.internship_event TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.scope_country(uuid) TO :"web_role";
+GRANT INSERT (scope_id, parent_id, name, legal_form, registration_number, country, sector, city, website, description, address, representative_name, representative_title,
+      contact_email, contact_phone, created_by),
+      UPDATE (name, legal_form, sector, city, website, description, address, representative_name, representative_title, contact_email, contact_phone,
+      state, decision_reason, decided_by, decided_at, closed_at) ON unoa.company TO :"web_role";
+GRANT INSERT (company_id, kind, filename, format, size_bytes, sha256, content, uploaded_by), UPDATE (content, purged_at) ON unoa.company_document TO :"web_role";
+GRANT INSERT (company_id, verifier_id, legal_exists, mandate_ok, decision, reason) ON unoa.company_verification TO :"web_role";
+GRANT INSERT (company_id, account_id, role, job_title, added_by), UPDATE (removed_at, removed_by) ON unoa.company_member TO :"web_role";
+GRANT INSERT (company_id, actor_id, action, detail) ON unoa.company_activity TO :"web_role";
+GRANT INSERT (company_id, reporter_id, reason), UPDATE (state, outcome, handled_by) ON unoa.company_report TO :"web_role";
+GRANT INSERT (company_id, scope_id, title, terms, terms_sha256, starts_on, ends_on, created_by),
+      UPDATE (state, company_signed_by, company_signed_at, institution_signed_by, institution_signed_at) ON unoa.partnership TO :"web_role";
+GRANT INSERT (scope_id, title, body, legal_reference, author_id), UPDATE (approved_by, approved_at, retired_at) ON unoa.internship_template TO :"web_role";
+GRANT INSERT (scope_id, title, criteria, scale, author_id) ON unoa.internship_grid TO :"web_role";
+GRANT INSERT (scope_id, student_id, registration_id, unit_id, free_training, company_id, title, missions, place, starts_on, ends_on, weekly_hours),
+      UPDATE (state, decision_note, decided_by, template_id, grid_id, agreement, agreement_sha256, starts_on, ends_on, mark, validated_by, validated_at) ON unoa.internship TO :"web_role";
+GRANT INSERT (internship_id, account_id, role, assigned_by), UPDATE (ended_at, end_reason) ON unoa.internship_supervisor TO :"web_role";
+GRANT INSERT (internship_id, party, account_id, sha256) ON unoa.internship_signature TO :"web_role";
+GRANT INSERT (internship_id, author_id, kind, entry_on, body) ON unoa.internship_log TO :"web_role";
+GRANT INSERT (internship_id, author_id, body) ON unoa.internship_message TO :"web_role";
+GRANT INSERT (internship_id, version, confidential, filename, size_bytes, sha256, content, submitted_by) ON unoa.internship_report TO :"web_role";
+GRANT INSERT (internship_id, reviewer_id, role, grid_id, scores, mark, comment) ON unoa.internship_review TO :"web_role";
+GRANT INSERT (internship_id, kind, reason, new_start, new_end, actor_id) ON unoa.internship_event TO :"web_role";
 COMMIT;

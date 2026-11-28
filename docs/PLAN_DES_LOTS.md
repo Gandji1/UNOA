@@ -10,7 +10,7 @@ définition de Done complète ; tant qu'un élément manque, ses exigences reste
 | P2 | ORG GOV CAT CMS ADM SIS | 006–007 structures et catalogue, 009 sites, 010 admissions | 013 scolarité (inscription, matricule, dossier), 014 gouvernance et conseils |
 | P3 | TEA LMS LIVE LAB ASS | 008 cours et classes virtuelles | enseignants, laboratoires, évaluations |
 | P4 | GRD EXN FIN CRED SHORT | — | notes et jurys, examens externes (suivi documentaire), finances, documents, formations courtes |
-| P5 | ENT JOB CAR STG B2B MEM PHD RND LIB | 025 mémoires et soutenances, 026 doctorat | Campus-Entreprise, stages, mémoires, doctorat, recherche, bibliothèque |
+| P5 | ENT JOB CAR STG B2B MEM PHD RND LIB | 025 mémoires et soutenances, 026 doctorat, 027 entreprises partenaires et stages | Campus-Entreprise, stages, mémoires, doctorat, recherche, bibliothèque |
 | P6 | CAMP SUP ALUM QMS DPO ANA AI | — | vie universitaire, support, alumni, qualité, protection des données, statistiques, IA |
 | P7 | toutes | — | tests globaux, durcissement, déploiement |
 

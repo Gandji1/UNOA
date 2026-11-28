@@ -26,6 +26,8 @@ const administration: [string, NavItem][] = [
   ['short.read', { href: '/administration/formations-courtes', label: 'Formations courtes', icon: 'cap' }],
   ['thesis.read', { href: '/administration/memoires', label: 'Mémoires et soutenances', icon: 'book' }],
   ['phd.read', { href: '/administration/doctorat', label: 'Doctorat', icon: 'cap' }],
+  ['stg.read', { href: '/administration/stages', label: 'Stages', icon: 'file' }],
+  ['ent.read', { href: '/administration/entreprises', label: 'Entreprises partenaires', icon: 'landmark' }],
   ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
@@ -43,6 +45,8 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/gouvernance': 'Conseils, membres et mandats, séances, ordres du jour, quorum, votes, décisions, procès-verbaux signés et publication.',
   '/administration/finances': 'Tarifs approuvés, factures et avoirs, échéances, remises et bourses, paiements confirmés par le prestataire, reçus, remboursements, rapprochement et exports.',
+  '/administration/stages': 'Modèles de convention approuvés, grilles d’évaluation, demandes, encadrement, conventions signées, validation et statistiques par territoire.',
+  '/administration/entreprises': 'Vérification des entreprises partenaires, conventions de partenariat, signalements et activité des recruteurs.',
   '/administration/memoires': 'Règlement des soutenances, sujets, validation des projets, encadrement, contrôle d’intégrité, jurys, procès-verbaux et dépôts.',
   '/administration/doctorat': 'Écoles doctorales et laboratoires, admissions, comités de suivi, réinscriptions, formations doctorales et autorisation de soutenance.',
   '/administration/formations-courtes': 'Catalogue de formations courtes, modules et compétences, sessions, clients entreprises, progression, attestations, microcertifications, reconnaissance des acquis et rapports.',
@@ -101,6 +105,7 @@ export async function allowedCreations(actor: string) {
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
   { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
   { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes', '/administration/memoires', '/administration/doctorat'] },
+  { label: 'Stages et entreprises', icon: 'landmark', hrefs: ['/administration/stages', '/administration/entreprises'] },
   { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux', '/administration/documents', '/administration/finances'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
   { label: 'Réglages', icon: 'sliders', hrefs: ['/administration/notifications', '/administration/parametres'] },
@@ -117,6 +122,7 @@ export const navigation = cache(async () => {
       { href: '/decisions', label: 'Décisions', icon: 'file' },
       { href: '/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' },
       { href: '/memoires', label: 'Mémoires publiés', icon: 'book' },
+      { href: '/entreprises', label: 'Entreprises partenaires', icon: 'landmark' },
       { href: '/verifier', label: 'Vérifier un document', icon: 'key' },
     ],
   }];
@@ -151,6 +157,8 @@ export const navigation = cache(async () => {
         [spaces.has('external'), { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' }],
         [spaces.has('thesis') || spaces.has('student'), { href: '/memoires/mes', label: 'Mon mémoire', icon: 'book' }],
         [spaces.has('doctorate') || spaces.has('student'), { href: '/doctorat', label: 'Mon doctorat', icon: 'cap' }],
+        [spaces.has('internship') || spaces.has('student'), { href: '/stages', label: 'Mes stages', icon: 'file' }],
+        [spaces.has('company'), { href: '/entreprise', label: 'Mon entreprise', icon: 'landmark' }],
         [spaces.has('councils'), { href: '/conseils', label: 'Mes conseils', icon: 'landmark' }],
       ];
       groups.push({ label: 'Mon espace', items: personal.filter(([shown]) => shown).map(([, item]) => item) });

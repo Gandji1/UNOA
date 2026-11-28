@@ -30,6 +30,7 @@ import { exerciseCredentials } from './fixtures/credentials.fixture.mjs';
 import { exerciseShort } from './fixtures/short.fixture.mjs';
 import { exerciseTheses } from './fixtures/theses.fixture.mjs';
 import { exerciseDoctorate } from './fixtures/doctorate.fixture.mjs';
+import { exerciseInternships } from './fixtures/internships.fixture.mjs';
 
 const ownerUrl = process.env.UNOA_TEST_DATABASE_URL;
 assert.ok(ownerUrl, 'UNOA_TEST_DATABASE_URL est requis.');
@@ -263,6 +264,9 @@ test('Connexion, droits et configuration via HTTP', { timeout: 2_400_000 }, asyn
     );
     await context.test('Doctorat : école doctorale, admission, comité de suivi, réinscription, formation, publications, éthique, soutenance', () =>
       exerciseDoctorate({ database, issuer, call, login, origin }),
+    );
+    await context.test('Entreprises et stages : vérification, équipe, partenariat, convention signée, journal, rapport, évaluations, validation, statistiques, clôture', () =>
+      exerciseInternships({ database, issuer, call, login, origin }),
     );
     await context.test('Notifications : modèles, consentements, file durable, relais, rejeu et confidentialité', () =>
       exerciseNotifications({ database, issuer, call, login, origin, relay, jobsToken }),

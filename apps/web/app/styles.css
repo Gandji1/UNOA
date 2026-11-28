@@ -298,3 +298,4 @@ main { width: 100%; max-width: 88rem; margin: 0 auto; padding: clamp(1.1rem, 2.6
   color: inherit; font: inherit; text-decoration: none; cursor: pointer; }
 .account-list a:hover, .account-list button:hover, .account-list a:focus-visible, .account-list button:focus-visible { background: var(--blue-wash); }
 .account-list small { opacity: .7; font-size: .8em; }
+.agreement { white-space: pre-wrap; font-family: inherit; background: var(--surface-alt); border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; max-height: 28rem; overflow: auto; }

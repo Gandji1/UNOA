@@ -95,6 +95,14 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Avis du comité de suivi {{year}}', body: 'Décision : {{decision}}' }, en: { subject: 'Monitoring committee {{year}}', body: 'Decision: {{decision}}' } } },
   { code: 'phd.authorized', module: 'PHD', variables: ['title'], sensitive: false, defaults: {
     fr: { subject: 'Soutenance autorisée', body: '« {{title}} » : le jury peut être constitué.' }, en: { subject: 'Defence authorised', body: '“{{title}}”: the jury can be set up.' } } },
+  { code: 'ent.decided', module: 'ENT', variables: ['company', 'decision'], sensitive: false, defaults: {
+    fr: { subject: 'Entreprise {{company}} : {{decision}}', body: 'Consultez la décision et ses motifs dans votre espace entreprise.' }, en: { subject: 'Company {{company}}: {{decision}}', body: 'See the decision and its reasons in your company space.' } } },
+  { code: 'stg.decided', module: 'STG', variables: ['title', 'decision'], sensitive: false, defaults: {
+    fr: { subject: 'Stage « {{title}} » : {{decision}}', body: 'Consultez la décision dans votre espace stages.' }, en: { subject: 'Internship “{{title}}”: {{decision}}', body: 'See the decision in your internship space.' } } },
+  { code: 'stg.to_sign', module: 'STG', variables: ['title'], sensitive: false, defaults: {
+    fr: { subject: 'Convention de stage à signer : {{title}}', body: 'La convention est prête : lisez-la et signez-la dans votre espace stages.' }, en: { subject: 'Internship agreement to sign: {{title}}', body: 'The agreement is ready: read and sign it in your internship space.' } } },
+  { code: 'stg.validated', module: 'STG', variables: ['title'], sensitive: true, defaults: {
+    fr: { subject: 'Stage validé : {{title}}', body: 'Votre stage a été validé académiquement. La note suit la délibération.' }, en: { subject: 'Internship validated: {{title}}', body: 'Your internship was academically validated. The mark follows the deliberation.' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

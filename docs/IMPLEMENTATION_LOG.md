@@ -283,3 +283,8 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Correction : la liste des personnes sélectionnables (encadrants, jury, directeurs) passe par `unoa.scope_people` (SECURITY DEFINER) au lieu d’une lecture directe des attributions, refusée au rôle web (42501).
 - Menu : « Mémoires publiés » (public), « Mon mémoire », « Mon doctorat », outils d’administration correspondants ; tableau de bord « Vos outils » complet.
 - Preuves : base 7/7 (33 migrations), recette HTTP 20/20. Outil automatique de similarité : BLOCKED_EXTERNAL (rapport d’outil externe saisi).
+
+## 2026-11-28 — Lot 027 : entreprises partenaires et stages
+
+- Migration 0034, stores `lib/companies` et `lib/internships`, API `/api/v1/ent` et `/api/v1/stg`, six écrans, menus (« Entreprises partenaires », « Mes stages », « Mon entreprise », outils d’administration).
+- Preuves : base 7/7, recette HTTP 21/21 (`internships.fixture.mjs`). Registre officiel des entreprises : BLOCKED_EXTERNAL.
