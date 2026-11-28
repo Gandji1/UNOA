@@ -7,8 +7,8 @@ Source : `docs/MATRICE_EXIGENCES.csv` (533 exigences, 44 modules), `python autom
 | Statut | Exigences | Sens |
 |---|---:|---|
 | VERIFIE | 0 | Aucune exigence n’est encore déclarée « vérifiée » : la recette navigateur complète, l’accessibilité et la sécurité outillée manquent pour atteindre la définition de Done. |
-| EN_COURS | 259 | Implémenté (interface, API, base, droits, tests HTTP) mais sans toutes les preuves exigées. |
-| NON_DEMARRE | 274 | Rien de livré. |
+| EN_COURS | 328 (259 au début de la journée) | Implémenté (interface, API, base, droits, tests HTTP) mais sans toutes les preuves exigées. |
+| NON_DEMARRE | 205 (274 au début de la journée) | Rien de livré. |
 
 ## 2. Modules livrés (EN_COURS, 25 modules)
 
@@ -35,7 +35,7 @@ Parcours réel en production : Bénin → Campus IA → Faculté de l’IA → 2
 
 | Phase | Modules |
 |---|---|
-| P5 | MEM (mémoires), PHD (doctorat) — travail préparé, à intégrer ; STG (stages), ENT (Campus-Entreprise), JOB (emplois), CAR (carrières), B2B (entreprises clientes), RND (recherche), LIB (bibliothèque) |
+| P5 | B2B (entreprises clientes), RND (recherche), LIB (bibliothèque) — MEM, PHD, ENT, STG, JOB, CAR livrés le 28 novembre (lots 025 à 028) |
 | P6 | CAMP (vie universitaire), SUP (support), ALUM (anciens), QMS (qualité), DPO (protection des données), ANA (statistiques), AI (assistants IA) |
 | P1 | WF (moteur de circuits de validation), DOC (gestion documentaire), I18N (langues), INTG (intégrations), LAB (laboratoires virtuels) |
 
@@ -48,8 +48,8 @@ Parcours réel en production : Bénin → Campus IA → Faculté de l’IA → 2
 
 ## 6. Ordre d’exécution retenu
 
-1. Lots 025 MEM et 026 PHD (intégration du travail préparé, migrations 0032–0033).
-2. P5 : STG, puis ENT/JOB/CAR, B2B, RND, LIB.
+1. ~~Lots 025 MEM et 026 PHD~~ ; ~~027 ENT/STG~~ ; ~~028 JOB/CAR~~ (livrés).
+2. P5 : B2B, RND, LIB.
 3. Compléments des modules commencés (CMS, IAM, CFG, LMS/A11Y).
 4. P6, puis P1 restants (WF, DOC, I18N, INTG, LAB).
 5. P7 : recette navigateur complète, sécurité outillée, exploitation, passage des exigences en VERIFIE.
