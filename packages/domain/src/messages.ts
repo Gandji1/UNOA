@@ -81,6 +81,20 @@ export const events: EventDefinition[] = [
     fr: { subject: 'Formation réussie : {{course}}', body: 'Félicitations ! Votre attestation sera disponible dans « Mes documents ».' }, en: { subject: 'Course completed: {{course}}', body: 'Congratulations! Your certificate will be available in “My documents”.' } } },
   { code: 'short.rpl_decided', module: 'SHORT', variables: ['target', 'decision'], sensitive: true, defaults: {
     fr: { subject: 'Reconnaissance des acquis', body: '{{target}} : {{decision}}' }, en: { subject: 'Recognition of prior learning', body: '{{target}}: {{decision}}' } } },
+  { code: 'thesis.validated', module: 'MEM', variables: ['title', 'decision'], sensitive: false, defaults: {
+    fr: { subject: 'Projet {{decision}} : {{title}}', body: 'Consultez la décision et les observations.' }, en: { subject: 'Project {{decision}}: {{title}}', body: 'See the decision and remarks.' } } },
+  { code: 'thesis.comment', module: 'MEM', variables: ['title'], sensitive: false, defaults: {
+    fr: { subject: 'Nouveau commentaire sur « {{title}} »', body: 'Votre encadrant a commenté votre dernière version.' }, en: { subject: 'New comment on “{{title}}”', body: 'Your supervisor commented on your latest version.' } } },
+  { code: 'thesis.convocation', module: 'MEM', variables: ['title', 'date', 'mode'], sensitive: false, defaults: {
+    fr: { subject: 'Convocation à la soutenance', body: '« {{title}} » — {{date}}, {{mode}}' }, en: { subject: 'Defence notice', body: '“{{title}}” — {{date}}, {{mode}}' } } },
+  { code: 'thesis.outcome', module: 'MEM', variables: ['title'], sensitive: true, defaults: {
+    fr: { subject: 'Résultat de votre soutenance', body: '« {{title}} » : consultez le procès-verbal.' }, en: { subject: 'Your defence result', body: '“{{title}}”: see the minutes.' } } },
+  { code: 'phd.admission', module: 'PHD', variables: ['title', 'decision'], sensitive: true, defaults: {
+    fr: { subject: 'Candidature en doctorat', body: '« {{title}} » : {{decision}}' }, en: { subject: 'Doctoral application', body: '“{{title}}”: {{decision}}' } } },
+  { code: 'phd.review', module: 'PHD', variables: ['year', 'decision'], sensitive: true, defaults: {
+    fr: { subject: 'Avis du comité de suivi {{year}}', body: 'Décision : {{decision}}' }, en: { subject: 'Monitoring committee {{year}}', body: 'Decision: {{decision}}' } } },
+  { code: 'phd.authorized', module: 'PHD', variables: ['title'], sensitive: false, defaults: {
+    fr: { subject: 'Soutenance autorisée', body: '« {{title}} » : le jury peut être constitué.' }, en: { subject: 'Defence authorised', body: '“{{title}}”: the jury can be set up.' } } },
 ];
 
 // Generic wording sent outside the platform for a sensitive event.

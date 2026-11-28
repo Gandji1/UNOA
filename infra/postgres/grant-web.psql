@@ -289,4 +289,36 @@ GRANT EXECUTE ON FUNCTION unoa.cascade_level(uuid), unoa.cascade_anchor(uuid), u
 GRANT EXECUTE ON FUNCTION unoa.role_fits(text, uuid) TO :"web_role";
 -- 0030: units created by the head.
 GRANT EXECUTE ON FUNCTION unoa.account_spaces(uuid) TO :"web_role";
+-- 0032: theses and defences.
+GRANT SELECT ON unoa.thesis_rule, unoa.thesis_topic, unoa.thesis_project, unoa.supervision, unoa.thesis_milestone, unoa.thesis_draft, unoa.draft_comment, unoa.integrity_check,
+      unoa.defense, unoa.defense_member, unoa.defense_report, unoa.defense_signature, unoa.thesis_deposit, unoa.defense_authorization TO :"web_role";
+GRANT EXECUTE ON FUNCTION unoa.thesis_rule_for(uuid, text, date), unoa.scope_people(uuid, text) TO :"web_role";
+GRANT INSERT (scope_id, level, min_jury, rapporteurs, external_member, similarity_threshold, max_embargo_years, notice_days, max_years, training_hours, ethics_required, effective_from, author_id) ON unoa.thesis_rule TO :"web_role";
+GRANT INSERT (scope_id, level, title, summary, proposed_by), UPDATE (state, validated_by) ON unoa.thesis_topic TO :"web_role";
+GRANT INSERT (scope_id, level, topic_id, author_id, registration_id, unit_id, title, abstract, protocol, confidential, state, validated_by, validation_note), UPDATE (protocol, abstract, state, validated_by, validation_note) ON unoa.thesis_project TO :"web_role";
+GRANT INSERT (project_id, account_id, role, qualification, assigned_by), UPDATE (ended_at, end_reason) ON unoa.supervision TO :"web_role";
+GRANT INSERT (project_id, label, due_on, created_by), UPDATE (done_at) ON unoa.thesis_milestone TO :"web_role";
+GRANT INSERT (project_id, version, kind, filename, format, size_bytes, sha256, content, submitted_by) ON unoa.thesis_draft TO :"web_role";
+GRANT INSERT (draft_id, author_id, body) ON unoa.draft_comment TO :"web_role";
+GRANT INSERT (draft_id, method, similarity, result, note, checked_by) ON unoa.integrity_check TO :"web_role";
+GRANT INSERT (project_id, rule_id, mode, starts_at, place, meeting_url, created_by), UPDATE (state, outcome, mark, minutes, minutes_sha256, held_at) ON unoa.defense TO :"web_role";
+GRANT INSERT (defense_id, account_id, role, external), UPDATE (present, convened_at) ON unoa.defense_member TO :"web_role";
+GRANT INSERT (defense_id, account_id, opinion, report) ON unoa.defense_report TO :"web_role";
+GRANT INSERT (defense_id, account_id, sha256) ON unoa.defense_signature TO :"web_role";
+GRANT INSERT (project_id, draft_id, accepted_by, embargo_until, embargo_reason) ON unoa.thesis_deposit TO :"web_role";
+GRANT INSERT (project_id, authorized_by, conditions) ON unoa.defense_authorization TO :"web_role";
+-- 0033: doctorate.
+GRANT SELECT ON unoa.doctoral_school, unoa.doctoral_lab, unoa.doctoral_application, unoa.doctoral_project, unoa.doctoral_enrollment, unoa.committee_member,
+      unoa.progress_review, unoa.doctoral_training, unoa.publication, unoa.ethics_review TO :"web_role";
+GRANT INSERT (scope_id, name, director_id, created_by) ON unoa.doctoral_school TO :"web_role";
+GRANT INSERT (school_id, code, name, head_id) ON unoa.doctoral_lab TO :"web_role";
+GRANT INSERT (school_id, lab_id, account_id, title, dossier, funding, proposed_director_id),
+      UPDATE (state, funding_status, decided_by, decision_note, decided_at, project_id) ON unoa.doctoral_application TO :"web_role";
+GRANT INSERT (project_id, school_id, lab_id, funding, ethics_needed, started_on) ON unoa.doctoral_project TO :"web_role";
+GRANT INSERT (project_id, academic_year, valid_from, valid_until, enrolled_by) ON unoa.doctoral_enrollment TO :"web_role";
+GRANT INSERT (project_id, account_id, added_by) ON unoa.committee_member TO :"web_role";
+GRANT INSERT (project_id, academic_year, report), UPDATE (opinion, decision, decided_by, decided_at) ON unoa.progress_review TO :"web_role";
+GRANT INSERT (project_id, kind, title, hours, evidence), UPDATE (validated_by, validated_at) ON unoa.doctoral_training TO :"web_role";
+GRANT INSERT (project_id, kind, title, venue, year, status, doi) ON unoa.publication TO :"web_role";
+GRANT INSERT (project_id, committee, reference, decision, note, recorded_by) ON unoa.ethics_review TO :"web_role";
 COMMIT;

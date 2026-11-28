@@ -24,6 +24,8 @@ const administration: [string, NavItem][] = [
   ['fin.read', { href: '/administration/finances', label: 'Finances', icon: 'sliders' }],
   ['cred.read', { href: '/administration/documents', label: 'Documents et diplômes', icon: 'file' }],
   ['short.read', { href: '/administration/formations-courtes', label: 'Formations courtes', icon: 'cap' }],
+  ['thesis.read', { href: '/administration/memoires', label: 'Mémoires et soutenances', icon: 'book' }],
+  ['phd.read', { href: '/administration/doctorat', label: 'Doctorat', icon: 'cap' }],
   ['gov.read', { href: '/administration/gouvernance', label: 'Conseils et décisions', icon: 'landmark' }],
   ['site.read', { href: '/administration/site', label: 'Site public', icon: 'globe' }],
   ['territory.read', { href: '/administration/territoires', label: 'Pays et établissements', icon: 'map' }],
@@ -41,6 +43,8 @@ export const studioDescriptions: Record<string, string> = {
   '/administration/scolarite': 'Matricules, cohortes et groupes, inscriptions administratives et pédagogiques, statuts et dossiers.',
   '/administration/gouvernance': 'Conseils, membres et mandats, séances, ordres du jour, quorum, votes, décisions, procès-verbaux signés et publication.',
   '/administration/finances': 'Tarifs approuvés, factures et avoirs, échéances, remises et bourses, paiements confirmés par le prestataire, reçus, remboursements, rapprochement et exports.',
+  '/administration/memoires': 'Règlement des soutenances, sujets, validation des projets, encadrement, contrôle d’intégrité, jurys, procès-verbaux et dépôts.',
+  '/administration/doctorat': 'Écoles doctorales et laboratoires, admissions, comités de suivi, réinscriptions, formations doctorales et autorisation de soutenance.',
   '/administration/formations-courtes': 'Catalogue de formations courtes, modules et compétences, sessions, clients entreprises, progression, attestations, microcertifications, reconnaissance des acquis et rapports.',
   '/administration/documents': 'Types et modèles de documents, délivrance sous conditions et habilitation, signatures, registre, révocation et vérification par QR.',
   '/administration/examens-nationaux': 'Suivi documentaire des examens nationaux : information officielle, déclarations, pièces déposées et vérification.',
@@ -96,7 +100,7 @@ export async function allowedCreations(actor: string) {
 // Sidebar sections, each folded under its heading (TDR §19: menus follow permissions).
 const sections: { label: string; icon: string; hrefs: string[] }[] = [
   { label: 'Organisation', icon: 'map', hrefs: ['/administration/territoires', '/administration/structures', '/administration/gouvernance', '/administration/site'] },
-  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes'] },
+  { label: 'Formations et cours', icon: 'book', hrefs: ['/administration/catalogue', '/administration/cours', '/administration/enseignants', '/administration/formations-courtes', '/administration/memoires', '/administration/doctorat'] },
   { label: 'Étudiants', icon: 'cap', hrefs: ['/administration/admissions', '/administration/scolarite', '/administration/notes', '/administration/examens-nationaux', '/administration/documents', '/administration/finances'] },
   { label: 'Utilisateurs', icon: 'key', hrefs: ['/administration/acces'] },
   { label: 'Réglages', icon: 'sliders', hrefs: ['/administration/notifications', '/administration/parametres'] },
@@ -112,6 +116,7 @@ export const navigation = cache(async () => {
       { href: '/structures', label: 'Structures', icon: 'landmark' },
       { href: '/decisions', label: 'Décisions', icon: 'file' },
       { href: '/examens-nationaux', label: 'Examens nationaux', icon: 'landmark' },
+      { href: '/memoires', label: 'Mémoires publiés', icon: 'book' },
       { href: '/verifier', label: 'Vérifier un document', icon: 'key' },
     ],
   }];
@@ -144,6 +149,8 @@ export const navigation = cache(async () => {
         [spaces.has('documents'), { href: '/documents', label: 'Mes documents', icon: 'file' }],
         [spaces.has('short'), { href: '/formations-courtes/mes', label: 'Mes formations courtes', icon: 'cap' }],
         [spaces.has('external'), { href: '/examens-nationaux/suivi', label: 'Examens nationaux', icon: 'landmark' }],
+        [spaces.has('thesis') || spaces.has('student'), { href: '/memoires/mes', label: 'Mon mémoire', icon: 'book' }],
+        [spaces.has('doctorate') || spaces.has('student'), { href: '/doctorat', label: 'Mon doctorat', icon: 'cap' }],
         [spaces.has('councils'), { href: '/conseils', label: 'Mes conseils', icon: 'landmark' }],
       ];
       groups.push({ label: 'Mon espace', items: personal.filter(([shown]) => shown).map(([, item]) => item) });

@@ -275,3 +275,11 @@ Voir LOT_001.md. Compilation Next.js, cinq tests et contrôles HTTP locaux réus
 - Menu « Mon espace » limité aux espaces qui concernent le compte (migration 0031, `unoa.account_spaces`) ; illustrations de leçon dimensionnées ; menu des comptes lisible ; accueil sans formation publiée orienté vers les structures.
 - Parcours de démonstration Bénin / Campus IA créé en production par l’API publique (script hors dépôt) : 1 pays, 1 établissement, 1 faculté, 2 départements, 6 filières, 10 cours avec leçons illustrées, vidéo, exercice, petit test et séance en direct ; 4 enseignants recrutés sur dossier (vérification du diplôme, avis du doyen et du recteur, décision du chef, contrat signé des deux parties, affectation). Visioconférence : `BLOCKED_EXTERNAL` (fournisseur Jitsi non configuré, la séance est planifiée mais « Rejoindre » répond « non configuré »). Formations diplômantes non publiées : publication subordonnée à une preuve d’habilitation réelle.
 - Preuves : base 7/7, recette HTTP 18/18.
+
+## 2026-11-28 — Analyse d’état ; lots 025 (MEM) et 026 (PHD)
+
+- `docs/ETAT_ACTUEL.md` : 533 exigences, 259 → 283 en cours, 250 non démarrées, 0 vérifiée ; ordre des prochains lots.
+- Mémoires et soutenances (migration 0032) et doctorat (migration 0033) intégrés : écrans `/memoires`, `/memoires/mes`, `/doctorat`, `/administration/memoires`, `/administration/doctorat`, API `/api/v1/thesis` et `/api/v1/phd`.
+- Correction : la liste des personnes sélectionnables (encadrants, jury, directeurs) passe par `unoa.scope_people` (SECURITY DEFINER) au lieu d’une lecture directe des attributions, refusée au rôle web (42501).
+- Menu : « Mémoires publiés » (public), « Mon mémoire », « Mon doctorat », outils d’administration correspondants ; tableau de bord « Vos outils » complet.
+- Preuves : base 7/7 (33 migrations), recette HTTP 20/20. Outil automatique de similarité : BLOCKED_EXTERNAL (rapport d’outil externe saisi).

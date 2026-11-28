@@ -16,13 +16,6 @@ export const dynamic = 'force-dynamic';
 
 // Studios grouped by level: what the platform configures, what each
 // institution configures, and teaching. Each studio checks its own rights.
-const levels: [string, string, string[]][] = [
-  ['Plateforme et pays', 'Super-administrateur (pays) et administrateurs pays (établissements et campus)', ['/administration/acces', '/administration/territoires', '/administration/parametres']],
-  ['Établissement', 'Administrateur d’établissement (campus) : site, facultés et départements, admissions, scolarité, messages',
-    ['/administration/site', '/administration/structures', '/administration/admissions', '/administration/scolarite', '/administration/notifications']],
-  ['Faculté, département et pédagogie', 'Doyens, chefs de département, responsables de formation et enseignants : filières, formations, matières, cours et séances en direct',
-    ['/administration/catalogue', '/administration/cours']],
-];
 
 export default async function Administration() {
   const settings = iamSettings();
@@ -88,7 +81,7 @@ export default async function Administration() {
       )}
 
       {(() => {
-        const available = levels.flatMap(([, , hrefs]) => hrefs).map(href => studios.get(href)).filter(Boolean);
+        const available = [...studios.values()].filter(item => item.href !== '/administration/guide');
         if (!available.length) return null;
         return (
           <section aria-labelledby="outils">
